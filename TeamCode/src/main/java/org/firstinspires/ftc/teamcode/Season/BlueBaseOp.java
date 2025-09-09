@@ -43,6 +43,8 @@ public class BlueBaseOp extends LinearOpMode {
             double ty = tag.ty;
             double tz = tag.tz;
 
+            //Telemetry is just for testing
+
             telemetry.addData("Red", red);
             telemetry.addData("Green", green);
             telemetry.addData("Blue", blue);
@@ -59,10 +61,11 @@ public class BlueBaseOp extends LinearOpMode {
                 telemetry.addLine("No AprilTags detected");
             }
 
-            ArrayList<Integer> tagIndex = new ArrayList<>();
             ArrayList<String> colorIndex = new ArrayList<>();
 
             telemetry.update();
+
+            //pedro here to get into position to find oblitag
 
             if (id == 21) {
                 colorIndex.set(0,"GPP");
@@ -82,6 +85,8 @@ public class BlueBaseOp extends LinearOpMode {
                 telemetry.addLine("Searching for Oblitag!");
             }
 
+            limelight.pipelineSwitch(1);
+
             if (id == 20) {
                 if (Objects.equals(colorIndex.get(0), "GPP")) {
                     //pedro
@@ -90,8 +95,7 @@ public class BlueBaseOp extends LinearOpMode {
                 } else if (Objects.equals(colorIndex.get(0), "PPG")) {
                     //pedro
                 } else {
-                    telemetry.addLine("ERROR!");
-                    break;
+                    telemetry.addLine("Oblitag wasn't found!");
                 }
             } else {
                 telemetry.addLine("Searching for goal!");

@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 //This is a basic auton for the blue goal and it first gets the obelisk and then goes on
 
@@ -74,10 +75,26 @@ public class BlueBaseOp extends LinearOpMode {
                 limelight.pipelineSwitch(1);
 
             } else if (id == 23) {
-                colorIndex.set(0,"PPQ");
+                colorIndex.set(0,"PPG");
 
                 limelight.pipelineSwitch(1);
+            } else {
+                telemetry.addLine("Searching for Oblitag!");
+            }
 
+            if (id == 20) {
+                if (Objects.equals(colorIndex.get(0), "GPP")) {
+                    //pedro
+                } else if (Objects.equals(colorIndex.get(0), "PGP")) {
+                    //pedro
+                } else if (Objects.equals(colorIndex.get(0), "PPG")) {
+                    //pedro
+                } else {
+                    telemetry.addLine("ERROR!");
+                    break;
+                }
+            } else {
+                telemetry.addLine("Searching for goal!");
             }
         }
     }

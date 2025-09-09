@@ -100,9 +100,6 @@ public class BlueBaseOp extends LinearOpMode {
             } else {
                 telemetry.addLine("Searching for goal!");
             }
-
-            //More pedro
-
         }
     }
 

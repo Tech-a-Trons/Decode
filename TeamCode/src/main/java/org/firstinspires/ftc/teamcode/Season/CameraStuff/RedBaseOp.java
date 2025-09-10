@@ -31,8 +31,8 @@ public class RedBaseOp extends LinearOpMode {
 
             waitForStart();
 
-            boolean purpleSeen = isPurple(colorSensor);
-            boolean greenSeen = isGreen(colorSensor);
+            boolean purpleSeen = PCheck(colorSensor);
+            boolean greenSeen = GCheck(colorSensor);
 
             int red = colorSensor.red();
             int green = colorSensor.green();
@@ -103,7 +103,7 @@ public class RedBaseOp extends LinearOpMode {
         }
     }
 
-    public boolean isPurple(ColorSensor sensor) {
+    public boolean PCheck(ColorSensor sensor) {
         int red = sensor.red();
         int green = sensor.green();
         int blue = sensor.blue();
@@ -118,7 +118,7 @@ public class RedBaseOp extends LinearOpMode {
         return (rNorm > 0.30 && bNorm > 0.30 && gNorm < 0.25);
     }
 
-    public boolean isGreen(ColorSensor sensor) {
+    public boolean GCheck(ColorSensor sensor) {
         int red = sensor.red();
         int green = sensor.green();
         int blue = sensor.blue();

@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import java.util.ArrayList;
 import java.util.Objects;
 
-//This is a basic auton for the red goal and it first gets the obelisk and then goes on
+//This is a basic auton for the red goal and it first gets the obelisk and then goes on - 9/08
 
 @Autonomous
 public class RedBaseOp extends LinearOpMode {

@@ -85,8 +85,6 @@ public class RedBaseOp extends LinearOpMode {
                 telemetry.addLine("Searching for Oblitag!");
             }
 
-            limelight.pipelineSwitch(2);
-
             if (id == 24) {
                 if (Objects.equals(colorIndex.get(0), "GPP")) {
                     //pedro

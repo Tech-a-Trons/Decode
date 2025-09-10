@@ -3,8 +3,8 @@ package org.firstinspires.ftc.teamcode.Personal.Pranav.ObjectDetection.Limelight
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Season.AprilTagExtractor;
-import org.firstinspires.ftc.teamcode.Season.TagData;
+import org.firstinspires.ftc.teamcode.Season.CameraStuff.AprilTagExtractor;
+import org.firstinspires.ftc.teamcode.Season.CameraStuff.TagData;
 
 @TeleOp
 public class AprilTagDetector extends LinearOpMode {

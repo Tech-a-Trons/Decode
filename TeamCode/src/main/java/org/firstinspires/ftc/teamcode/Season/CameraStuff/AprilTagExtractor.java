@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season;
+package org.firstinspires.ftc.teamcode.Season.CameraStuff;
 
 import org.json.JSONObject;
 

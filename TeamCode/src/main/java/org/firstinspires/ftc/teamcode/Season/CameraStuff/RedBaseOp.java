@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season;
+package org.firstinspires.ftc.teamcode.Season.CameraStuff;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -8,10 +8,10 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import java.util.ArrayList;
 import java.util.Objects;
 
-//This is a basic auton for the blue goal and it first gets the obelisk and then goes on
+//This is a basic auton for the red goal and it first gets the obelisk and then goes on
 
 @Autonomous
-public class BlueBaseOp extends LinearOpMode {
+public class RedBaseOp extends LinearOpMode {
     ColorSensor colorSensor;
     Limelight3A limelight;
 
@@ -70,24 +70,24 @@ public class BlueBaseOp extends LinearOpMode {
             if (id == 21) {
                 colorIndex.set(0,"GPP");
 
-                limelight.pipelineSwitch(1);
+                limelight.pipelineSwitch(2);
 
             } else if (id == 22) {
                 colorIndex.set(0,"PGP");
 
-                limelight.pipelineSwitch(1);
+                limelight.pipelineSwitch(2);
 
             } else if (id == 23) {
                 colorIndex.set(0,"PPG");
 
-                limelight.pipelineSwitch(1);
+                limelight.pipelineSwitch(2);
             } else {
                 telemetry.addLine("Searching for Oblitag!");
             }
 
-            limelight.pipelineSwitch(1);
+            limelight.pipelineSwitch(2);
 
-            if (id == 20) {
+            if (id == 24) {
                 if (Objects.equals(colorIndex.get(0), "GPP")) {
                     //pedro
                 } else if (Objects.equals(colorIndex.get(0), "PGP")) {

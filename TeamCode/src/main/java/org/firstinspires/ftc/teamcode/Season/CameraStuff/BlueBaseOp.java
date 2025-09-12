@@ -70,17 +70,12 @@ public class BlueBaseOp extends LinearOpMode {
             if (id == 21) {
                 colorIndex.set(0,"GPP");
 
-                limelight.pipelineSwitch(1);
-
             } else if (id == 22) {
                 colorIndex.set(0,"PGP");
-
-                limelight.pipelineSwitch(1);
 
             } else if (id == 23) {
                 colorIndex.set(0,"PPG");
 
-                limelight.pipelineSwitch(1);
             } else {
                 telemetry.addLine("Searching for Oblitag!");
             }

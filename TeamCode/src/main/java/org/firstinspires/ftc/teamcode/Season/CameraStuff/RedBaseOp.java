@@ -20,7 +20,7 @@ public class RedBaseOp extends LinearOpMode {
 
         limelight = hardwareMap.get(Limelight3A.class,"Limelight");
 
-        limelight.pipelineSwitch(0);
+        limelight.pipelineSwitch(1);
 
         waitForStart();
 
@@ -70,17 +70,12 @@ public class RedBaseOp extends LinearOpMode {
             if (id == 21) {
                 colorIndex.set(0,"GPP");
 
-                limelight.pipelineSwitch(2);
-
             } else if (id == 22) {
                 colorIndex.set(0,"PGP");
-
-                limelight.pipelineSwitch(2);
 
             } else if (id == 23) {
                 colorIndex.set(0,"PPG");
 
-                limelight.pipelineSwitch(2);
             } else {
                 telemetry.addLine("Searching for Oblitag!");
             }

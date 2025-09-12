@@ -80,6 +80,8 @@ public class BlueBaseOp extends LinearOpMode {
                 telemetry.addLine("Searching for Oblitag!");
             }
 
+            //then pedro to detect goal, from this we will plan out what to do
+
             if (id == 20) {
                 if (Objects.equals(colorIndex.get(0), "GPP")) {
                     //pedro

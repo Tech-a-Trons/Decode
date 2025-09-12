@@ -96,7 +96,6 @@ public class AprilTagDetector extends LinearOpMode {
             } else {
 
                 telemetry.addLine("Searching!");
-
             }
         }
     }

@@ -35,6 +35,8 @@ public class RedBaseOp extends LinearOpMode {
 
             double presentVoltage;
             presentVoltage = myControlHubVoltageSensor.getVoltage();
+            double powerValue = 0.5;
+            double offsetVoltage =  powerValue * (12.5/presentVoltage);
 
             boolean purpleSeen = PCheck(colorSensor);
             boolean greenSeen = GCheck(colorSensor);
@@ -50,6 +52,7 @@ public class RedBaseOp extends LinearOpMode {
 
             //Telemetry is just for testing
             telemetry.addData("Voltage: ",presentVoltage);
+            telemetry.addData("offset Voltage: ",offsetVoltage);
 
             telemetry.addData("Red", red);
             telemetry.addData("Green", green);

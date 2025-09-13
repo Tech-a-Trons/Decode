@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.CameraStuff;
+package org.firstinspires.ftc.teamcode.Season.SensorStuff;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;

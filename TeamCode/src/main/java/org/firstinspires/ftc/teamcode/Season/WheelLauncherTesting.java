@@ -43,7 +43,7 @@ public class WheelLauncherTesting extends LinearOpMode {
             //launchRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             launchLeft.setPower(-0.25);
-            //launchRight.setPower(-0.25);
+            //launchRight.setPower(0.25);
         }
     }
 }

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.SensorStuff;
+package org.firstinspires.ftc.teamcode.Season;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -6,13 +6,16 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
+import org.firstinspires.ftc.teamcode.Season.SensorStuff.AprilTagExtractor;
+import org.firstinspires.ftc.teamcode.Season.SensorStuff.TagData;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
-//This is a basic auton for the red goal and it first gets the obelisk and then goes on - 9/08
+//This is a basic auton for the blue goal and it first gets the obelisk and then goes on - 9/08
 
 @Autonomous
-public class RedBaseOp extends LinearOpMode {
+public class BlueBaseOp extends LinearOpMode {
     ColorSensor colorSensor;
     Limelight3A limelight;
     private VoltageSensor myControlHubVoltageSensor;
@@ -24,7 +27,7 @@ public class RedBaseOp extends LinearOpMode {
 
         limelight = hardwareMap.get(Limelight3A.class,"Limelight");
 
-        limelight.pipelineSwitch(1);
+        limelight.pipelineSwitch(0);
 
         waitForStart();
 
@@ -38,7 +41,7 @@ public class RedBaseOp extends LinearOpMode {
             double powerValue = 0.5;
             double offsetVoltage =  powerValue * (12.5/presentVoltage);
 
-            boolean purpleSeen = PCheck(colorSensor);
+            boolean purpleSeen = Pcheck(colorSensor);
             boolean greenSeen = GCheck(colorSensor);
 
             int red = colorSensor.red();
@@ -52,7 +55,7 @@ public class RedBaseOp extends LinearOpMode {
 
             //Telemetry is just for testing
             telemetry.addData("Voltage: ",presentVoltage);
-            telemetry.addData("offset Voltage: ",offsetVoltage);
+            telemetry.addData("Offset Voltage: ",offsetVoltage);
 
             telemetry.addData("Red", red);
             telemetry.addData("Green", green);
@@ -91,7 +94,7 @@ public class RedBaseOp extends LinearOpMode {
 
             //then pedro to detect goal, from this we will plan out what to do
 
-            if (id == 24) {
+            if (id == 20) {
                 if (Objects.equals(colorIndex.get(0), "GPP")) {
                     //pedro
                 } else if (Objects.equals(colorIndex.get(0), "PGP")) {
@@ -107,7 +110,7 @@ public class RedBaseOp extends LinearOpMode {
         }
     }
 
-    public boolean PCheck(ColorSensor sensor) {
+    public boolean Pcheck(ColorSensor sensor) {
         int red = sensor.red();
         int green = sensor.green();
         int blue = sensor.blue();

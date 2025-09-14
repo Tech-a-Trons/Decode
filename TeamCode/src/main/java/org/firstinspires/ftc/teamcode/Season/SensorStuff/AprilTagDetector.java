@@ -59,42 +59,56 @@ public class AprilTagDetector extends LinearOpMode {
 
             if (tag.id == 21) {
 
-                fl.setTargetPosition(100);
-                fr.setTargetPosition(100);
-                bl.setTargetPosition(100);
-                br.setTargetPosition(100);
+                fl.setTargetPosition(25);
+                fr.setTargetPosition(25);
+                bl.setTargetPosition(25);
+                br.setTargetPosition(25);
 
                 fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                fl.setPower(0.05);
+                fr.setPower(0.05);
+                bl.setPower(0.05);
+                br.setPower(0.05);
 
             } else if (tag.id == 22) {
 
-                fl.setTargetPosition(100);
-                fr.setTargetPosition(100);
-                bl.setTargetPosition(100);
-                br.setTargetPosition(100);
+                fl.setTargetPosition(25);
+                fr.setTargetPosition(25);
+                bl.setTargetPosition(25);
+                br.setTargetPosition(25);
 
                 fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                fl.setPower(0.05);
+                fr.setPower(0.05);
+                bl.setPower(0.05);
+                br.setPower(0.05);
 
             } else if (tag.id == 23) {
 
-                fl.setTargetPosition(100);
-                fr.setTargetPosition(100);
-                bl.setTargetPosition(100);
-                br.setTargetPosition(100);
+                fl.setTargetPosition(25);
+                fr.setTargetPosition(25);
+                bl.setTargetPosition(25);
+                br.setTargetPosition(25);
 
                 fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            } else {
+                fl.setPower(0.05);
+                fr.setPower(0.05);
+                bl.setPower(0.05);
+                br.setPower(0.05);
 
+            } else {
                 telemetry.addLine("Searching!");
             }
         }

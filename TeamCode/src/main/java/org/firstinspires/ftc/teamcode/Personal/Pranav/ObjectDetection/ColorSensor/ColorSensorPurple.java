@@ -38,7 +38,7 @@ public class ColorSensorPurple extends LinearOpMode {
         double gNorm = (double) green / total;
         double bNorm = (double) blue / total;
 
-        return (rNorm > 0.30 && bNorm > 0.30 && gNorm < 0.25);
+        return (rNorm > 0.35 && bNorm > 0.30 && gNorm < 0.25);
     }
 }
 

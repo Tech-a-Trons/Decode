@@ -34,11 +34,11 @@ public class surgicaltest extends LinearOpMode {
 //            telemetry.addData("offset Voltage: ", offsetVoltage);
 
             if (gamepad1.a) {
-                activeintake.setPower(-0.25);
+                activeintake.setPower(-0.5);
             }
 
             if (gamepad1.b) {
-                activeintake.setPower(0.25);
+                activeintake.setPower(0.5);
             }
 
             if (gamepad1.x) {

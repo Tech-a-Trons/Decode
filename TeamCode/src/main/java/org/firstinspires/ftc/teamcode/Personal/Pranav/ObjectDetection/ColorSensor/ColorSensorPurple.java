@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Personal.Pranav.ObjectDetection.ColorSensor;
 
+import android.graphics.Color;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -31,14 +33,16 @@ public class ColorSensorPurple extends LinearOpMode {
         int green = sensor.green();
         int blue = sensor.blue();
 
-        int total = red + green + blue;
-        if (total == 0) return false;
+        float[] hsv = new float[3];
+        Color.RGBToHSV(sensor.red(), sensor.green(), sensor.blue(), hsv);
 
-        double rNorm = (double) red / total;
-        double gNorm = (double) green / total;
-        double bNorm = (double) blue / total;
+        float hue = hsv[0];   // 0–360
+        float sat = hsv[1];   // 0–1
+        float val = hsv[2];   // 0–1
 
-        return (rNorm > 0.30 && bNorm > 0.30 && gNorm < 0.37);
+        // Purple usually ~260–300 hue
+        return (hue >= 260 && hue <= 300 && sat > 0.4 && val > 0.2);
+
     }
 }
 

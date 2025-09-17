@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.Personal.Pranav.ObjectDetection.ColorSensor;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
+@TeleOp
 public class ColorSensorPurpleGreen extends LinearOpMode {
     ColorSensor colorSensor;
 

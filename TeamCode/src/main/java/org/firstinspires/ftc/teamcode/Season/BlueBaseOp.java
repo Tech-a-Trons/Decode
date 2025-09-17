@@ -28,6 +28,8 @@ public class BlueBaseOp extends LinearOpMode {
 
         limelight = hardwareMap.get(Limelight3A.class,"Limelight");
 
+        colorSensor = hardwareMap.get(ColorSensor.class, "ColorSensor");
+
         limelight.pipelineSwitch(0);
 
         waitForStart();
@@ -35,8 +37,6 @@ public class BlueBaseOp extends LinearOpMode {
         while (opModeIsActive()) {
             TagData tag = AprilTagExtractor.getAprilTagData();
             // Map your color sensor (check config name)
-            colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
-
             double presentVoltage;
             presentVoltage = myControlHubVoltageSensor.getVoltage();
             double powerValue = 0.5;

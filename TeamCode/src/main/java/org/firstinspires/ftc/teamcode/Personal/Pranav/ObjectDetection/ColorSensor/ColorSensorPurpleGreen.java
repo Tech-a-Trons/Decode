@@ -11,7 +11,7 @@ public class ColorSensorPurpleGreen extends LinearOpMode {
     @Override
     public void runOpMode() {
         // Map your color sensor (check config name)
-        colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+        colorSensor = hardwareMap.get(ColorSensor.class, "ColorSensor");
 
         waitForStart();
 

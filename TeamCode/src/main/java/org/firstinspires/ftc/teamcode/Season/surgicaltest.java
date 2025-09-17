@@ -17,7 +17,7 @@ public class surgicaltest extends LinearOpMode {
 
         myControlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
-        activeintake = hardwareMap.get(DcMotor.class, "launchLeft");
+        activeintake = hardwareMap.get(DcMotor.class, "activeintake");
 
         activeintake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 

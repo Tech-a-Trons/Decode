@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Season;
 
+import android.graphics.Color;
+
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -116,28 +118,27 @@ public class BlueBaseOp extends LinearOpMode {
         int green = sensor.green();
         int blue = sensor.blue();
 
-        int total = red + green + blue;
-        if (total == 0) return false;
+        float[] hsv = new float[3];
+        Color.RGBToHSV(sensor.red(), sensor.green(), sensor.blue(), hsv);
 
-        double rNorm = (double) red / total;
-        double gNorm = (double) green / total;
-        double bNorm = (double) blue / total;
+        float hue = hsv[0];   // 0–360
+        float sat = hsv[1];   // 0–1
+        float val = hsv[2];   // 0–1
 
-        return (rNorm > 0.30 && bNorm > 0.30 && gNorm < 0.25);
+        // Purple usually ~260–300 hue
+        return (hue >= 260 && hue <= 300 && sat > 0.4 && val > 0.2);
+
     }
-
     public boolean GCheck(ColorSensor sensor) {
-        int red = sensor.red();
-        int green = sensor.green();
-        int blue = sensor.blue();
+        // Convert RGB → HSV
+        float[] hsv = new float[3];
+        Color.RGBToHSV(sensor.red(), sensor.green(), sensor.blue(), hsv);
 
-        int total = red + green + blue;
-        if (total == 0) return false;
+        float hue = hsv[0];   // Hue angle (0–360)
+        float sat = hsv[1];   // Saturation (0–1)
+        float val = hsv[2];   // Brightness (0–1)
 
-        double rNorm = (double) red / total;
-        double gNorm = (double) green / total;
-        double bNorm = (double) blue / total;
-
-        return (gNorm > 0.40 && rNorm < 0.35 && bNorm < 0.35);
+        // Typical green hue is ~80–160
+        return (hue >= 80 && hue <= 160 && sat > 0.4 && val > 0.2);
     }
 }

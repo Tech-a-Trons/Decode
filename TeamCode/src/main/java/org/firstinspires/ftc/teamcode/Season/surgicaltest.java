@@ -8,13 +8,9 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 @TeleOp
 public class surgicaltest extends LinearOpMode {
     DcMotor activeintake = null;
-    //DcMotor launchRight = null;
-    //private VoltageSensor myControlHubVoltageSensor;
 
     @Override
     public void runOpMode() throws InterruptedException {
-
-       // myControlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
 
@@ -25,23 +21,16 @@ public class surgicaltest extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-//            double presentVoltage;
-//            presentVoltage = myControlHubVoltageSensor.getVoltage();
-//            telemetry.addData("Voltage: ", presentVoltage);
-//
-//            double powerValue = -0.25;
-//            double offsetVoltage = powerValue * (12.5 / presentVoltage);
-//            telemetry.addData("offset Voltage: ", offsetVoltage);
 
             if (gamepad1.a) {
-                activeintake.setPower(-0.5);
+                activeintake.setPower(-0.9);
             }
 
             if (gamepad1.b) {
-                activeintake.setPower(0.5);
+                activeintake.setPower(0.9);
             }
 
-            if (gamepad1.x) {
+            if (gamepad1.x || gamepad1.y) {
                 activeintake.setPower(0);
             }
         }

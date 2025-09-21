@@ -23,11 +23,11 @@ public class surgicaltest extends LinearOpMode {
         while (opModeIsActive()) {
 
             if (gamepad1.a) {
-                activeintake.setPower(-0.45);
+                activeintake.setPower(-1);
             }
 
             if (gamepad1.b) {
-                activeintake.setPower(0.45);
+                activeintake.setPower(1);
             }
 
             if (gamepad1.x || gamepad1.y) {

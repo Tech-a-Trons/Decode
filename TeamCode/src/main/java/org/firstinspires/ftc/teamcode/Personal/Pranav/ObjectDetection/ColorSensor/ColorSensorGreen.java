@@ -11,6 +11,8 @@ public class ColorSensorGreen extends LinearOpMode {
 
     ColorSensor colorSensor;
 
+    PersonalGreenandPurple personal;
+
     @Override
     public void runOpMode() {
         // Map your color sensor (check the config name in the Driver Hub)
@@ -19,27 +21,18 @@ public class ColorSensorGreen extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            boolean greenSeen = isGreen(colorSensor);
+            boolean greenSeen = personal.GCheck(colorSensor);
+            float ghue = personal.getGhue();
+            float gsat = personal.getGsat();
+            float gval = personal.getGval();
 
             telemetry.addData("Red", colorSensor.red());
             telemetry.addData("Green", colorSensor.green());
             telemetry.addData("Blue", colorSensor.blue());
             telemetry.addData("Detected Green?", greenSeen);
-            telemetry.update();
+            telemetry.addData("Hue: ", ghue);
+            telemetry.addData("Saturation: ",gsat);
+            telemetry.addData("Value: ", gval);
         }
-    }
-
-    // Method to check if sensor sees green
-    public boolean isGreen(ColorSensor sensor) {
-        // Convert RGB → HSV
-        float[] hsv = new float[3];
-        Color.RGBToHSV(sensor.red(), sensor.green(), sensor.blue(), hsv);
-
-        float hue = hsv[0];   // Hue angle (0–360)
-        float sat = hsv[1];   // Saturation (0–1)
-        float val = hsv[2];   // Brightness (0–1)
-
-        // Typical green hue is ~80–160
-        return (hue >= 80 && hue <= 160 && sat > 0.4 && val > 0.2);
     }
 }

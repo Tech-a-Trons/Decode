@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 @TeleOp
 public class ColorSensorPurple extends LinearOpMode {
     ColorSensor colorSensor;
+    PersonalGreenandPurple personal;
 
     @Override
     public void runOpMode() {
@@ -18,31 +19,20 @@ public class ColorSensorPurple extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            boolean purpleSeen = Pcheck(colorSensor);
+            boolean purpleSeen = personal.Pcheck(colorSensor);
+            float phue = personal.getPhue();
+            float psat = personal.getPsat();
+            float pval = personal.getPval();
 
             telemetry.addData("Red", colorSensor.red());
             telemetry.addData("Green", colorSensor.green());
             telemetry.addData("Blue", colorSensor.blue());
             telemetry.addData("Detected Purple?", purpleSeen);
+            telemetry.addData("Hue: ", phue);
+            telemetry.addData("Saturation: ",psat);
+            telemetry.addData("Value: ", pval);
             telemetry.update();
         }
-    }
-
-    public boolean Pcheck(ColorSensor sensor) {
-        int red = sensor.red();
-        int green = sensor.green();
-        int blue = sensor.blue();
-
-        float[] hsv = new float[3];
-        Color.RGBToHSV(sensor.red(), sensor.green(), sensor.blue(), hsv);
-
-        float hue = hsv[0];   // 0–360
-        float sat = hsv[1];   // 0–1
-        float val = hsv[2];   // 0–1
-
-        // Purple usually ~260–300 hue
-        return (hue >= 260 && hue <= 300 && sat > 0.4 && val > 0.2);
-
     }
 }
 

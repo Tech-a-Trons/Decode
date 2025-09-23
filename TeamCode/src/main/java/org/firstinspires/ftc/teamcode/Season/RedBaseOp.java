@@ -22,6 +22,7 @@ public class RedBaseOp extends LinearOpMode {
     ColorSensor colorSensor;
     Limelight3A limelight;
     private VoltageSensor myControlHubVoltageSensor;
+    SeasonGreenandPurple color;
 
     @Override
     public void runOpMode() {
@@ -44,8 +45,14 @@ public class RedBaseOp extends LinearOpMode {
             double powerValue = 0.5;
             double offsetVoltage =  powerValue * (12.5/presentVoltage);
 
-            boolean purpleSeen = PCheck(colorSensor);
-            boolean greenSeen = GCheck(colorSensor);
+            boolean purpleSeen = color.PCheck(colorSensor);
+            boolean greenSeen = color.GCheck(colorSensor);
+            float phue = color.getPhue();
+            float psat = color.getPsat();
+            float pval = color.getPval();
+            float ghue = color.getGhue();
+            float gsat = color.getGsat();
+            float gval = color.getGval();
 
             int red = colorSensor.red();
             int green = colorSensor.green();
@@ -65,6 +72,12 @@ public class RedBaseOp extends LinearOpMode {
             telemetry.addData("Blue", blue);
             telemetry.addData("Detected Purple?", purpleSeen);
             telemetry.addData("Detected Green?", greenSeen);
+            telemetry.addData("PHue: ", phue);
+            telemetry.addData("PSaturation: ",psat);
+            telemetry.addData("PValue: ", pval);
+            telemetry.addData("GHue: ", ghue);
+            telemetry.addData("GSaturation: ",gsat);
+            telemetry.addData("GValue: ", gval);
             telemetry.update();
 
             if (tag.valid) {
@@ -111,35 +124,5 @@ public class RedBaseOp extends LinearOpMode {
                 telemetry.addLine("Searching for goal!");
             }
         }
-    }
-
-    public boolean PCheck(ColorSensor sensor) {
-        int red = sensor.red();
-        int green = sensor.green();
-        int blue = sensor.blue();
-
-        float[] hsv = new float[3];
-        Color.RGBToHSV(sensor.red(), sensor.green(), sensor.blue(), hsv);
-
-        float hue = hsv[0];   // 0–360
-        float sat = hsv[1];   // 0–1
-        float val = hsv[2];   // 0–1
-
-        // Purple usually ~260–300 hue
-        return (hue >= 260 && hue <= 300 && sat > 0.4 && val > 0.2);
-
-    }
-
-    public boolean GCheck(ColorSensor sensor) {
-        // Convert RGB → HSV
-        float[] hsv = new float[3];
-        Color.RGBToHSV(sensor.red(), sensor.green(), sensor.blue(), hsv);
-
-        float hue = hsv[0];   // Hue angle (0–360)
-        float sat = hsv[1];   // Saturation (0–1)
-        float val = hsv[2];   // Brightness (0–1)
-
-        // Typical green hue is ~80–160
-        return (hue >= 80 && hue <= 160 && sat > 0.4 && val > 0.2);
     }
 }

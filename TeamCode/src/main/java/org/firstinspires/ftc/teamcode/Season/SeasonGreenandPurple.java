@@ -29,7 +29,7 @@ public class SeasonGreenandPurple {
         return (phue >= 80 && phue <= 160 && psat > 0.4 && pval > 0.2);
     }
 
-    public boolean Pcheck(ColorSensor sensor) {
+    public boolean PCheck(ColorSensor sensor) {
         int red = sensor.red();
         int green = sensor.green();
         int blue = sensor.blue();

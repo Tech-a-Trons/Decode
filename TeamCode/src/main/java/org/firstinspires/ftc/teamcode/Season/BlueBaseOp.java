@@ -70,12 +70,12 @@ public class BlueBaseOp extends LinearOpMode {
             telemetry.addData("Blue", blue);
             telemetry.addData("Detected Purple?", color.PCheck(colorSensor));
             telemetry.addData("Detected Green?", color.GCheck(colorSensor));
-            telemetry.addData("PHue: ", phue);
-            telemetry.addData("PSaturation: ",psat);
-            telemetry.addData("PValue: ", pval);
-            telemetry.addData("GHue: ", ghue);
-            telemetry.addData("GSaturation: ",gsat);
-            telemetry.addData("GValue: ", gval);
+            telemetry.addData("PHue: ", color.getPhue());
+            telemetry.addData("PSaturation: ", color.getPsat());
+            telemetry.addData("PValue: ", color.getPval());
+            telemetry.addData("GHue: ", color.getGhue());
+            telemetry.addData("GSaturation: ",color.getGsat());
+            telemetry.addData("GValue: ", color.getGval());
             telemetry.update();
 
             if (tag.valid) {

@@ -19,17 +19,13 @@ public class ColorSensorPurple extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            float phue = personal.getPhue();
-            float psat = personal.getPsat();
-            float pval = personal.getPval();
-
             telemetry.addData("Red", colorSensor.red());
             telemetry.addData("Green", colorSensor.green());
             telemetry.addData("Blue", colorSensor.blue());
             telemetry.addData("Detected Purple?", personal.Pcheck(colorSensor));
-            telemetry.addData("Hue: ", phue);
-            telemetry.addData("Saturation: ",psat);
-            telemetry.addData("Value: ", pval);
+            telemetry.addData("Hue: ", personal.getPhue());
+            telemetry.addData("Saturation: ", personal.getPsat());
+            telemetry.addData("Value: ", personal.getPval());
             telemetry.update();
         }
     }

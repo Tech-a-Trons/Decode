@@ -21,17 +21,13 @@ public class ColorSensorGreen extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            float ghue = personal.getGhue();
-            float gsat = personal.getGsat();
-            float gval = personal.getGval();
-
             telemetry.addData("Red", colorSensor.red());
             telemetry.addData("Green", colorSensor.green());
             telemetry.addData("Blue", colorSensor.blue());
             telemetry.addData("Detected Green?", personal.GCheck(colorSensor));
-            telemetry.addData("Hue: ", ghue);
-            telemetry.addData("Saturation: ",gsat);
-            telemetry.addData("Value: ", gval);
+            telemetry.addData("Hue: ", personal.getGhue());
+            telemetry.addData("Saturation: ", personal.getGsat());
+            telemetry.addData("Value: ", personal.getGval());
         }
     }
 }

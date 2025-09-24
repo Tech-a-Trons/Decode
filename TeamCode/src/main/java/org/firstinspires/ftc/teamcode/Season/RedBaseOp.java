@@ -45,8 +45,6 @@ public class RedBaseOp extends LinearOpMode {
             double powerValue = 0.5;
             double offsetVoltage =  powerValue * (12.5/presentVoltage);
 
-            boolean purpleSeen = color.PCheck(colorSensor);
-            boolean greenSeen = color.GCheck(colorSensor);
             float phue = color.getPhue();
             float psat = color.getPsat();
             float pval = color.getPval();
@@ -70,8 +68,8 @@ public class RedBaseOp extends LinearOpMode {
             telemetry.addData("Red", red);
             telemetry.addData("Green", green);
             telemetry.addData("Blue", blue);
-            telemetry.addData("Detected Purple?", purpleSeen);
-            telemetry.addData("Detected Green?", greenSeen);
+            telemetry.addData("Detected Purple?", color.PCheck(colorSensor));
+            telemetry.addData("Detected Green?", color.GCheck(colorSensor));
             telemetry.addData("PHue: ", phue);
             telemetry.addData("PSaturation: ",psat);
             telemetry.addData("PValue: ", pval);

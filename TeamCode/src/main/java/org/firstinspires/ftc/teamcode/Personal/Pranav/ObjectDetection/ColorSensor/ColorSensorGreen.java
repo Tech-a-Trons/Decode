@@ -21,7 +21,6 @@ public class ColorSensorGreen extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            boolean greenSeen = personal.GCheck(colorSensor);
             float ghue = personal.getGhue();
             float gsat = personal.getGsat();
             float gval = personal.getGval();
@@ -29,7 +28,7 @@ public class ColorSensorGreen extends LinearOpMode {
             telemetry.addData("Red", colorSensor.red());
             telemetry.addData("Green", colorSensor.green());
             telemetry.addData("Blue", colorSensor.blue());
-            telemetry.addData("Detected Green?", greenSeen);
+            telemetry.addData("Detected Green?", personal.GCheck(colorSensor));
             telemetry.addData("Hue: ", ghue);
             telemetry.addData("Saturation: ",gsat);
             telemetry.addData("Value: ", gval);

@@ -19,7 +19,6 @@ public class ColorSensorPurple extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            boolean purpleSeen = personal.Pcheck(colorSensor);
             float phue = personal.getPhue();
             float psat = personal.getPsat();
             float pval = personal.getPval();
@@ -27,7 +26,7 @@ public class ColorSensorPurple extends LinearOpMode {
             telemetry.addData("Red", colorSensor.red());
             telemetry.addData("Green", colorSensor.green());
             telemetry.addData("Blue", colorSensor.blue());
-            telemetry.addData("Detected Purple?", purpleSeen);
+            telemetry.addData("Detected Purple?", personal.Pcheck(colorSensor));
             telemetry.addData("Hue: ", phue);
             telemetry.addData("Saturation: ",psat);
             telemetry.addData("Value: ", pval);

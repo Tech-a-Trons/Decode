@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 public class ColorSensorPurpleGreen extends LinearOpMode {
     ColorSensor colorSensor;
     PersonalGreenandPurple personal;
+    String greenCheck;
+    String purpleCheck;
 
     @Override
     public void runOpMode() {
@@ -18,13 +20,23 @@ public class ColorSensorPurpleGreen extends LinearOpMode {
 
         waitForStart();
 
-        while (opModeIsActive()) {
+        if (personal.Getcolor(colorSensor) == "purple") {
+            purpleCheck = "Yes";
+            greenCheck = "No";
+        } else if (personal.Getcolor(colorSensor) == "green"){
+            purpleCheck = "No";
+            greenCheck = "Yes";
+        }
 
+        while (opModeIsActive()) {
             telemetry.addData("Red", colorSensor.red());
             telemetry.addData("Green", colorSensor.green());
             telemetry.addData("Blue", colorSensor.blue());
-            telemetry.addData("Detected Purple?", personal.Pcheck(colorSensor));
-            telemetry.addData("Detected Green?", personal.GCheck(colorSensor));
+            telemetry.addData("Purple?: ", purpleCheck);
+            telemetry.addData("Green?: ", greenCheck);
+            telemetry.addData("Hue: ", personal.gethue());
+            telemetry.addData("Saturation: ", personal.getsat());
+            telemetry.addData("Value: ", personal.getval());
             telemetry.update();
         }
     }

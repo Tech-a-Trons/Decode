@@ -5,62 +5,49 @@ import android.graphics.Color;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
 public class PersonalGreenandPurple {
-    float phue;
-    float psat;
-    float pval;
-    float ghue;
-    float gsat;
-    float gval;
+    float chue;
+    float csat;
+    float cval;
 
-    public boolean GCheck(ColorSensor sensor) {
+    float[] hsv = new float[3];
+    //ColorSensor sensor;
+
+    public String Getcolor(ColorSensor sensor) {
         int red = sensor.red();
         int green = sensor.green();
         int blue = sensor.blue();
+
+        float max = Math.max(red, Math.max(green, blue));
+        float scale = (max > 0) ? 255f / max : 1;
+        int scaledR = (int) (red * scale);
+        int scaledG = (int) (green * scale);
+        int scaledB = (int) (blue * scale);
 
         // Convert RGB → HSV
-        float[] hsv = new float[3];
-        Color.RGBToHSV(red, green, blue, hsv);
+        Color.RGBToHSV(scaledR, scaledG, scaledB, hsv);
 
-        phue = hsv[0];   // Hue angle (0–360)
-        psat = hsv[1];   // Saturation (0–1)
-        pval = hsv[2];   // Brightness (0–1)
+        chue = hsv[0];   // Hue angle (0–360)
+        csat = hsv[1];   // Saturation (0–1)
+        cval = hsv[2];   // Brightness (0–1)
 
         // Typical green hue is ~80–160
-        return (phue >= 80 && phue <= 160 && psat > 0.4 && pval > 0.2);
-    }
+        if (chue >= 90 && chue <= 170 && csat > 0.2 && cval > 0.2) {
+            return "green";
+        } else if (chue >= 260 && chue <= 320 && csat > 0.1 && cval > 0.2) {
+            return "purple";
+        }
 
-    public boolean Pcheck(ColorSensor sensor) {
-        int red = sensor.red();
-        int green = sensor.green();
-        int blue = sensor.blue();
-
-        float[] hsv = new float[3];
-        Color.RGBToHSV(red, green, blue, hsv);
-
-        ghue = hsv[0];   // 0–360
-        gsat = hsv[1];   // 0–1
-        gval = hsv[2];   // 0–1
-
-        // Purple usually ~260–300 hue
-        return (ghue >= 260 && ghue <= 300 && gsat > 0.4 && gval > 0.2);
+        return null;
 
     }
-    public float getPhue() {
-        return phue;
+
+    public float gethue() {
+        return chue;
     }
-    public float getPsat() {
-        return psat;
+    public float getsat() {
+        return csat;
     }
-    public float getPval() {
-        return pval;
-    }
-    public float getGhue() {
-        return ghue;
-    }
-    public float getGsat() {
-        return gsat;
-    }
-    public float getGval() {
-        return gval;
+    public float getval() {
+        return cval;
     }
 }

@@ -1,10 +1,12 @@
-package org.firstinspires.ftc.teamcode.Season;
+package org.firstinspires.ftc.teamcode.Personal.Pranav.ObjectDetection.ColorSensor;
 
 import android.graphics.Color;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 
-public class SeasonGreenandPurple {
+
+public class TestingDetector {
     float chue;
     float csat;
     float cval;

@@ -23,6 +23,8 @@ public class RedBaseOp extends LinearOpMode {
     Limelight3A limelight;
     private VoltageSensor myControlHubVoltageSensor;
     SeasonGreenandPurple color;
+    String purpleCheck;
+    String greenCheck;
 
     @Override
     public void runOpMode() {
@@ -36,18 +38,29 @@ public class RedBaseOp extends LinearOpMode {
         limelight.pipelineSwitch(1);
 
         waitForStart();
+        if (color.Getcolor(colorSensor) == "purple") {
+            purpleCheck = "Yes";
+            greenCheck = "No";
+        } else if (color.Getcolor(colorSensor) == "green"){
+            purpleCheck = "No";
+            greenCheck = "Yes";
+        }
 
         while (opModeIsActive()) {
+            telemetry.addData("Red", colorSensor.red());
+            telemetry.addData("Green", colorSensor.green());
+            telemetry.addData("Blue", colorSensor.blue());
+            telemetry.addData("Purple?: ", purpleCheck);
+            telemetry.addData("Green?: ", greenCheck);
+            telemetry.addData("Hue: ", color.gethue());
+            telemetry.addData("Saturation: ", color.getsat());
+            telemetry.addData("Value: ", color.getval());
+
             TagData tag = AprilTagExtractor.getAprilTagData();
-            // Map your color sensor (check config name)
             double presentVoltage;
             presentVoltage = myControlHubVoltageSensor.getVoltage();
             double powerValue = 0.5;
             double offsetVoltage =  powerValue * (12.5/presentVoltage);
-
-            int red = colorSensor.red();
-            int green = colorSensor.green();
-            int blue = colorSensor.blue();
 
             int id = tag.id;
             double tx = tag.tx;
@@ -58,17 +71,6 @@ public class RedBaseOp extends LinearOpMode {
             telemetry.addData("Voltage: ",presentVoltage);
             telemetry.addData("offset Voltage: ",offsetVoltage);
 
-            telemetry.addData("Red", red);
-            telemetry.addData("Green", green);
-            telemetry.addData("Blue", blue);
-            telemetry.addData("Detected Purple?", color.PCheck(colorSensor));
-            telemetry.addData("Detected Green?", color.GCheck(colorSensor));
-            telemetry.addData("PHue: ", color.getPhue());
-            telemetry.addData("PSaturation: ", color.getPsat());
-            telemetry.addData("PValue: ", color.getPval());
-            telemetry.addData("GHue: ", color.getGhue());
-            telemetry.addData("GSaturation: ",color.getGsat());
-            telemetry.addData("GValue: ", color.getGval());
             telemetry.update();
 
             if (tag.valid) {

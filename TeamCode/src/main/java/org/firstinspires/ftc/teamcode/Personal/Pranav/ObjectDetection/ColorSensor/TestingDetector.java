@@ -19,28 +19,42 @@ public class TestingDetector {
         int green = sensor.green();
         int blue = sensor.blue();
 
-        float max = Math.max(red, Math.max(green, blue));
-        float scale = (max > 0) ? 255f / max : 1;
-        int scaledR = (int) (red * scale);
-        int scaledG = (int) (green * scale);
-        int scaledB = (int) (blue * scale);
+        // Normalize to remove brightness dependence
+        int total = red + green + blue;
+        if (total == 0) return null; // avoid divide-by-zero
 
-        // Convert RGB → HSV
+        double rNorm = (double) red / total;
+        double gNorm = (double) green / total;
+        double bNorm = (double) blue / total;
+
+        // Scale to 0–255 for HSV conversion
+        int scaledR = (int) (rNorm * 255);
+        int scaledG = (int) (gNorm * 255);
+        int scaledB = (int) (bNorm * 255);
+
+        float[] hsv = new float[3];
         Color.RGBToHSV(scaledR, scaledG, scaledB, hsv);
 
         chue = hsv[0];   // Hue angle (0–360)
         csat = hsv[1];   // Saturation (0–1)
         cval = hsv[2];   // Brightness (0–1)
 
-        // Typical green hue is ~80–160
-        if (chue >= 90 && chue <= 170 && csat > 0.2 && cval > 0.2) {
-            return "green";
-        } else if (chue >= 260 && chue <= 320 && csat > 0.1 && cval > 0.2) {
-            return "purple";
+        // Filter: ignore very dim or grayish readings
+        if (cval < 0.15 || csat < 0.1) {
+            return null;
         }
 
-        return null;
+        // Green: hue around 80–170
+        if (chue >= 80 && chue <= 170) {
+            return "green";
+        }
 
+        // Purple: can wrap around (magenta-red area or violet area)
+        // REV sensors often report purple around 260–320
+        if ((chue >= 260 && chue <= 320) || (chue >= 280 && chue <= 300)) {
+            return "purple";
+        }
+        return null;
     }
 
     public float gethue() {

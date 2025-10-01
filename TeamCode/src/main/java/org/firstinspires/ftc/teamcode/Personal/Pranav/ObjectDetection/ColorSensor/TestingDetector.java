@@ -58,11 +58,14 @@ public class TestingDetector {
         // Purple: red and blue strong, blue >= red, green not dominant
         if (rNorm > 0.25 && bNorm > 0.25 && bNorm >= rNorm && gNorm < 0.7) return "purple";
 
+        int intblue = (int) blue;
+        int intred = (int) green;
+
         // ----------------------------
         // 3️⃣ Secondary heuristics
         // ----------------------------
         // If blue is highest and red moderate → likely purple
-        if (blue > green && green > red && total > 100) return "purple";
+        if (blue >= green | green-blue == 3 && green > red && total > 100) return "purple";
 
         // If green is clearly highest → likely green
         if (green > red && green > blue && total > 100) return "green";

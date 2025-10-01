@@ -62,10 +62,10 @@ public class TestingDetector {
         // 3️⃣ Secondary heuristics
         // ----------------------------
         // If blue is highest and red moderate → likely purple
-        if (green > blue && blue > red && total > 50) return "purple";
+        if (blue > green && green > red && total > 100) return "purple";
 
         // If green is clearly highest → likely green
-        if (green > red && green > blue && total > 50) return "green";
+        if (green > red && green > blue && total > 100) return "green";
 
         return null; // unknown color
     }

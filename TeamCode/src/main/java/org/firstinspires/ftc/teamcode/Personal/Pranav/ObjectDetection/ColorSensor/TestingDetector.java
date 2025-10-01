@@ -15,7 +15,6 @@ public class TestingDetector {
     //ColorSensor sensor;
 
     public String Getcolor(ColorSensor sensor) {
-        // Read raw RGB
         int red = sensor.red();
         int green = sensor.green();
         int blue = sensor.blue();
@@ -23,12 +22,12 @@ public class TestingDetector {
         int total = red + green + blue;
         if (total == 0) return null; // avoid divide-by-zero
 
-        // Normalize RGB (brightness-independent)
+        // Normalize for brightness independence
         double rNorm = (double) red / total;
         double gNorm = (double) green / total;
         double bNorm = (double) blue / total;
 
-        // Convert to HSV for hue-based detection
+        // Scale for HSV conversion
         int scaledR = (int) (rNorm * 255);
         int scaledG = (int) (gNorm * 255);
         int scaledB = (int) (bNorm * 255);
@@ -36,26 +35,39 @@ public class TestingDetector {
         float[] hsv = new float[3];
         Color.RGBToHSV(scaledR, scaledG, scaledB, hsv);
 
-        chue = hsv[0];  // 0–360
-        csat = hsv[1];  // 0–1
-        cval = hsv[2];  // 0–1
+        chue = hsv[0];   // 0–360
+        csat = hsv[1];   // 0–1
+        cval = hsv[2];   // 0–1
 
-        // Ignore dim or grayish readings
-        if (cval < 0.15 || csat < 0.2) return null;
-
-        // ----- Green detection -----
-        if (chue >= 80 && chue <= 170 && csat > 0.25 && cval > 0.25) {
-            return "green";
+        // ----------------------------
+        // 1️⃣ Primary HSV detection
+        // ----------------------------
+        if (csat > 0.15 && cval > 0.15) { // ignore dim/gray
+            // Green
+            if (chue >= 80 && chue <= 170) return "green";
+            // Purple
+            if (chue >= 250 && chue <= 330) return "purple";
         }
 
-        // ----- Purple detection -----
-        // Purple can have moderate green, so don't rely on low green
-        // Typical hue for purple/magenta: 250–320
-        if (chue >= 250 && chue <= 320 && csat > 0.15 && cval > 0.2) {
-            return "purple";
-        }
+        // ----------------------------
+        // 2️⃣ Relative RGB fallback
+        // ----------------------------
+        // Green dominates
+        if (gNorm > rNorm + 0.15 && gNorm > bNorm + 0.15) return "green";
 
-        return null;
+        // Purple: red and blue strong, blue >= red, green not dominant
+        if (rNorm > 0.25 && bNorm > 0.25 && bNorm >= rNorm && gNorm < 0.7) return "purple";
+
+        // ----------------------------
+        // 3️⃣ Secondary heuristics
+        // ----------------------------
+        // If blue is highest and red moderate → likely purple
+        if (blue > red && red > green && total > 50) return "purple";
+
+        // If green is clearly highest → likely green
+        if (green > red && green > blue && total > 50) return "green";
+
+        return null; // unknown color
     }
 
     public float gethue() {

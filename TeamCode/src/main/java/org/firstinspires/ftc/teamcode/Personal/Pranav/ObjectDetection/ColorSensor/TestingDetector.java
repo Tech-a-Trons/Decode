@@ -43,26 +43,19 @@ public class TestingDetector {
         // Ignore dim or grayish readings
         if (cval < 0.15 || csat < 0.2) return null;
 
-        // ----- Green Detection -----
-        // HSV-based
-        if (chue >= 80 && chue <= 170 && csat > 0.2 && cval > 0.2) {
-            return "green";
-        }
-        // Relative RGB fallback
-        if (gNorm > rNorm + 0.1 && gNorm > bNorm + 0.1) {
+        // ----- Green detection -----
+        if (chue >= 80 && chue <= 170 && csat > 0.25 && cval > 0.25) {
             return "green";
         }
 
-        // ----- Purple Detection -----
-        // HSV-based (typical violet/magenta)
-        if ((chue >= 260 && chue <= 320) && csat > 0.2 && cval > 0.2) {
+        // ----- Purple detection -----
+        // Purple can have moderate green, so don't rely on low green
+        // Typical hue for purple/magenta: 250–320
+        if (chue >= 250 && chue <= 320 && csat > 0.15 && cval > 0.2) {
             return "purple";
         }
-        // Relative RGB fallback
-        if (rNorm > 0.2 && bNorm > 0.3 && gNorm < 0.3) {
-            return "purple";
-        }
-        return null; // color not recognized
+
+        return null;
     }
 
     public float gethue() {

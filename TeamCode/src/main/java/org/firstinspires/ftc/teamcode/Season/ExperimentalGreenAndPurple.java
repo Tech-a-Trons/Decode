@@ -11,7 +11,6 @@ public class ExperimentalGreenAndPurple {
     float csat;
     float cval;
 
-    float[] hsv = new float[3];
     //ColorSensor sensor;
 
     public String Getcolor(ColorSensor sensor) {

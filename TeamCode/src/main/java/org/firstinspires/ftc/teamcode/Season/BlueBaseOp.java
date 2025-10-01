@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.Season;
 
-import android.graphics.Color;
-
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -22,7 +20,7 @@ public class BlueBaseOp extends LinearOpMode {
     ColorSensor colorSensor;
     Limelight3A limelight;
     private VoltageSensor myControlHubVoltageSensor;
-    SeasonGreenandPurple color;
+    StableGreenandPurple color;
     String purpleCheck;
     String greenCheck;
 

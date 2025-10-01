@@ -4,7 +4,9 @@ import android.graphics.Color;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
-public class SeasonGreenandPurple {
+//Make changes here
+
+public class ExperimentalGreenAndPurple {
     float chue;
     float csat;
     float cval;

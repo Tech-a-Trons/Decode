@@ -11,8 +11,6 @@ public class ExperimentalGreenAndPurple {
     float csat;
     float cval;
 
-    //ColorSensor sensor;
-
     public String Getcolor(ColorSensor sensor) {
         int red = sensor.red();
         int green = sensor.green();

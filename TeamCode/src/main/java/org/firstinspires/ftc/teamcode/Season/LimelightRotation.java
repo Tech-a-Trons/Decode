@@ -2,9 +2,11 @@ package org.firstinspires.ftc.teamcode.Season;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+@TeleOp
 public class LimelightRotation extends LinearOpMode {
 
     public Limelight3A limelight;

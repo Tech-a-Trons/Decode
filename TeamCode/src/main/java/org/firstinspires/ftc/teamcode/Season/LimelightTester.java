@@ -43,6 +43,7 @@ public class LimelightTester extends LinearOpMode {
             telemetry.addData("ty", ty != null ? String.format("%.2f", ty) : "N/A");
             String status = ll.getStatus();
             telemetry.addData("Status: ", status);
+            telemetry.update();
         }
         ll.stop();
     }

@@ -101,9 +101,10 @@ public class SeasonLimelightExtractor {
                 if (json.has("value")) {
                     double value = json.getJSONArray("value").getDouble(0);
 
-                    if (topic.contains("tx")) tx = value;
-                    else if (topic.contains("ty")) ty = value;
-                    else if (topic.contains("ta")) ta = value;
+                    if (topic.contains("tx")) {tx = value;}
+                    else if (topic.contains("ty")) {ty = value;}
+                    else if (topic.contains("ta")) {ta = value;}
+                    else {return;}
                 }
             }
         } catch (Exception e) {
@@ -113,6 +114,7 @@ public class SeasonLimelightExtractor {
 
 
     public Double getTx() { return tx; }
+
     public Double getTy() { return ty; }
     public Double getTa() { return ta; }
 

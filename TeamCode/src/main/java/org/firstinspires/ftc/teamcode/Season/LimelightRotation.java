@@ -33,7 +33,7 @@ public class LimelightRotation extends LinearOpMode {
         if (tx == null) tx = 0.0;
 
         // Telemetry-safe: use fallback text if null
-        telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");
+//        telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");
 
         telemetry.addLine("Connecting to Limelight...");
         telemetry.update();
@@ -41,6 +41,9 @@ public class LimelightRotation extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
+            tx = ll.getTx();
+            telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");
+
             if (tx > 1) {
                 fl.setPower(0.1);
                 fr.setPower(-0.1);

@@ -59,10 +59,10 @@ public class SeasonLimelightExtractor {
         out.write(hello.getBytes(StandardCharsets.UTF_8));
         out.flush();
 
-        // Subscribe to relevant Limelight topics
-        subscribe("limelight/tx");
-        subscribe("limelight/ty");
-        subscribe("limelight/ta");
+        // Subscribe to the correct Limelight 3A topics
+        subscribe("limelight/limelight/tx");
+        subscribe("limelight/limelight/ty");
+        subscribe("limelight/limelight/ta");
 
         System.out.println("[Limelight] Connected and subscribed.");
     }
@@ -89,16 +89,28 @@ public class SeasonLimelightExtractor {
     public void parseMessage(String msg) {
         try {
             JSONObject json = new JSONObject(msg);
-            if (!json.has("topic") || !json.has("value")) return;
 
-            String topic = json.getString("topic");
-            double value = json.getJSONArray("value").getDouble(0);
+            if (json.has("topic")) {
+                String topic = json.getString("topic");
 
-            if (topic.endsWith("tx")) tx = value;
-            else if (topic.endsWith("ty")) ty = value;
-            else if (topic.endsWith("ta")) ta = value;
-        } catch (Exception ignored) {}
+                // Debug: print unknown topic names
+                if (tx == null && ty == null && ta == null) {
+                    System.out.println("[Limelight topic] " + topic);
+                }
+
+                if (json.has("value")) {
+                    double value = json.getJSONArray("value").getDouble(0);
+
+                    if (topic.contains("tx")) tx = value;
+                    else if (topic.contains("ty")) ty = value;
+                    else if (topic.contains("ta")) ta = value;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("[Parse error] " + e.getMessage());
+        }
     }
+
 
     public Double getTx() { return tx; }
     public Double getTy() { return ty; }

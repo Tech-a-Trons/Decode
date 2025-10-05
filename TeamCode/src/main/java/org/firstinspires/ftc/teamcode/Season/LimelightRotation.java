@@ -74,6 +74,8 @@ public class LimelightRotation extends LinearOpMode {
                 bl.setPower(0);
                 br.setPower(0);
                 telemetry.addLine("No AprilTags in sight!");
+            } else {
+                telemetry.addLine("ERROR!");
             }
         }
         ll.stop();

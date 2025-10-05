@@ -30,6 +30,7 @@ public class LimelightRotation extends LinearOpMode {
         limelight.pipelineSwitch(1);
 
         Double tx = ll.getTx();
+        if (tx == null) tx = 0.0;
 
         // Telemetry-safe: use fallback text if null
         telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");

@@ -135,4 +135,3 @@ public class SeasonLimelightExtractor {
         out = null;
     }
 }
-

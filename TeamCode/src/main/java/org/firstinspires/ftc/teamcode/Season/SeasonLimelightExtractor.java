@@ -30,6 +30,9 @@ public class SeasonLimelightExtractor {
     private volatile Double ty = null;
     private volatile Double ta = null;
     private volatile Double tl = null;
+    private Double fps = null;
+    private long lastTime = System.currentTimeMillis();
+
 
     private volatile String connectionStatus = "Not connected";
 
@@ -113,7 +116,16 @@ public class SeasonLimelightExtractor {
                 case "tx": tx = smooth(tx, val); break;
                 case "ty": ty = smooth(ty, val); break;
                 case "ta": ta = smooth(ta, val); break;
-                case "tl": tl = smooth(tl, val); break;
+                case "tl":
+                    tl = smooth(tl, val);
+
+                    // Calculate FPS from latency
+                    if (tl > 0) {
+                        double newFps = 1000.0 / tl;
+                        fps = fps == null ? newFps : fps * 0.8 + newFps * 0.2; // smoothing
+                    }
+                    break;
+
             }
 
             connectionStatus = "Receiving data";
@@ -130,6 +142,7 @@ public class SeasonLimelightExtractor {
     public Double getTy() { return ty; }
     public Double getTa() { return ta; }
     public Double getTl() { return tl; }
+    public Double getFps() { return fps; }
     public String getStatus() { return connectionStatus; }
 
     public void addTelemetry() {
@@ -140,6 +153,7 @@ public class SeasonLimelightExtractor {
         telemetry.addData("ty", ty != null ? String.format("%.2f", ty) : "N/A");
         telemetry.addData("ta", ta != null ? String.format("%.2f", ta) : "N/A");
         telemetry.addData("tl", tl != null ? String.format("%.2f", tl) : "N/A");
+        telemetry.addData("FPS", fps != null ? String.format("%.1f", fps) : "N/A");
     }
 
     public void close() {

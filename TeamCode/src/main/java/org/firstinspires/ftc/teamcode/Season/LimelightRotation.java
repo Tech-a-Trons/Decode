@@ -18,10 +18,10 @@ public class LimelightRotation extends LinearOpMode {
 
         SeasonLimelightExtractor ll = new SeasonLimelightExtractor(hardwareMap);
 
-        fl = hardwareMap.get(DcMotor.class, "frontLeft");
-        fr = hardwareMap.get(DcMotor.class, "frontRight");
-        bl = hardwareMap.get(DcMotor.class, "backLeft");
-        br = hardwareMap.get(DcMotor.class, "backRight");
+        fl = hardwareMap.get(DcMotor.class, "fl");
+        fr = hardwareMap.get(DcMotor.class, "fr");
+        bl = hardwareMap.get(DcMotor.class, "bl");
+        br = hardwareMap.get(DcMotor.class, "br");
 
         // Reverse the right side
         fl.setDirection(DcMotor.Direction.REVERSE);

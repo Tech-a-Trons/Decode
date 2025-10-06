@@ -35,7 +35,7 @@ public class SeasonLimelightExtractor {
     private volatile boolean running = false;
 
     public SeasonLimelightExtractor(HardwareMap hardwareMap) {
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight = hardwareMap.get(Limelight3A.class, "Limelight");
         limelight.setPollRateHz(100);
         limelight.start();
     }

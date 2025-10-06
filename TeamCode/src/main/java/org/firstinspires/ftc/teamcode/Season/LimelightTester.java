@@ -15,8 +15,6 @@ public class LimelightTester extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         SeasonLimelightExtractor ll = new SeasonLimelightExtractor();
-        ll.start(); // start listening for Limelight data
-
         limelight = hardwareMap.get(Limelight3A.class,"Limelight");
 
         limelight.pipelineSwitch(1);
@@ -29,8 +27,6 @@ public class LimelightTester extends LinearOpMode {
         if (ta == null) {ta = 0.0;}
         Double tl = ll.getTl();
         if (tl == null) {tl = 0.0;}
-        Double fps = ll.getFps();
-        if (fps == null) {fps = 0.0;}
         String status = ll.getStatus();
 
         // Telemetry-safe: use fallback text if null
@@ -46,9 +42,8 @@ public class LimelightTester extends LinearOpMode {
             telemetry.addData("ty", ty != null ? String.format("%.2f", ty) : "N/A");
             telemetry.addData("Status: ", status);
             telemetry.addData("tl", tl != null ? String.format("%.2f", tl) : "N/A");
-            telemetry.addData("FPS: ", fps);
             telemetry.update();
         }
-        ll.stop();
+        ll.close();
     }
 }

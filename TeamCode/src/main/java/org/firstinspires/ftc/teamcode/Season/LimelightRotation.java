@@ -19,7 +19,6 @@ public class LimelightRotation extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         SeasonLimelightExtractor ll = new SeasonLimelightExtractor();
-        ll.start(); // start listening for Limelight data
 
         limelight = hardwareMap.get(Limelight3A.class,"Limelight");
 
@@ -78,6 +77,6 @@ public class LimelightRotation extends LinearOpMode {
                 telemetry.addLine("ERROR!");
             }
         }
-        ll.stop();
+        ll.close();
     }
 }

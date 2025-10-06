@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class SeasonLimelightExtractor {
 
-    private static final String HOST = "10.0.0.11"; // Replace with your Limelight IP
+    private static final String HOST = "179.29.0.22"; // Replace with your Limelight IP
     private static final int PORT = 5810;
     private static final int RECONNECT_DELAY_MS = 2000;
 

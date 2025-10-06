@@ -12,8 +12,7 @@ public class LimelightTester extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        SeasonLimelightExtractor ll = new SeasonLimelightExtractor();
-        limelight = hardwareMap.get(Limelight3A.class,"Limelight");
+        SeasonLimelightExtractor ll = new SeasonLimelightExtractor(hardwareMap);
 
         limelight.pipelineSwitch(1);
 
@@ -27,10 +26,6 @@ public class LimelightTester extends LinearOpMode {
         if (ty == null) {ty = 0.0;}
         Double ta = ll.getTa();
         if (ta == null) {ta = 0.0;}
-        Double tl = ll.getTl();
-        if (tl == null) {tl = 0.0;}
-        String status = ll.getStatus();
-        Double fps = ll.getFps();
 
         // Telemetry-safe: use fallback text if null
 //        telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");
@@ -43,6 +38,15 @@ public class LimelightTester extends LinearOpMode {
         while (opModeIsActive()) {
             ll.update();
             telemetry.update();
+
+            double hAngle = ll.getHorizontalAngle();
+            double vAngle = ll.getVerticalAngle();
+            boolean visible = ll.isTargetVisible();
+
+            // Optional: use values in your robot logic
+            if (visible) {
+                telemetry.addData("Info", "Target detected! H: %.2f, V: %.2f", hAngle, vAngle);
+            }
         }
         ll.stopReading();
     }

@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Season;
 
-import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -11,70 +10,223 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Robust Limelight 3A extractor for Control Hub (USB)
- * Works over NT4 virtual network (port 5810)
+ * Robust Limelight 3A extractor for FTC Control Hub (USB)
+ * Fully merges connection, fallback, and reading logic.
+ * Automatically clears stale values if no data is received.
  */
 public class SeasonLimelightExtractor {
 
-    private static final String HOST = "179.29.0.22"; // Replace with your Limelight IP
-    private static final int PORT = 5810;
-    private static final int RECONNECT_DELAY_MS = 2000;
+    // Fallback hosts
+    private final String[] FALLBACK_HOSTS = {
+            "limelight.local",   // USB/mDNS
+            "10.9.30.2",         // example DHCP/static fallback
+            "10.9.30.11"         // common FTC convention
+    };
 
+    private final int PORT = 5810;
+    private final int RECONNECT_DELAY_MS = 2000;
+    private final double SMOOTHING_FACTOR = 0.2;
+    private final long STALE_TIMEOUT_MS = 500; // 0.5s without messages = stale
+
+    // Current host
+    private String HOST = FALLBACK_HOSTS[0];
+
+    // Network
     private volatile Socket socket;
     private volatile InputStream in;
     private volatile OutputStream out;
+    private volatile boolean targetVisible = false;
+    private volatile double horizontalAngle = 0.0;
+    private volatile double verticalAngle = 0.0;
+    private volatile double distanceEstimate = 0.0; // can be computed if target height known
 
+    // Limelight values
     private volatile Double tx = null;
     private volatile Double ty = null;
     private volatile Double ta = null;
     private volatile Double tl = null;
     private Double fps = null;
-    private long lastTime = System.currentTimeMillis();
 
-
+    // Status
     private volatile String connectionStatus = "Not connected";
+    private volatile long lastUpdateTime = 0;
 
-    // For smoothing
-    private final double SMOOTHING_FACTOR = 0.2;
+    // Background thread
+    private Thread readingThread;
+    private volatile boolean running = false;
 
+    // ------------------- PUBLIC METHODS -------------------
+
+    /**
+     * Starts reading Limelight values in a background thread.
+     * Automatically handles connection, host fallback, NT4 handshake, reading, and stale-value reset.
+     */
+    public void startReading() {
+        if (running) return;
+        running = true;
+
+        readingThread = new Thread(() -> {
+            int hostIndex = 0;
+
+            while (running && !Thread.currentThread().isInterrupted()) {
+                try {
+                    // Connect if not connected
+                    if (socket == null || socket.isClosed()) {
+                        HOST = FALLBACK_HOSTS[hostIndex];
+                        hostIndex = (hostIndex + 1) % FALLBACK_HOSTS.length;
+
+                        try {
+                            connectionStatus = "Connecting to " + HOST + "...";
+                            socket = new Socket(HOST, PORT);
+                            in = socket.getInputStream();
+                            out = socket.getOutputStream();
+
+                            // NT4 handshake
+                            String hello = "{\"op\":\"hello\",\"protocol\":\"NT4\",\"version\":0}\n";
+                            out.write(hello.getBytes(StandardCharsets.UTF_8));
+                            out.flush();
+
+                            // Subscribe to topics
+                            subscribe("tx");
+                            subscribe("ty");
+                            subscribe("ta");
+                            subscribe("tl");
+
+                            connectionStatus = "Connected to " + HOST;
+
+                        } catch (Exception e) {
+                            connectionStatus = "Failed to connect to " + HOST;
+                            close();
+                            TimeUnit.MILLISECONDS.sleep(RECONNECT_DELAY_MS);
+                            continue; // try next host
+                        }
+                    }
+
+                    // Read messages if connected
+                    if (socket != null && !socket.isClosed()) {
+                        readMessages();
+                    }
+
+                    // Clear stale values if no data recently
+                    if (System.currentTimeMillis() - lastUpdateTime > STALE_TIMEOUT_MS) {
+                        tx = null;
+                        ty = null;
+                        ta = null;
+                        tl = null;
+                        fps = null;
+                        connectionStatus = "No data (stale)";
+                    }
+
+                } catch (Exception ignored) {}
+
+                try {
+                    Thread.sleep(10); // prevent CPU hog
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        });
+
+        readingThread.start();
+    }
+
+    /**
+     * Stops the background reading thread and closes the socket.
+     */
+    public void stopReading() {
+        running = false;
+        if (readingThread != null) {
+            readingThread.interrupt();
+            readingThread = null;
+        }
+        close();
+    }
+
+    /**
+     * Adds current Limelight data to telemetry.
+     */
+    public void addTelemetry() {
+        if (telemetry == null) return;
+
+        telemetry.addData("Limelight Status", connectionStatus != null ? connectionStatus : "N/A");
+        telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");
+        telemetry.addData("ty", ty != null ? String.format("%.2f", ty) : "N/A");
+        telemetry.addData("ta", ta != null ? String.format("%.2f", ta) : "N/A");
+        telemetry.addData("tl", tl != null ? String.format("%.2f", tl) : "N/A");
+        telemetry.addData("FPS", fps != null ? String.format("%.1f", fps) : "N/A");
+    }
+
+    /**
+     * Updates internal state for TeleOp.
+     * Call this inside your loop() method every iteration.
+     * Handles telemetry, stale-value check, and internal updates.
+     */
+    // Optional derived values for TeleOp
+
+    /**
+     * Updates internal state for TeleOp.
+     * Call this inside loop() every iteration.
+     * Handles telemetry, stale-value reset, and calculates derived values.
+     */
+    /**
+     * Updates internal state for TeleOp.
+     * Handles telemetry, stale-value reset, and calculates smoothed derived values.
+     */
     public void update() {
-        if (socket == null || socket.isClosed()) {
-            tryConnect();
+        long now = System.currentTimeMillis();
+
+        // 1. Clear stale values if no data received recently
+        if (now - lastUpdateTime > STALE_TIMEOUT_MS) {
+            tx = null;
+            ty = null;
+            ta = null;
+            tl = null;
+            fps = null;
+            connectionStatus = "No data (stale)";
+            targetVisible = false;
+            horizontalAngle = 0.0;
+            verticalAngle = 0.0;
+            distanceEstimate = 0.0;
+        } else {
+            // 2. Update target visibility
+            targetVisible = (ta != null && ta > 0.0);
+
+            // 3. Compute raw derived values
+            double rawHorizontal = tx != null ? tx : 0.0;
+            double rawVertical = ty != null ? ty : 0.0;
+
+            // Distance estimate
+            final double TARGET_HEIGHT = 24.0; // inches (example)
+            final double CAMERA_HEIGHT = 9.0;  // inches (example)
+            final double CAMERA_ANGLE = 20.0;  // degrees mounting angle
+            double rawDistance = 0.0;
+
+            if (targetVisible) {
+                double angleToTarget = CAMERA_ANGLE + rawVertical;
+                rawDistance = (TARGET_HEIGHT - CAMERA_HEIGHT) / Math.tan(Math.toRadians(angleToTarget));
+            }
+
+            // 4. Apply smoothing to derived values
+            horizontalAngle = smooth(horizontalAngle, rawHorizontal);
+            verticalAngle = smooth(verticalAngle, rawVertical);
+            distanceEstimate = smooth(distanceEstimate, rawDistance);
         }
-        if (socket != null && !socket.isClosed()) {
-            readMessages();
-        }
+
+        // 5. Refresh telemetry
+        addTelemetry();
+        telemetry.addData("Target Visible", targetVisible);
+        telemetry.addData("Horizontal Angle", String.format("%.2f", horizontalAngle));
+        telemetry.addData("Vertical Angle", String.format("%.2f", verticalAngle));
+        telemetry.addData("Distance Estimate", String.format("%.2f", distanceEstimate));
     }
 
-    private void tryConnect() {
-        try {
-            connectionStatus = "Connecting...";
-            socket = new Socket(HOST, PORT);
-            in = socket.getInputStream();
-            out = socket.getOutputStream();
 
-            // NT4 handshake
-            String hello = "{\"op\":\"hello\",\"protocol\":\"NT4\",\"version\":0}\n";
-            out.write(hello.getBytes(StandardCharsets.UTF_8));
-            out.flush();
 
-            // Subscribe only to required topics
-            subscribe("tx");
-            subscribe("ty");
-            subscribe("ta");
-            subscribe("tl");
-
-            connectionStatus = "Connected";
-        } catch (Exception e) {
-            connectionStatus = "Failed to connect, retrying...";
-            close();
-            try {
-                Thread.sleep(RECONNECT_DELAY_MS);
-            } catch (InterruptedException ignored) {}
-        }
-    }
+    // ------------------- PRIVATE METHODS -------------------
 
     private void subscribe(String topic) throws Exception {
         String msg = String.format("{\"op\":\"subscribe\",\"topics\":[\"/%s\"]}\n", topic);
@@ -85,10 +237,10 @@ public class SeasonLimelightExtractor {
     private void readMessages() {
         try {
             byte[] buffer = new byte[2048];
-            if (in.available() <= 0) {return;}
+            if (in.available() <= 0) return;
 
             int len = in.read(buffer);
-            if (len <= 0) {return;}
+            if (len <= 0) return;
 
             String raw = new String(buffer, 0, len, StandardCharsets.UTF_8);
             String[] messages = raw.split("\n");
@@ -106,7 +258,7 @@ public class SeasonLimelightExtractor {
     private void parseMessage(String msg) {
         try {
             JSONObject json = new JSONObject(msg);
-            if (!json.has("topic") || !json.has("value")) {return;}
+            if (!json.has("topic") || !json.has("value")) return;
 
             String topic = json.getString("topic");
             JSONArray values = json.getJSONArray("value");
@@ -118,47 +270,35 @@ public class SeasonLimelightExtractor {
                 case "ta": ta = smooth(ta, val); break;
                 case "tl":
                     tl = smooth(tl, val);
-
-                    // Calculate FPS from latency
                     if (tl > 0) {
                         double newFps = 1000.0 / tl;
-                        fps = fps == null ? newFps : fps * 0.8 + newFps * 0.2; // smoothing
+                        fps = fps == null ? newFps : fps * 0.8 + newFps * 0.2;
                     }
                     break;
-
             }
 
+            lastUpdateTime = System.currentTimeMillis();
             connectionStatus = "Receiving data";
 
         } catch (Exception ignored) {}
     }
 
     private double smooth(Double oldVal, double newVal) {
-        if (oldVal == null) {return newVal;}
+        if (oldVal == null) return newVal;
         return oldVal * (1.0 - SMOOTHING_FACTOR) + newVal * SMOOTHING_FACTOR;
     }
 
+    private void close() {
+        try { if (socket != null) socket.close(); } catch (Exception ignored) {}
+        socket = null; in = null; out = null;
+        connectionStatus = "Closed";
+    }
+
+    // ------------------- GETTERS -------------------
     public Double getTx() { return tx; }
     public Double getTy() { return ty; }
     public Double getTa() { return ta; }
     public Double getTl() { return tl; }
     public Double getFps() { return fps; }
     public String getStatus() { return connectionStatus; }
-
-    public void addTelemetry() {
-        if (telemetry == null) {return;}  // safety check
-
-        telemetry.addData("Limelight Status", connectionStatus != null ? connectionStatus : "N/A");
-        telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");
-        telemetry.addData("ty", ty != null ? String.format("%.2f", ty) : "N/A");
-        telemetry.addData("ta", ta != null ? String.format("%.2f", ta) : "N/A");
-        telemetry.addData("tl", tl != null ? String.format("%.2f", tl) : "N/A");
-        telemetry.addData("FPS", fps != null ? String.format("%.1f", fps) : "N/A");
-    }
-
-    public void close() {
-        try { if (socket != null) socket.close(); } catch (Exception ignored) {}
-        socket = null; in = null; out = null;
-        connectionStatus = "Closed";
-    }
 }

@@ -40,6 +40,16 @@ public class SeasonLimelightExtractor {
         limelight.start();
     }
 
+    /**
+     * Computes a simple proportional steering correction based on tx.
+     * Positive output → turn right, negative → turn left.
+     * kP is a proportional constant you can tune.
+     */
+    public double getSteeringCorrection(double kP) {
+        if (!targetVisible || tx == null) return 0.0;
+        return kP * tx;
+    }
+
     public void setTelemetry(Telemetry telemetry) {
         this.opModeTelemetry = telemetry;
     }

@@ -1,48 +1,36 @@
 package org.firstinspires.ftc.teamcode.Season;
 
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-
 import org.firstinspires.ftc.teamcode.Season.SensorStuff.SeasonLimelightExtractor;
 
 @TeleOp
 public class LimelightRotation extends LinearOpMode {
 
-    public Limelight3A limelight;
     DcMotor fl;
     DcMotor fr;
     DcMotor bl;
     DcMotor br;
 
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void runOpMode() {
 
-        SeasonLimelightExtractor ll = new SeasonLimelightExtractor();
+        SeasonLimelightExtractor ll = new SeasonLimelightExtractor(hardwareMap);
 
-        limelight = hardwareMap.get(Limelight3A.class,"Limelight");
+        fl = hardwareMap.get(DcMotor.class, "frontLeft");
+        fr = hardwareMap.get(DcMotor.class, "frontRight");
+        bl = hardwareMap.get(DcMotor.class, "backLeft");
+        br = hardwareMap.get(DcMotor.class, "backRight");
 
-        fl = hardwareMap.get(DcMotor.class, "fl");
-        fr = hardwareMap.get(DcMotor.class, "fr");
-        bl = hardwareMap.get(DcMotor.class, "bl");
-        br = hardwareMap.get(DcMotor.class, "br");
+        // Reverse the right side
+        fl.setDirection(DcMotor.Direction.REVERSE);
+        bl.setDirection(DcMotor.Direction.REVERSE);
 
-        limelight.pipelineSwitch(1);
-
+        ll.setTelemetry(telemetry);
         ll.startReading();
 
-        Double tx = ll.getTx();
-        if (tx == null) {tx = 0.0;}
-        Double ty = ll.getTy();
-        if (ty == null) {ty = 0.0;}
-        Double ta = ll.getTa();
-        if (ta == null) {ta = 0.0;}
-
-        // Telemetry-safe: use fallback text if null
-//        telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");
-
-        telemetry.addLine("Connecting to Limelight...");
+        telemetry.addLine("rdy!");
         telemetry.update();
 
         waitForStart();
@@ -50,31 +38,34 @@ public class LimelightRotation extends LinearOpMode {
         while (opModeIsActive()) {
             ll.update();
 
-            if (tx > 1) {
-                fl.setPower(0.01);
-                fr.setPower(-0.01);
-                bl.setPower(0.01);
-                br.setPower(-0.01);
-            } else if (tx < -1) {
-                fl.setPower(-0.01);
-                fr.setPower(0.01);
-                bl.setPower(-0.01);
-                br.setPower(0.01);
-            } else if (1 <= tx && tx >= -1) {
-                fl.setPower(0);
-                fr.setPower(0);
-                bl.setPower(0);
-                br.setPower(0);
-            } else if (tx == 0 && ty == 0 && ta == 0) {
-                fl.setPower(0);
-                fr.setPower(0);
-                bl.setPower(0);
-                br.setPower(0);
-                telemetry.addLine("No AprilTags in sight!");
-            } else {
-                telemetry.addLine("ERROR!");
+            double correction = ll.getSteeringCorrection(0.02); // Tune kP
+            boolean visible = ll.isTargetVisible();
+
+            double rPwr = 0.0;
+
+            if (visible) {
+                // Rotate to center the target
+                rPwr = correction;
             }
+
+            // Mecanum rotation (no translation)
+            double flp = rPwr;
+            double frp = -rPwr;
+            double blp = rPwr;
+            double brp = -rPwr;
+
+            fl.setPower(flp);
+            fr.setPower(frp);
+            bl.setPower(blp);
+            br.setPower(brp);
+
+            telemetry.addData("Correction", correction);
+            telemetry.addData("Target Visible", visible);
+            telemetry.update();
+
+            sleep(20);
         }
+
         ll.stopReading();
     }
 }

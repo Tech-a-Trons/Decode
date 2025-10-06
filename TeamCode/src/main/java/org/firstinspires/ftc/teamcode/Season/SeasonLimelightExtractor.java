@@ -13,7 +13,7 @@ import java.util.Date;
  * Supports auto-detecting topic prefixes and rich debugging.
  */
 public class SeasonLimelightExtractor {
-    private static final String HOST = "172.29.0.1"; // <- Replace with your Limelight’s IP
+    private static final String HOST = "172.29.0.22"; // <- Replace with your Limelight’s IP
     private static final int PORT = 5810;
     private static final int RECONNECT_DELAY_MS = 2000;
 

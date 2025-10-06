@@ -45,11 +45,6 @@ public class SeasonLimelightExtractor {
         limelight.start();
     }
 
-    public double getSteeringCorrection(double kP) {
-        if (!targetVisible || tx == null) return 0.0;
-        return kP * tx;
-    }
-
     public void setTelemetry(Telemetry telemetry) {
         this.opModeTelemetry = telemetry;
     }

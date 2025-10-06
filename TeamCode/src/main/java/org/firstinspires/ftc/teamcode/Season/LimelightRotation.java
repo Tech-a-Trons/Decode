@@ -29,7 +29,11 @@ public class LimelightRotation extends LinearOpMode {
         ll.setTelemetry(telemetry);
         ll.startReading();
 
-        telemetry.addLine("rdy!");
+        Double tx = ll.getTx();
+        Double ty = ll.getTy();
+        Double ta = ll.getTa();
+
+        telemetry.addLine("Ready!");
         telemetry.update();
 
         waitForStart();
@@ -37,34 +41,32 @@ public class LimelightRotation extends LinearOpMode {
         while (opModeIsActive()) {
             ll.update();
 
-            double correction = ll.getSteeringCorrection(0.02); // Tune kP
-            boolean visible = ll.isTargetVisible();
-
-            double rPwr = 0.0;
-
-            if (visible) {
-                // Rotate to center the target
-                rPwr = correction;
+            if (tx > 1.0) {
+                fl.setPower(0.05);
+                fr.setPower(-0.05);
+                bl.setPower(0.05);
+                br.setPower(-0.05);
+            } else if (tx < -1.0) {
+                fl.setPower(-0.05);
+                fr.setPower(0.05);
+                bl.setPower(-0.05);
+                br.setPower(0.05);
+            } else if (tx < 1.0 && tx > -1.0) {
+                fl.setPower(0.0);
+                fr.setPower(0.0);
+                bl.setPower(0.0);
+                br.setPower(0.0);
+            } else if (tx == 0.0 && ty == 0.0 && ta == 0.0) {
+                telemetry.addLine("Not detected!");
+                telemetry.update();
+                fl.setPower(0.0);
+                fr.setPower(0.0);
+                bl.setPower(0.0);
+                br.setPower(0.0);
+            } else {
+                return;
             }
-
-            // Mecanum rotation (no translation)
-            double flp = rPwr;
-            double frp = -rPwr;
-            double blp = rPwr;
-            double brp = -rPwr;
-
-            fl.setPower(flp);
-            fr.setPower(frp);
-            bl.setPower(blp);
-            br.setPower(brp);
-
-            telemetry.addData("Correction", correction);
-            telemetry.addData("Target Visible", visible);
-            telemetry.update();
-
-            sleep(20);
         }
-
         ll.stopReading();
     }
 }

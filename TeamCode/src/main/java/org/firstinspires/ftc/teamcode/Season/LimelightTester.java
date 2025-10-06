@@ -27,6 +27,11 @@ public class LimelightTester extends LinearOpMode {
         if (ty == null) {ty = 0.0;}
         Double ta = ll.getTa();
         if (ta == null) {ta = 0.0;}
+        Double tl = ll.getTl();
+        if (tl == null) {tl = 0.0;}
+        Double fps = ll.getFps();
+        if (fps == null) {fps = 0.0;}
+        String status = ll.getStatus();
 
         // Telemetry-safe: use fallback text if null
 //        telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");
@@ -37,12 +42,11 @@ public class LimelightTester extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            tx = ll.getTx();
             telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");
-            ty = ll.getTy();
             telemetry.addData("ty", ty != null ? String.format("%.2f", ty) : "N/A");
-            String status = ll.getStatus();
             telemetry.addData("Status: ", status);
+            telemetry.addData("tl", tl != null ? String.format("%.2f", tl) : "N/A");
+            telemetry.addData("FPS: ", fps);
             telemetry.update();
         }
         ll.stop();

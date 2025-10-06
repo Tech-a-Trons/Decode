@@ -1,10 +1,8 @@
-package org.firstinspires.ftc.teamcode.Season;
+package org.firstinspires.ftc.teamcode.Season.SensorStuff;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -23,7 +21,10 @@ public class SeasonLimelightExtractor {
     private final String[] FALLBACK_HOSTS = {
             "limelight.local",   // USB/mDNS
             "10.9.30.2",         // example DHCP/static fallback
-            "10.9.30.11"         // common FTC convention
+            "10.9.30.11",         // common FTC convention
+            "172.29.0.1",
+            "172.28.0.1",
+            "172.29.0.22"
     };
 
     private final int PORT = 5810;

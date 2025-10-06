@@ -27,6 +27,7 @@ public class P1LimelightExample extends LinearOpMode {
         if (!ll.connect()) {
             telemetry.addLine("Failed to connect!");
             telemetry.update();
+            sleep(100000);
             return;
         }
 

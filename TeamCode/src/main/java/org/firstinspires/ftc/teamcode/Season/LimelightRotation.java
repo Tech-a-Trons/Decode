@@ -29,6 +29,8 @@ public class LimelightRotation extends LinearOpMode {
 
         limelight.pipelineSwitch(1);
 
+        ll.startReading();
+
         Double tx = ll.getTx();
         if (tx == null) {tx = 0.0;}
         Double ty = ll.getTy();
@@ -45,12 +47,7 @@ public class LimelightRotation extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            tx = ll.getTx();
-            telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");
-            ty = ll.getTy();
-            telemetry.addData("ty", ty != null ? String.format("%.2f", ty) : "N/A");
-            String status = ll.getStatus();
-            telemetry.addData("Status: ", status);
+            ll.update();
 
             if (tx > 1) {
                 fl.setPower(0.01);
@@ -77,6 +74,6 @@ public class LimelightRotation extends LinearOpMode {
                 telemetry.addLine("ERROR!");
             }
         }
-        ll.close();
+        ll.stopReading();
     }
 }

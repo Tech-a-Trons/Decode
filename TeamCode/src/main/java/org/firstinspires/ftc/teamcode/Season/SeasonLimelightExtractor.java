@@ -146,28 +146,14 @@ public class SeasonLimelightExtractor {
         close();
     }
 
-    /**
-     * Adds current Limelight data to telemetry.
-     */
-    public void addTelemetry() {
-        if (telemetry == null) return;
-
-        telemetry.addData("Limelight Status", connectionStatus != null ? connectionStatus : "N/A");
-        telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");
-        telemetry.addData("ty", ty != null ? String.format("%.2f", ty) : "N/A");
-        telemetry.addData("ta", ta != null ? String.format("%.2f", ta) : "N/A");
-        telemetry.addData("tl", tl != null ? String.format("%.2f", tl) : "N/A");
-        telemetry.addData("FPS", fps != null ? String.format("%.1f", fps) : "N/A");
-    }
-
-    /**
+    /*
      * Updates internal state for TeleOp.
      * Call this inside your loop() method every iteration.
      * Handles telemetry, stale-value check, and internal updates.
      */
     // Optional derived values for TeleOp
 
-    /**
+    /*
      * Updates internal state for TeleOp.
      * Call this inside loop() every iteration.
      * Handles telemetry, stale-value reset, and calculates derived values.
@@ -175,6 +161,10 @@ public class SeasonLimelightExtractor {
     /**
      * Updates internal state for TeleOp.
      * Handles telemetry, stale-value reset, and calculates smoothed derived values.
+     */
+    /**
+     * Updates internal state for TeleOp and automatically refreshes telemetry.
+     * Call this every loop; no need to call telemetry.update() separately.
      */
     public void update() {
         long now = System.currentTimeMillis();
@@ -210,7 +200,7 @@ public class SeasonLimelightExtractor {
                 rawDistance = (TARGET_HEIGHT - CAMERA_HEIGHT) / Math.tan(Math.toRadians(angleToTarget));
             }
 
-            // 4. Apply smoothing to derived values
+            // 4. Apply smoothing
             horizontalAngle = smooth(horizontalAngle, rawHorizontal);
             verticalAngle = smooth(verticalAngle, rawVertical);
             distanceEstimate = smooth(distanceEstimate, rawDistance);
@@ -222,7 +212,11 @@ public class SeasonLimelightExtractor {
         telemetry.addData("Horizontal Angle", String.format("%.2f", horizontalAngle));
         telemetry.addData("Vertical Angle", String.format("%.2f", verticalAngle));
         telemetry.addData("Distance Estimate", String.format("%.2f", distanceEstimate));
+
+        // 6. Send telemetry to driver station immediately
+        telemetry.update();
     }
+
 
 
 
@@ -281,6 +275,20 @@ public class SeasonLimelightExtractor {
             connectionStatus = "Receiving data";
 
         } catch (Exception ignored) {}
+    }
+
+    /**
+     * Adds current Limelight data to telemetry.
+     */
+    private void addTelemetry() {
+        if (telemetry == null) return;
+
+        telemetry.addData("Limelight Status", connectionStatus != null ? connectionStatus : "N/A");
+        telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");
+        telemetry.addData("ty", ty != null ? String.format("%.2f", ty) : "N/A");
+        telemetry.addData("ta", ta != null ? String.format("%.2f", ta) : "N/A");
+        telemetry.addData("tl", tl != null ? String.format("%.2f", tl) : "N/A");
+        telemetry.addData("FPS", fps != null ? String.format("%.1f", fps) : "N/A");
     }
 
     private double smooth(Double oldVal, double newVal) {

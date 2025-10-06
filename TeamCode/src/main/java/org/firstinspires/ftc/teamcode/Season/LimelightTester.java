@@ -21,6 +21,7 @@ public class LimelightTester extends LinearOpMode {
 
         ll.startReading();
 
+        //just getting values. this is a framework to base my other codes on
         Double tx = ll.getTx();
         if (tx == null) {tx = 0.0;}
         Double ty = ll.getTy();
@@ -30,6 +31,7 @@ public class LimelightTester extends LinearOpMode {
         Double tl = ll.getTl();
         if (tl == null) {tl = 0.0;}
         String status = ll.getStatus();
+        Double fps = ll.getFps();
 
         // Telemetry-safe: use fallback text if null
 //        telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");

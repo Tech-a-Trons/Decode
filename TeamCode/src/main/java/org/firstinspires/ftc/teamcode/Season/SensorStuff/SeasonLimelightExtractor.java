@@ -24,7 +24,10 @@ public class SeasonLimelightExtractor {
             "10.9.30.11",         // common FTC convention
             "172.29.0.1",
             "172.28.0.1",
-            "172.29.0.22"
+            "172.29.0.22",
+            "10.0.0.2",
+            "192.168.1.100",
+            "10.0.0.1"
     };
 
     private final int PORT = 5810;

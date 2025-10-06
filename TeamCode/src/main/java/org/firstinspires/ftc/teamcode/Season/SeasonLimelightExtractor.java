@@ -1,14 +1,17 @@
-package org.firstinspires.ftc.teamcode.Season.SensorStuff;
+package org.firstinspires.ftc.teamcode.Season;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import java.util.List;
+
 /**
  * FTC-Legal Limelight 3A extractor with background polling thread.
- * Preserves smoothing, target visibility, telemetry, and stale-value fallback.
+ * Includes AprilTag ID extraction using LLResultTypes.FiducialResult.
  */
 public class SeasonLimelightExtractor {
 
@@ -22,6 +25,7 @@ public class SeasonLimelightExtractor {
     private volatile Double tx = null;
     private volatile Double ty = null;
     private volatile Double ta = null;
+    private volatile Integer tagId = null;
 
     // Smoothed / derived values
     private volatile double horizontalAngle = 0.0;
@@ -37,14 +41,10 @@ public class SeasonLimelightExtractor {
     public SeasonLimelightExtractor(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");
         limelight.setPollRateHz(100);
+        limelight.pipelineSwitch(1);
         limelight.start();
     }
 
-    /**
-     * Computes a simple proportional steering correction based on tx.
-     * Positive output → turn right, negative → turn left.
-     * kP is a proportional constant you can tune.
-     */
     public double getSteeringCorrection(double kP) {
         if (!targetVisible || tx == null) return 0.0;
         return kP * tx;
@@ -68,15 +68,18 @@ public class SeasonLimelightExtractor {
                         tx = result.getTx();
                         ty = result.getTy();
                         ta = result.getTa();
+                        tagId = extractTagId(result);
+
                         lastUpdateTime = now;
                         connectionStatus = "Connected";
                     }
 
-                    // Clear stale values
+                    // Handle stale data
                     if (now - lastUpdateTime > STALE_TIMEOUT_MS) {
                         tx = null;
                         ty = null;
                         ta = null;
+                        tagId = null;
                         targetVisible = false;
                         horizontalAngle = 0.0;
                         verticalAngle = 0.0;
@@ -96,6 +99,17 @@ public class SeasonLimelightExtractor {
         pollingThread.start();
     }
 
+    /**
+     * Extracts the first detected AprilTag ID from the LLResult.
+     */
+    private Integer extractTagId(LLResult result) {
+        List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+        if (fiducials != null && !fiducials.isEmpty()) {
+            return fiducials.get(0).getFiducialId(); // ✅ correct SDK call
+        }
+        return null;
+    }
+
     public void stopReading() {
         running = false;
         if (pollingThread != null) {
@@ -106,7 +120,6 @@ public class SeasonLimelightExtractor {
     }
 
     public void update() {
-        // Only refresh telemetry
         if (opModeTelemetry != null) {
             addTelemetry(opModeTelemetry);
             opModeTelemetry.update();
@@ -123,6 +136,7 @@ public class SeasonLimelightExtractor {
         telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");
         telemetry.addData("ty", ty != null ? String.format("%.2f", ty) : "N/A");
         telemetry.addData("ta", ta != null ? String.format("%.2f", ta) : "N/A");
+        telemetry.addData("Tag ID", tagId != null ? tagId : "None");
         telemetry.addData("Horizontal Angle", String.format("%.2f", horizontalAngle));
         telemetry.addData("Vertical Angle", String.format("%.2f", verticalAngle));
     }
@@ -131,6 +145,7 @@ public class SeasonLimelightExtractor {
     public Double getTx() { return tx; }
     public Double getTy() { return ty; }
     public Double getTa() { return ta; }
+    public Integer getTagId() { return tagId; }
     public double getHorizontalAngle() { return horizontalAngle; }
     public double getVerticalAngle() { return verticalAngle; }
     public boolean isTargetVisible() { return targetVisible; }

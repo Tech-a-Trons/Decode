@@ -4,6 +4,8 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Season.SeasonLimelightExtractor;
+
 @TeleOp
 public class LimelightTester extends LinearOpMode {
 
@@ -13,8 +15,6 @@ public class LimelightTester extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         SeasonLimelightExtractor ll = new SeasonLimelightExtractor(hardwareMap);
-
-        limelight.pipelineSwitch(1);
 
         ll.setTelemetry(telemetry); // pass telemetry reference
         ll.startReading();

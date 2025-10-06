@@ -33,6 +33,7 @@ public class SeasonLimelightExtractor {
 
     // Current host
     private String HOST = FALLBACK_HOSTS[0];
+    private Telemetry opModeTelemetry;
 
     // Network
     private volatile Socket socket;
@@ -64,6 +65,11 @@ public class SeasonLimelightExtractor {
      * Starts reading Limelight values in a background thread.
      * Automatically handles connection, host fallback, NT4 handshake, reading, and stale-value reset.
      */
+
+    public void setTelemetry(Telemetry telemetry) {
+        this.opModeTelemetry = telemetry;
+    }
+
     public void startReading() {
         if (running) return;
         running = true;
@@ -207,18 +213,15 @@ public class SeasonLimelightExtractor {
         }
 
         // 5. Refresh telemetry
-        addTelemetry();
-        telemetry.addData("Target Visible", targetVisible);
-        telemetry.addData("Horizontal Angle", String.format("%.2f", horizontalAngle));
-        telemetry.addData("Vertical Angle", String.format("%.2f", verticalAngle));
-        telemetry.addData("Distance Estimate", String.format("%.2f", distanceEstimate));
-
-        // 6. Send telemetry to driver station immediately
-        telemetry.update();
+        if (opModeTelemetry != null) {
+            addTelemetry(opModeTelemetry); // optionally pass telemetry into addTelemetry()
+            opModeTelemetry.addData("Target Visible", targetVisible);
+            opModeTelemetry.addData("Horizontal Angle", String.format("%.2f", horizontalAngle));
+            opModeTelemetry.addData("Vertical Angle", String.format("%.2f", verticalAngle));
+            opModeTelemetry.addData("Distance Estimate", String.format("%.2f", distanceEstimate));
+            opModeTelemetry.update();
+        }
     }
-
-
-
 
     // ------------------- PRIVATE METHODS -------------------
 
@@ -280,9 +283,8 @@ public class SeasonLimelightExtractor {
     /**
      * Adds current Limelight data to telemetry.
      */
-    private void addTelemetry() {
+    private void addTelemetry(Telemetry telemetry) {
         if (telemetry == null) return;
-
         telemetry.addData("Limelight Status", connectionStatus != null ? connectionStatus : "N/A");
         telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");
         telemetry.addData("ty", ty != null ? String.format("%.2f", ty) : "N/A");
@@ -290,6 +292,7 @@ public class SeasonLimelightExtractor {
         telemetry.addData("tl", tl != null ? String.format("%.2f", tl) : "N/A");
         telemetry.addData("FPS", fps != null ? String.format("%.1f", fps) : "N/A");
     }
+
 
     private double smooth(Double oldVal, double newVal) {
         if (oldVal == null) return newVal;

@@ -19,6 +19,7 @@ public class LimelightTester extends LinearOpMode {
 
         limelight.pipelineSwitch(1);
 
+        ll.setTelemetry(telemetry); // pass telemetry reference
         ll.startReading();
 
         //just getting values. this is a framework to base my other codes on

@@ -34,7 +34,13 @@ public class LimelightRotation extends LinearOpMode {
             tx = 0.0;
         }
         Double ty = ll.getTy();
+        if (ty == null) {
+            tx = 0.0;
+        }
         Double ta = ll.getTa();
+        if (ta == null) {
+            tx = 0.0;
+        }
 
         telemetry.addLine("Ready!");
         telemetry.update();

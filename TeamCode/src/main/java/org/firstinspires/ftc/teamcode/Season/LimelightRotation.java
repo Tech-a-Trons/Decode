@@ -49,6 +49,10 @@ public class LimelightRotation extends LinearOpMode {
 
         while (opModeIsActive()) {
             ll.update();
+            ta = ll.getTa();
+            tx = ll.getTx();
+            ty = ll.getTy();
+
 
             if (tx > 1.0) {
                 fl.setPower(0.35);

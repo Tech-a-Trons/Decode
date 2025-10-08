@@ -22,7 +22,7 @@ public class LimelightRotation extends LinearOpMode {
         bl = hardwareMap.get(DcMotor.class, "bl");
         br = hardwareMap.get(DcMotor.class, "br");
 
-        // Reverse the right side
+        // Reverse the left side
         fl.setDirection(DcMotor.Direction.REVERSE);
         bl.setDirection(DcMotor.Direction.REVERSE);
 
@@ -35,11 +35,11 @@ public class LimelightRotation extends LinearOpMode {
         }
         Double ty = ll.getTy();
         if (ty == null) {
-            tx = 0.0;
+            ty = 0.0;
         }
         Double ta = ll.getTa();
         if (ta == null) {
-            tx = 0.0;
+            ta = 0.0;
         }
 
         telemetry.addLine("Ready!");

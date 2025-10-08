@@ -7,10 +7,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 @TeleOp
 public class LimelightRotation extends LinearOpMode {
 
-    DcMotor fl;
-    DcMotor fr;
-    DcMotor bl;
-    DcMotor br;
+    DcMotor fl = null;
+    DcMotor fr = null;
+    DcMotor bl = null;
+    DcMotor br = null;
 
     @Override
     public void runOpMode() {
@@ -51,15 +51,15 @@ public class LimelightRotation extends LinearOpMode {
             ll.update();
 
             if (tx > 1.0) {
-                fl.setPower(0.05);
-                fr.setPower(-0.05);
-                bl.setPower(0.05);
-                br.setPower(-0.05);
+                fl.setPower(0.35);
+                fr.setPower(-0.35);
+                bl.setPower(0.35);
+                br.setPower(-0.35);
             } else if (tx < -1.0) {
-                fl.setPower(-0.05);
-                fr.setPower(0.05);
-                bl.setPower(-0.05);
-                br.setPower(0.05);
+                fl.setPower(-0.35);
+                fr.setPower(0.35);
+                bl.setPower(-0.35);
+                br.setPower(0.35);
             } else if (tx < 1.0 || tx > -1.0) {
                 fl.setPower(0.0);
                 fr.setPower(0.0);

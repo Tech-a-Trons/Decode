@@ -30,6 +30,9 @@ public class LimelightRotation extends LinearOpMode {
         ll.startReading();
 
         Double tx = ll.getTx();
+        if (tx == null) {
+            tx = 0.0;
+        }
         Double ty = ll.getTy();
         Double ta = ll.getTa();
 

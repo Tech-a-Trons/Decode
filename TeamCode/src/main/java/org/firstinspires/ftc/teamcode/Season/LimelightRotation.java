@@ -60,7 +60,7 @@ public class LimelightRotation extends LinearOpMode {
                 fr.setPower(0.05);
                 bl.setPower(-0.05);
                 br.setPower(0.05);
-            } else if (tx < 1.0 && tx > -1.0) {
+            } else if (tx < 1.0 || tx > -1.0) {
                 fl.setPower(0.0);
                 fr.setPower(0.0);
                 bl.setPower(0.0);

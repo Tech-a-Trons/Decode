@@ -69,6 +69,7 @@ public class LimelightRotation extends LinearOpMode {
                 fr.setPower(0.0);
                 bl.setPower(0.0);
                 br.setPower(0.0);
+                break;
             } else {
                 telemetry.addLine("JUNK");
             }

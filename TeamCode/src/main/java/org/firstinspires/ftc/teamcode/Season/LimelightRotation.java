@@ -65,15 +65,8 @@ public class LimelightRotation extends LinearOpMode {
                 fr.setPower(0.0);
                 bl.setPower(0.0);
                 br.setPower(0.0);
-            } else if (tx == 0.0 && ty == 0.0 && ta == 0.0) {
-                telemetry.addLine("Not detected!");
-                telemetry.update();
-                fl.setPower(0.0);
-                fr.setPower(0.0);
-                bl.setPower(0.0);
-                br.setPower(0.0);
             } else {
-                return;
+                telemetry.addLine("JUNK");
             }
         }
         ll.stopReading();

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season;
+package org.firstinspires.ftc.teamcode.Season.SensorStuff;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -6,18 +6,14 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-import org.firstinspires.ftc.teamcode.Season.SensorStuff.AprilTagExtractor;
-import org.firstinspires.ftc.teamcode.Season.SensorStuff.StableGreenandPurple;
-import org.firstinspires.ftc.teamcode.Season.SensorStuff.TagData;
-
 import java.util.ArrayList;
 import java.util.Objects;
 
-//This is a basic auton for the blue goal and it first gets the obelisk and then goes on - 9/08
+//This is a basic auton for the red goal and it first gets the obelisk and then goes on - 9/08
 //Added Voltage Sensor - 9/13
 
 @Autonomous
-public class BlueBaseOp extends LinearOpMode {
+public class RedBaseOp extends LinearOpMode {
     ColorSensor colorSensor;
     Limelight3A limelight;
     private VoltageSensor myControlHubVoltageSensor;
@@ -34,7 +30,7 @@ public class BlueBaseOp extends LinearOpMode {
 
         colorSensor = hardwareMap.get(ColorSensor.class, "ColorSensor");
 
-        limelight.pipelineSwitch(0);
+        limelight.pipelineSwitch(1);
 
         waitForStart();
         if (color.Getcolor(colorSensor) == "purple") {
@@ -54,8 +50,8 @@ public class BlueBaseOp extends LinearOpMode {
             telemetry.addData("Hue: ", color.gethue());
             telemetry.addData("Saturation: ", color.getsat());
             telemetry.addData("Value: ", color.getval());
+
             TagData tag = AprilTagExtractor.getAprilTagData();
-            // Map your color sensor (check config name)
             double presentVoltage;
             presentVoltage = myControlHubVoltageSensor.getVoltage();
             double powerValue = 0.5;
@@ -68,7 +64,7 @@ public class BlueBaseOp extends LinearOpMode {
 
             //Telemetry is just for testing
             telemetry.addData("Voltage: ",presentVoltage);
-            telemetry.addData("Offset Voltage: ",offsetVoltage);
+            telemetry.addData("offset Voltage: ",offsetVoltage);
 
             telemetry.update();
 
@@ -102,7 +98,7 @@ public class BlueBaseOp extends LinearOpMode {
 
             //then pedro to detect goal, from this we will plan out what to do
 
-            if (id == 20) {
+            if (id == 24) {
                 if (Objects.equals(colorIndex.get(0), "GPP")) {
                     //pedro
                 } else if (Objects.equals(colorIndex.get(0), "PGP")) {

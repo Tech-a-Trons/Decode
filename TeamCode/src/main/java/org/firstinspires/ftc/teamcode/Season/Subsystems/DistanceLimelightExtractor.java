@@ -78,8 +78,8 @@ public class DistanceLimelightExtractor {
         tagGroups.put(23, "Obelisk");
 
         // Initialize mount angles and calibration flags
-        mountAngles.put("Goal", 4.0);
-        mountAngles.put("Obelisk", 4.0);
+        mountAngles.put("Goal", 3.2);
+        mountAngles.put("Obelisk", 3.2);
         calibrated.put("Goal", false);
         calibrated.put("Obelisk", false);
     }
@@ -178,14 +178,18 @@ public class DistanceLimelightExtractor {
                     ? tagGroups.get(tagId)
                     : "Unknown";
 
-            double angle = mountAngles.getOrDefault(group, 4.0);
+            double angle = mountAngles.getOrDefault(group, 3.2);
             double angleRad = Math.toRadians(angle + ty);
-            double rawDistance = (targetHeight - limelightHeightInches) / Math.tan(angleRad);
+
+            double heightDiff = targetHeight - limelightHeightInches;
+            double rawDistance = Math.abs(heightDiff / Math.tan(angleRad));
+
             estimatedDistanceInches = smooth(estimatedDistanceInches, rawDistance);
         } else {
             estimatedDistanceInches = smooth(estimatedDistanceInches, 0.0);
         }
     }
+
 
     public void stopReading() {
         running = false;

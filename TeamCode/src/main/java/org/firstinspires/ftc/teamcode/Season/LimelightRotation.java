@@ -33,14 +33,6 @@ public class LimelightRotation extends LinearOpMode {
         if (tx == null) {
             tx = 0.0;
         }
-        Double ty = ll.getTy();
-        if (ty == null) {
-            ty = 0.0;
-        }
-        Double ta = ll.getTa();
-        if (ta == null) {
-            ta = 0.0;
-        }
 
         telemetry.addLine("Ready!");
         telemetry.update();
@@ -49,10 +41,10 @@ public class LimelightRotation extends LinearOpMode {
 
         while (opModeIsActive()) {
             ll.update();
-            ta = ll.getTa();
             tx = ll.getTx();
-            ty = ll.getTy();
-
+            if (tx == null) {
+                tx = 0.0;
+            }
 
             if (tx > 1.0) {
                 fl.setPower(0.15);
@@ -73,6 +65,7 @@ public class LimelightRotation extends LinearOpMode {
             } else {
                 telemetry.addLine("JUNK");
             }
+            ll.update();
         }
         ll.stopReading();
     }

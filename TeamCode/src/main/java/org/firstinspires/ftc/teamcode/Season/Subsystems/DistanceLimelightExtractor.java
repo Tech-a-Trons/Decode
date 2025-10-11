@@ -1,238 +1,175 @@
 package org.firstinspires.ftc.teamcode.Season.Subsystems;
 
-import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.hardware.limelightvision.LLResult;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-//This file is for testing - Pranav 10/10
-
-/**
- * Competition-ready Limelight 3A extractor for Decode:
- * - Automatic distance calculation
- * - Supports multiple target heights and auto-calibrated mounting angles per target group
- * - Smoothed distance for TeleOp/Autonomous
- */
 public class DistanceLimelightExtractor {
 
-    private final double SMOOTHING_FACTOR = 0.2;
-    private final long STALE_TIMEOUT_MS = 500;
+    private final Limelight3A limelight;
+    private final Telemetry telemetry;
 
-    private Limelight3A limelight;
-    private Telemetry opModeTelemetry;
+    // --- Hardcoded robot-specific constants (in inches & degrees) ---
+    private final double LIMELIGHT_HEIGHT_INCHES = 13.0;
+    private double limelightMountAngle = 3.0;       // degrees
+    private double currentTargetHeightMeters = 0.762; // default 30 inches converted to meters
 
-    private volatile Double tx = null;
-    private volatile Double ty = null;
-    private volatile Double ta = null;
-    private volatile Integer tagId = null;
+    // smoothing buffers
+    private final LinkedList<Double> txSamples = new LinkedList<>();
+    private final LinkedList<Double> tySamples = new LinkedList<>();
+    private final LinkedList<Double> taSamples = new LinkedList<>();
+    private final LinkedList<Double> distanceSamples = new LinkedList<>();
+    private static final int SMOOTHING_WINDOW = 5;
 
-    private volatile double horizontalAngle = 0.0;
-    private volatile double verticalAngle = 0.0;
-    private volatile double estimatedDistanceInches = 0.0;
-    private volatile boolean targetVisible = false;
+    // latest values
+    private double tx = 0, ty = 0, ta = 0, distanceMeters = 0;
+    private boolean targetVisible = false;
 
-    private volatile String connectionStatus = "Not connected";
-    private volatile long lastUpdateTime = 0;
+    // pose values
+    private double poseX = 0, poseY = 0, poseZ = 0;
+    private double poseRoll = 0, posePitch = 0, poseYaw = 0;
 
-    private Thread pollingThread;
-    private volatile boolean running = false;
+    // fallback calibration for ta-based distance
+    private double knownTagArea = 5.0;       // % area at 1m, adjust
+    private double knownTagDistanceMeters = 0.991; // 39 inches converted to meters
 
-    // ---------------- Robot / Limelight config ----------------
-    private double limelightHeightInches = 13.0;
-
-    // Default mount angles per target group (will be auto-calibrated)
-    private final Map<String, Double> mountAngles = new HashMap<>();
-    private final Map<String, Boolean> calibrated = new HashMap<>();
-
-    // Multi-height support: tag ID -> height in inches
+    // map of tag IDs to heights (in inches)
     private final Map<Integer, Double> tagHeightsInches = new HashMap<>();
-    private final double DEFAULT_TARGET_HEIGHT = 30.0;
 
-    // Tag groups
-    private final Map<Integer, String> tagGroups = new HashMap<>();
+    /** Constructor - only need Limelight object and telemetry now */
+    public DistanceLimelightExtractor(Limelight3A limelight, Telemetry telemetry) {
+        this.limelight = limelight;
+        this.telemetry = telemetry;
 
-    public DistanceLimelightExtractor(HardwareMap hardwareMap) {
-        limelight = hardwareMap.get(Limelight3A.class, "Limelight");
-        limelight.setPollRateHz(100);
-        limelight.pipelineSwitch(1);
-        limelight.start();
-
-        // Example Decode 2025 tag setup:
-        // Goal tags
-        tagHeightsInches.put(20, 30.0);
-        tagHeightsInches.put(24, 30.0);
-        tagGroups.put(20, "Goal");
-        tagGroups.put(24, "Goal");
-
-        // Obelisk tags
-        tagHeightsInches.put(21, 18.0);
-        tagHeightsInches.put(22, 18.0);
-        tagHeightsInches.put(23, 18.0);
-        tagGroups.put(21, "Obelisk");
-        tagGroups.put(22, "Obelisk");
-        tagGroups.put(23, "Obelisk");
-
-        // Initialize mount angles and calibration flags
-        mountAngles.put("Goal", 3.2);
-        mountAngles.put("Obelisk", 3.2);
-        calibrated.put("Goal", false);
-        calibrated.put("Obelisk", false);
+        // default target height in meters (30 inches)
+        this.currentTargetHeightMeters = inchesToMeters(30.0);
     }
 
-    public void setTelemetry(Telemetry telemetry) {
-        this.opModeTelemetry = telemetry;
+    /** Add mapping from tag ID to height (in inches) */
+    public void addTagHeight(int tagId, double heightInches) {
+        tagHeightsInches.put(tagId, heightInches);
     }
 
-    public void startReading() {
-        if (running) return;
-        running = true;
+    /** Update readings each frame */
+    public void update() {
+        LLResult result = limelight.getLatestResult();
 
-        pollingThread = new Thread(() -> {
-            while (running && !Thread.currentThread().isInterrupted()) {
-                try {
-                    LLResult result = limelight.getLatestResult();
-                    long now = System.currentTimeMillis();
+        if (result != null && result.isValid()) {
+            tx = result.getTx();
+            ty = result.getTy();
+            ta = result.getTa();
+            targetVisible = ta > 0;
 
-                    if (result != null && result.isValid()) {
-                        tx = result.getTx();
-                        ty = result.getTy();
-                        ta = result.getTa();
-                        tagId = extractTagId(result);
-                        lastUpdateTime = now;
-                        connectionStatus = "Connected";
+            distanceMeters = 0;
 
-                        targetVisible = ty != null && ta != null && ta > 0.0;
-
-                        horizontalAngle = smooth(horizontalAngle, tx != null ? tx : 0.0);
-                        verticalAngle = smooth(verticalAngle, ty != null ? ty : 0.0);
-
-                        // Auto-calibrate per group
-                        if (tagId != null && tagGroups.containsKey(tagId)) {
-                            String group = tagGroups.get(tagId);
-                            if (!calibrated.get(group)) {
-                                autoCalibrate(group);
-                            }
-                        }
-
-                        updateDistance();
-                    }
-
-                    if (now - lastUpdateTime > STALE_TIMEOUT_MS) {
-                        tx = null;
-                        ty = null;
-                        ta = null;
-                        tagId = null;
-                        targetVisible = false;
-                        horizontalAngle = 0.0;
-                        verticalAngle = 0.0;
-                        estimatedDistanceInches = 0.0;
-                        connectionStatus = "No data (stale)";
-                    }
-
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
+            // check detected fiducials
+            List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+            if (fiducials != null && !fiducials.isEmpty()) {
+                int tagId = fiducials.get(0).getFiducialId(); // get first detected tag
+                if (tagHeightsInches.containsKey(tagId)) {
+                    currentTargetHeightMeters = inchesToMeters(tagHeightsInches.get(tagId));
                 }
             }
-        });
-        pollingThread.start();
-    }
 
-    private Integer extractTagId(LLResult result) {
-        List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
-        if (fiducials != null && !fiducials.isEmpty()) {
-            return fiducials.get(0).getFiducialId();
-        }
-        return null;
-    }
 
-    /**
-     * Auto-calibrates mounting angle for the given target group.
-     */
-    private void autoCalibrate(String group) {
-        if (ty != null && tagId != null) {
-            double targetHeight = tagHeightsInches.getOrDefault(tagId, DEFAULT_TARGET_HEIGHT);
-            double rawDistance = (targetHeight - limelightHeightInches) / Math.tan(Math.toRadians(mountAngles.get(group) + ty));
-            double angleRad = Math.atan((targetHeight - limelightHeightInches) / rawDistance);
-            mountAngles.put(group, Math.toDegrees(angleRad) - ty);
-            calibrated.put(group, true);
-            if (opModeTelemetry != null) {
-                opModeTelemetry.addData("Auto-Calibrated " + group + " Angle", mountAngles.get(group));
-                opModeTelemetry.update();
+            // get Botpose safely
+            Object botposeObj = result.getBotpose();
+            if (botposeObj instanceof double[]) {
+                double[] pose = (double[]) botposeObj;
+                if (pose.length >= 6) {
+                    poseX = pose[0];
+                    poseY = pose[1];
+                    poseZ = pose[2];
+                    poseRoll = pose[3];
+                    posePitch = pose[4];
+                    poseYaw = pose[5];
+                    distanceMeters = poseZ;
+                }
             }
-        }
-    }
 
-    private void updateDistance() {
-        if (ty != null) {
-            double targetHeight = tagId != null && tagHeightsInches.containsKey(tagId)
-                    ? tagHeightsInches.get(tagId)
-                    : DEFAULT_TARGET_HEIGHT;
+            // fallback using ta
+            if (distanceMeters <= 0 && ta > 0) {
+                distanceMeters = knownTagDistanceMeters * Math.sqrt(knownTagArea / ta);
+                poseX = poseY = poseRoll = posePitch = poseYaw = 0;
+            }
 
-            String group = tagId != null && tagGroups.containsKey(tagId)
-                    ? tagGroups.get(tagId)
-                    : "Unknown";
-
-            double angle = mountAngles.getOrDefault(group, 3.2);
-            double angleRad = Math.toRadians(angle + ty);
-
-            double heightDiff = targetHeight - limelightHeightInches;
-            double rawDistance = Math.abs(heightDiff / Math.tan(angleRad));
-
-            estimatedDistanceInches = smooth(estimatedDistanceInches, rawDistance);
+            addSample(txSamples, tx);
+            addSample(tySamples, ty);
+            addSample(taSamples, ta);
+            addSample(distanceSamples, distanceMeters);
         } else {
-            estimatedDistanceInches = smooth(estimatedDistanceInches, 0.0);
+            targetVisible = false;
+        }
+
+        if (telemetry != null) {
+            telemetry.addData("Target Visible", targetVisible);
+            telemetry.addData("tx", getSmoothed(txSamples));
+            telemetry.addData("ty", getSmoothed(tySamples));
+            telemetry.addData("ta", getSmoothed(taSamples));
+            telemetry.addData("Distance (m)", String.format("%.2f", getSmoothed(distanceSamples)));
+            telemetry.addData("Pose X", poseX);
+            telemetry.addData("Pose Y", poseY);
+            telemetry.addData("Pose Z", poseZ);
+            telemetry.addData("Roll", poseRoll);
+            telemetry.addData("Pitch", posePitch);
+            telemetry.addData("Yaw", poseYaw);
         }
     }
 
-
-    public void stopReading() {
-        running = false;
-        if (pollingThread != null) pollingThread.interrupt();
-        limelight.stop();
-        connectionStatus = "Stopped";
-    }
-
-    public void update() {
-        if (opModeTelemetry != null) {
-            addTelemetry(opModeTelemetry);
-            opModeTelemetry.update();
+    /** Dynamically change Limelight pipeline */
+    public void setPipeline(int pipeline) {
+        if (limelight != null) {
+            limelight.pipelineSwitch(pipeline);
         }
     }
 
-    private double smooth(double oldVal, double newVal) {
-        return oldVal * (1.0 - SMOOTHING_FACTOR) + newVal * SMOOTHING_FACTOR;
+    /** Auto-calibrate mount angle using known target */
+    public void calibrateMountAngle() {
+        if (!targetVisible) return;
+        limelightMountAngle = Math.toDegrees(Math.atan((currentTargetHeightMeters - inchesToMeters(LIMELIGHT_HEIGHT_INCHES)) / distanceMeters)) - ty;
+        telemetry.addData("Calibrated Mount Angle", limelightMountAngle);
     }
 
-    private void addTelemetry(Telemetry telemetry) {
-        telemetry.addData("Limelight Status", connectionStatus);
-        telemetry.addData("Target Visible", targetVisible);
-        telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");
-        telemetry.addData("ty", ty != null ? String.format("%.2f", ty) : "N/A");
-        telemetry.addData("ta", ta != null ? String.format("%.2f", ta) : "N/A");
-        telemetry.addData("Tag ID", tagId != null ? tagId : "None");
-        telemetry.addData("Horizontal Angle", String.format("%.2f", horizontalAngle));
-        telemetry.addData("Vertical Angle", String.format("%.2f", verticalAngle));
-        telemetry.addData("Smoothed Distance (in)",
-                estimatedDistanceInches > 0 ? String.format("%.2f", estimatedDistanceInches) : "N/A");
-        if (tagId != null && tagGroups.containsKey(tagId)) {
-            telemetry.addData("Mount Angle (" + tagGroups.get(tagId) + ")", mountAngles.get(tagGroups.get(tagId)));
-        }
+    /** Set fallback constants for ta-based distance */
+    public void setTaFallback(double knownTagAreaPercent, double knownTagDistanceInches) {
+        this.knownTagArea = knownTagAreaPercent;
+        this.knownTagDistanceMeters = inchesToMeters(knownTagDistanceInches);
     }
 
-    // ------------------- GETTERS -------------------
-    public Double getTx() { return tx; }
-    public Double getTy() { return ty; }
-    public Double getTa() { return ta; }
-    public Integer getTagId() { return tagId; }
-    public double getHorizontalAngle() { return horizontalAngle; }
-    public double getVerticalAngle() { return verticalAngle; }
-    public double getEstimatedDistanceInches() { return estimatedDistanceInches; }
+    private void addSample(LinkedList<Double> list, double value) {
+        list.add(value);
+        if (list.size() > SMOOTHING_WINDOW) list.removeFirst();
+    }
+
+    private double getSmoothed(LinkedList<Double> list) {
+        if (list.isEmpty()) return 0;
+        double sum = 0;
+        for (double v : list) sum += v;
+        return sum / list.size();
+    }
+
+    private double inchesToMeters(double inches) { return inches * 0.0254; }
+
+    // --- Getters ---
     public boolean isTargetVisible() { return targetVisible; }
-    public String getStatus() { return connectionStatus; }
+    public double getTx() { return getSmoothed(txSamples); }
+    public double getTy() { return getSmoothed(tySamples); }
+    public double getTa() { return getSmoothed(taSamples); }
+    public double getDistanceMeters() { return getSmoothed(distanceSamples); }
+
+    public double getPoseX() { return poseX; }
+    public double getPoseY() { return poseY; }
+    public double getPoseZ() { return poseZ; }
+    public double getPoseRoll() { return poseRoll; }
+    public double getPosePitch() { return posePitch; }
+    public double getPoseYaw() { return poseYaw; }
+
+    public double getMountAngle() { return limelightMountAngle; }
 }

@@ -22,11 +22,15 @@ public class DistanceLimelightTester extends LinearOpMode {
 
         ll.setPipeline(1);
 
+        ll.startReading();
+
         waitForStart();
 
         while (opModeIsActive()) {
             ll.update();
             telemetry.update();
         }
+
+        ll.stopReading();
     }
 }

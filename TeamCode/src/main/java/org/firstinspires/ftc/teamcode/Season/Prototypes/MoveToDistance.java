@@ -32,6 +32,8 @@ public class MoveToDistance extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
+            ll.startReading();
+            ll.update();
             if (ll.getDistance() >= target) {
                 fl.setPower(-0.35);
                 fr.setPower(-0.35);

@@ -51,7 +51,7 @@ public class DistanceLimelightExtractor {
     public DistanceLimelightExtractor(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");
         limelight.setPollRateHz(100);
-        limelight.pipelineSwitch(1);
+        limelight.pipelineSwitch(3);
         limelight.start();
     }
 

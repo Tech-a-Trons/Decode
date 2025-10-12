@@ -37,13 +37,11 @@ public class MoveToDistance extends LinearOpMode {
                 fr.setPower(-0.1);
                 bl.setPower(-0.1);
                 br.setPower(-0.1);
-                break;
             } else if (ll.getDistance() <= target) {
                 fl.setPower(0.1);
                 fr.setPower(0.1);
                 bl.setPower(0.1);
                 br.setPower(0.1);
-                break;
             } else if (target - ll.getDistance() < 0.1 || target - ll.getDistance() < -0.1) {
                 fl.setPower(0);
                 fr.setPower(0);
@@ -55,7 +53,6 @@ public class MoveToDistance extends LinearOpMode {
                 fr.setPower(0);
                 bl.setPower(0);
                 br.setPower(0);
-                break;
             } else {
                 telemetry.addLine("Smth sus happened");
             }

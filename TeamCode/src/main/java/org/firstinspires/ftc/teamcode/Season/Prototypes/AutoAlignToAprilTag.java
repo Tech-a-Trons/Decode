@@ -49,7 +49,7 @@ public class AutoAlignToAprilTag extends LinearOpMode {
             double distanceError = distance - TARGET_DISTANCE;
             double angleError = tx;
 
-            double forwardPower = (distanceError * 0.05) * 0.2;
+            double forwardPower = (-    distanceError * 0.05) * 0.2;
             double strafePower = (-angleError * 0.03) * 0.2;
             double turnPower = (-angleError * 0.02) * 0.2;
 

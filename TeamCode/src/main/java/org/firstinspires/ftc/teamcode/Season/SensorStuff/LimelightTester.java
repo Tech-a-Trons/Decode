@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.SeasonLimelightExtractor
 @TeleOp
 public class LimelightTester extends LinearOpMode {
 
-    public Limelight3A limelight;
+    Limelight3A limelight;
 
     @Override
     public void runOpMode() throws InterruptedException {

@@ -13,14 +13,10 @@ public class DistanceLimelightTester extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        limelight = hardwareMap.get(Limelight3A.class, "Limelight");
-
-        DistanceLimelightExtractor ll = new DistanceLimelightExtractor(limelight,telemetry);
+        DistanceLimelightExtractor ll = new DistanceLimelightExtractor(hardwareMap);
 
         telemetry.addLine("Connecting to Limelight...");
         telemetry.update();
-
-        ll.setPipeline(1);
 
         ll.startReading();
 

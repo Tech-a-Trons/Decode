@@ -116,15 +116,19 @@ public class DistanceLimelightExtractor {
     }
 
     public Double getEuclideanDistance() {
-        if (ty == null || tagId == null) {return null;}
+        if (ty == null) return null;
+        if (tagId == null) return null;
 
-        // Look up target height based on tag ID
         Double targetHeight = tagHeights.get(tagId);
-        if (targetHeight == null) {return null;} // unknown tag
+        if (targetHeight == null) {
+            // optional: default to a common tag height
+            targetHeight = 30.000000;
+        }
 
         double totalAngleDeg = LIMELIGHT_ANGLE + ty;
-        double totalAngleRad = Math.toRadians(totalAngleDeg);
+        if (Math.abs(totalAngleDeg) < 1e-6) return null; // prevent division by zero
 
+        double totalAngleRad = Math.toRadians(totalAngleDeg);
         double verticalDistance = targetHeight - LIMELIGHT_HEIGHT;
         double horizontalDistance = verticalDistance / Math.tan(totalAngleRad);
 

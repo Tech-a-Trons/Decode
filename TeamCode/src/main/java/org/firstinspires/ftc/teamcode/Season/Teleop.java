@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 @TeleOp
 public class Teleop extends LinearOpMode {
-//    DcMotor activeintake = null;
+    DcMotor activeintake = null;
     DcMotor out1 = null;
     DcMotor out2 = null;
     DcMotor ramp = null;
@@ -17,7 +17,7 @@ public class Teleop extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         out1 = hardwareMap.get(DcMotor.class,"outtake1");
         out2 = hardwareMap.get(DcMotor.class,"outtake2");
-//        activeintake = hardwareMap.get(DcMotor.class, "activeintake");
+        activeintake = hardwareMap.get(DcMotor.class, "activeintake");
         ramp = hardwareMap.get(DcMotor.class,"ramp");
         // Make sure your ID's match your configuration
         DcMotor frontLeftMotor = hardwareMap.dcMotor.get("fl");
@@ -41,30 +41,44 @@ public class Teleop extends LinearOpMode {
         while (opModeIsActive()) {
 
             if (gamepad1.a) {
-//                activeintake.setPower(-1);
+                activeintake.setPower(1);
+                ramp.setPower(-.5);
+                sleep(1000);
+                activeintake.setPower(0);
+                out1.setPower(-.3);
+                out2.setPower(.3);
+                sleep(1000);
+                ramp.setPower(-1);
             }
 
             if (gamepad1.b) {
 //                activeintake.setPower(1);
+                out1.setPower(-.3);
+                out2.setPower(.3);
+
+                //launching
             }
 
             if (gamepad1.x ) {
 //                activeintake.setPower(0);
                 out1.setPower(0);
                 out2.setPower(0);
+                ramp.setPower(0);
             }
-            if (gamepad1.dpad_up){
-                ramp.setPower(.37);
+            if (gamepad1.right_trigger>0.0 || gamepad1.right_trigger < 0){
+                ramp.setPower(gamepad1.right_trigger);
+                //intake
             }
-            if (gamepad1.dpad_down){
-                ramp.setPower(.4);
+            if (gamepad1.right_bumper){
+                ramp.setPower(-.4);
+                //intake
             }
-            if (gamepad1.dpad_left){
-                ramp.setPower(.45);
+
+            if (gamepad1.left_bumper){
+                ramp.setPower(-.2);
+                //holding
             }
-            if (gamepad1.dpad_right){
-                ramp.setPower(.42);
-            }
+
 
 
 

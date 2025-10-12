@@ -100,7 +100,6 @@ public class DistanceLimelightExtractor {
                     Thread.currentThread().interrupt();
                 }
             }
-            getEuclideanDistance();
         });
         pollingThread.start();
     }

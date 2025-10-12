@@ -100,6 +100,7 @@ public class DistanceLimelightExtractor {
                     Thread.currentThread().interrupt();
                 }
             }
+            getEuclideanDistance();
         });
         pollingThread.start();
     }
@@ -114,12 +115,13 @@ public class DistanceLimelightExtractor {
         }
         return null;
     }
+
     public Double getEuclideanDistance() {
-        if (ty == null || tagId == null) return null;
+        if (ty == null || tagId == null) {return null;}
 
         // Look up target height based on tag ID
         Double targetHeight = tagHeights.get(tagId);
-        if (targetHeight == null) return null; // unknown tag
+        if (targetHeight == null) {return null;} // unknown tag
 
         double totalAngleDeg = LIMELIGHT_ANGLE + ty;
         double totalAngleRad = Math.toRadians(totalAngleDeg);

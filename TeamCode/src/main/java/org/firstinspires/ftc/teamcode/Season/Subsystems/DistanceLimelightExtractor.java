@@ -46,7 +46,7 @@ public class DistanceLimelightExtractor {
             23,19.5,
             24,30.0
     );
-    private final double LIMELIGHT_ANGLE = 3.0;  // degrees
+    private final double LIMELIGHT_ANGLE = 6.3333333333333;  // degrees
 
     public DistanceLimelightExtractor(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");
@@ -154,8 +154,8 @@ public class DistanceLimelightExtractor {
     private double smooth(double oldVal, double newVal) {
         return oldVal * (1.0 - SMOOTHING_FACTOR) + newVal * SMOOTHING_FACTOR;
     }
-    Double euclideanDistance = getEuclideanDistance();
     private void addTelemetry(Telemetry telemetry) {
+        Double euclideanDistance = getEuclideanDistance();
         telemetry.addData("Limelight Status", connectionStatus);
         telemetry.addData("Target Visible", targetVisible);
         telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");
@@ -177,5 +177,5 @@ public class DistanceLimelightExtractor {
     public double getVerticalAngle() { return verticalAngle; }
     public boolean isTargetVisible() { return targetVisible; }
     public String getStatus() { return connectionStatus; }
-    public Double getDistance() {return euclideanDistance;}
+    public Double getDistance() {return getEuclideanDistance();}
 }

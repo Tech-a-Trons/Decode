@@ -1,10 +1,9 @@
-package org.firstinspires.ftc.teamcode.Season;
+package org.firstinspires.ftc.teamcode.Season.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 @TeleOp
 public class Teleop extends LinearOpMode {

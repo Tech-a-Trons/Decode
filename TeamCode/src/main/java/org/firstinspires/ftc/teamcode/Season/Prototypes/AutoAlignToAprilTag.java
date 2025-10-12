@@ -5,13 +5,14 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.DistanceLimelightExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.StableDistanceLExtractor;
 
+//Niranjan's code, rotation + distance
 @TeleOp(name = "AutoAlignToAprilTag", group = "Subsystems")
 public class AutoAlignToAprilTag extends LinearOpMode {
 
     private DcMotor fl, fr, bl, br;
-    private DistanceLimelightExtractor limelightExtractor;
+    private StableDistanceLExtractor limelightExtractor;
 
     private final double TARGET_DISTANCE = 10.0; // inches
     private final double DISTANCE_TOLERANCE = 1.0;
@@ -27,7 +28,7 @@ public class AutoAlignToAprilTag extends LinearOpMode {
         fl.setDirection(DcMotorSimple.Direction.REVERSE);
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        limelightExtractor = new DistanceLimelightExtractor(hardwareMap);
+        limelightExtractor = new StableDistanceLExtractor(hardwareMap);
         limelightExtractor.setTelemetry(telemetry);
         limelightExtractor.startReading();
 

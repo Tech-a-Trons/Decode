@@ -6,8 +6,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.DistanceLimelightExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.StableDistanceLExtractor;
 
+//Pranav's code, distance + rotation
 @TeleOp
 public class MoveToDistance extends LinearOpMode {
     Limelight3A limelight;
@@ -15,7 +16,7 @@ public class MoveToDistance extends LinearOpMode {
     DcMotor fr = null;
     DcMotor bl = null;
     DcMotor br = null;
-    DistanceLimelightExtractor ll;
+    StableDistanceLExtractor ll;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -30,7 +31,7 @@ public class MoveToDistance extends LinearOpMode {
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
-        ll = new DistanceLimelightExtractor(hardwareMap);
+        ll = new StableDistanceLExtractor(hardwareMap);
         ll.setTelemetry(telemetry);
         ll.startReading();
 

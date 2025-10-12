@@ -8,13 +8,12 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * FTC-Legal Limelight 3A extractor with background polling thread.
  * Includes AprilTag ID extraction using LLResultTypes.FiducialResult.
  */
-public class DistanceLimelightExtractor {
+public class ExperimentalSeasonLExtractor {
 
     private final double SMOOTHING_FACTOR = 0.2;
     private final long STALE_TIMEOUT_MS = 500; // 0.5s
@@ -38,20 +37,11 @@ public class DistanceLimelightExtractor {
 
     private Thread pollingThread;
     private volatile boolean running = false;
-    private final double LIMELIGHT_HEIGHT = 13.0; // inches
-    private final Map<Integer, Double> tagHeights = Map.of(
-            20, 30.0,   // Goal tag height in inches
-            21, 19.5,    // Obelisk tag height
-            22, 19.5,     // Another example tag
-            23,19.5,
-            24,30.0
-    );
-    private final double LIMELIGHT_ANGLE = 10.4;  // degrees
 
-    public DistanceLimelightExtractor(HardwareMap hardwareMap) {
+    public ExperimentalSeasonLExtractor(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");
         limelight.setPollRateHz(100);
-        limelight.pipelineSwitch(3);
+        limelight.pipelineSwitch(1);
         limelight.start();
     }
 
@@ -115,26 +105,6 @@ public class DistanceLimelightExtractor {
         return null;
     }
 
-    public Double getEuclideanDistance() {
-        if (ty == null) return null;
-        if (tagId == null) return null;
-
-        Double targetHeight = tagHeights.get(tagId);
-        if (targetHeight == null) {
-            // optional: default to a common tag height
-            targetHeight = 30.000000;
-        }
-
-        double totalAngleDeg = LIMELIGHT_ANGLE + ty;
-        if (Math.abs(totalAngleDeg) < 1e-6) return null; // prevent division by zero
-
-        double totalAngleRad = Math.toRadians(totalAngleDeg);
-        double verticalDistance = targetHeight - LIMELIGHT_HEIGHT;
-        double horizontalDistance = verticalDistance / Math.tan(totalAngleRad);
-
-        return Math.sqrt(horizontalDistance * horizontalDistance + verticalDistance * verticalDistance);
-    }
-
     public void stopReading() {
         running = false;
         if (pollingThread != null) {
@@ -154,8 +124,8 @@ public class DistanceLimelightExtractor {
     private double smooth(double oldVal, double newVal) {
         return oldVal * (1.0 - SMOOTHING_FACTOR) + newVal * SMOOTHING_FACTOR;
     }
+
     private void addTelemetry(Telemetry telemetry) {
-        Double euclideanDistance = getEuclideanDistance();
         telemetry.addData("Limelight Status", connectionStatus);
         telemetry.addData("Target Visible", targetVisible);
         telemetry.addData("tx", tx != null ? String.format("%.2f", tx) : "N/A");
@@ -164,11 +134,9 @@ public class DistanceLimelightExtractor {
         telemetry.addData("Tag ID", tagId != null ? tagId : "None");
         telemetry.addData("Horizontal Angle", String.format("%.2f", horizontalAngle));
         telemetry.addData("Vertical Angle", String.format("%.2f", verticalAngle));
-        telemetry.addData("Euclidean Distance (in)", euclideanDistance != null ? String.format("%.2f", euclideanDistance) : "N/A");
     }
 
     // ------------------- GETTERS -------------------
-
     public Double getTx() { return tx; }
     public Double getTy() { return ty; }
     public Double getTa() { return ta; }
@@ -177,5 +145,4 @@ public class DistanceLimelightExtractor {
     public double getVerticalAngle() { return verticalAngle; }
     public boolean isTargetVisible() { return targetVisible; }
     public String getStatus() { return connectionStatus; }
-    public Double getDistance() {return getEuclideanDistance();}
 }

@@ -1,10 +1,15 @@
 package org.firstinspires.ftc.teamcode.Season.Prototypes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 //Made this to test outtake 9/13
+
+@Disabled
+@TeleOp
 public class WheelLauncherTesting extends LinearOpMode {
 
     DcMotor launchLeft = null;

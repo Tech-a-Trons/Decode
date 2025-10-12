@@ -1,11 +1,15 @@
 package org.firstinspires.ftc.teamcode.Season.SensorStuff;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.SeasonLimelightExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.StableSeasonLExtractor;
 
+//To test my Limelight code
+
+@Disabled
 @TeleOp
 public class LimelightTester extends LinearOpMode {
 
@@ -14,7 +18,7 @@ public class LimelightTester extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        SeasonLimelightExtractor ll = new SeasonLimelightExtractor(hardwareMap);
+        StableSeasonLExtractor ll = new StableSeasonLExtractor(hardwareMap);
 
         ll.setTelemetry(telemetry); // pass telemetry reference
         ll.startReading();

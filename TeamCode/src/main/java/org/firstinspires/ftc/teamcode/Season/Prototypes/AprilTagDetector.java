@@ -1,10 +1,18 @@
-package org.firstinspires.ftc.teamcode.Season.SensorStuff;
+package org.firstinspires.ftc.teamcode.Season.Prototypes;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.Season.SensorStuff.AprilTagExtractor;
+import org.firstinspires.ftc.teamcode.Season.SensorStuff.TagData;
+
+
+//Old Apriltag code
+
+@Disabled
 @TeleOp
 public class AprilTagDetector extends LinearOpMode {
 

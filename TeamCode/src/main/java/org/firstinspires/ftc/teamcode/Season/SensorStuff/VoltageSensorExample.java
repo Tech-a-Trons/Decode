@@ -1,9 +1,13 @@
 package org.firstinspires.ftc.teamcode.Season.SensorStuff;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
+//For voltage sensor
+
+@Disabled
 @TeleOp
 public class VoltageSensorExample extends LinearOpMode {
     private VoltageSensor myControlHubVoltageSensor;

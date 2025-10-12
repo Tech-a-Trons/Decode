@@ -1,10 +1,13 @@
-package org.firstinspires.ftc.teamcode.Season.SensorStuff;
+package org.firstinspires.ftc.teamcode.Season.Subsystems;
 
 import android.graphics.Color;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
-public class StableGreenandPurple {
+//Make changes here
+//For color sensor
+
+public class ExperimentalGreenAndPurple {
     float chue;
     float csat;
     float cval;

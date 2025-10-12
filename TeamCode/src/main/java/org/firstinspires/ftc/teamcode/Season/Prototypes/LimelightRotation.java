@@ -1,11 +1,15 @@
 package org.firstinspires.ftc.teamcode.Season.Prototypes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.SeasonLimelightExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.StableSeasonLExtractor;
 
+//Example Limelight rotation code
+
+@Disabled
 @TeleOp
 public class LimelightRotation extends LinearOpMode {
 
@@ -17,7 +21,7 @@ public class LimelightRotation extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        SeasonLimelightExtractor ll = new SeasonLimelightExtractor(hardwareMap);
+        StableSeasonLExtractor ll = new StableSeasonLExtractor(hardwareMap);
 
         fl = hardwareMap.get(DcMotor.class, "fl");
         fr = hardwareMap.get(DcMotor.class, "fr");

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Season.Prototypes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -8,6 +9,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.StableDistanceLExtractor;
 
 //Niranjan's code, rotation + distance
+
+@Disabled
 @TeleOp(name = "AutoAlignToAprilTag", group = "Subsystems")
 public class AutoAlignToAprilTag extends LinearOpMode {
 

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Season.Prototypes;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,6 +10,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.StableDistanceLExtractor;
 
 //Pranav's code, distance + rotation
+
+@Disabled
 @TeleOp
 public class MoveToDistance extends LinearOpMode {
     Limelight3A limelight;

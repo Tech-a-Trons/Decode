@@ -1,11 +1,11 @@
-package org.firstinspires.ftc.teamcode.Season.Pedropathing;
+package org.firstinspires.ftc.teamcode.Season.Pedro;
 
-import static org.firstinspires.ftc.teamcode.Season.Pedropathing.Tuning.changes;
-import static org.firstinspires.ftc.teamcode.Season.Pedropathing.Tuning.draw;
-import static org.firstinspires.ftc.teamcode.Season.Pedropathing.Tuning.drawOnlyCurrent;
-import static org.firstinspires.ftc.teamcode.Season.Pedropathing.Tuning.follower;
-import static org.firstinspires.ftc.teamcode.Season.Pedropathing.Tuning.stopRobot;
-import static org.firstinspires.ftc.teamcode.Season.Pedropathing.Tuning.telemetryM;
+import static org.firstinspires.ftc.teamcode.Season.Pedro.Tuning.changes;
+import static org.firstinspires.ftc.teamcode.Season.Pedro.Tuning.draw;
+import static org.firstinspires.ftc.teamcode.Season.Pedro.Tuning.drawOnlyCurrent;
+import static org.firstinspires.ftc.teamcode.Season.Pedro.Tuning.follower;
+import static org.firstinspires.ftc.teamcode.Season.Pedro.Tuning.stopRobot;
+import static org.firstinspires.ftc.teamcode.Season.Pedro.Tuning.telemetryM;
 
 
 import com.bylazar.configurables.PanelsConfigurables;

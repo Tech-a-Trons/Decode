@@ -89,8 +89,10 @@ public class GamepadSetDistanceLauncher extends LinearOpMode {
                     l1.setPower(0);
                     l2.setPower(0);
                 }
+            } else if (Math.abs(distanceError) < 0){
+                moveMecanum(-forwardPower,strafePower,turnPower);
             } else {
-                moveMecanum(forwardPower, strafePower, turnPower);
+                moveMecanum(forwardPower,strafePower,turnPower);
             }
 
             telemetry.addData("Distance: ", distance);

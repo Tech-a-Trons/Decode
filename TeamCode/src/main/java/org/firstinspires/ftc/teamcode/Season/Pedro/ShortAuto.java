@@ -14,14 +14,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Autonomous(name="Path1Auto")
 public class ShortAuto extends OpMode {
     Servo claw;
-
-
-
     private Follower follower;
-
     public static PathBuilder builder;
-
-
 
     public static PathChain pathChain = builder
             .addPath(
@@ -72,6 +66,7 @@ public class ShortAuto extends OpMode {
             )
             .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(135))
             .build();
+
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);

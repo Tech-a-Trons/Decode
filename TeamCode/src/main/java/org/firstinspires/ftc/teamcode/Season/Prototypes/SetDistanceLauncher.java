@@ -90,8 +90,10 @@ public class SetDistanceLauncher extends LinearOpMode {
                     x=x+1;
                 }
                 break;
+            } else if (Math.abs(distanceError) < 0){
+                moveMecanum(-forwardPower,strafePower,turnPower);
             } else {
-                moveMecanum(forwardPower, strafePower, turnPower);
+                moveMecanum(forwardPower,strafePower,turnPower);
             }
 
             telemetry.addData("Distance: ", distance);

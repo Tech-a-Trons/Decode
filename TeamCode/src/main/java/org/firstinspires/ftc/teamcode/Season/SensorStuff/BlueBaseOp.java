@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode.Season.SensorStuff;
 
+import androidx.annotation.XmlRes;
+
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -14,6 +17,7 @@ import java.util.Objects;
 //This is a basic auton for the blue goal and it first gets the obelisk and then goes on - 9/08
 //Added Voltage Sensor - 9/13
 
+@Disabled
 @Autonomous
 public class BlueBaseOp extends LinearOpMode {
     ColorSensor colorSensor;

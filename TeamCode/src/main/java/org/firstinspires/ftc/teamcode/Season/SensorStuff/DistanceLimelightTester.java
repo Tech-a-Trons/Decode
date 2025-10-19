@@ -9,7 +9,6 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.StableDistanceLExtractor
 
 //To test
 
-@Disabled
 @TeleOp
 public class DistanceLimelightTester extends LinearOpMode {
 

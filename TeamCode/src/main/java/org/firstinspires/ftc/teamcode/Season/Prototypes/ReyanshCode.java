@@ -26,19 +26,18 @@ public class ReyanshCode extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-
             if (gamepad1.y) {
-                motor3.setPower(0.8);
+                motor3.setPower(1);
             }
 
             if (gamepad1.b) {
-                motor2.setPower(-0.8);
+                motor2.setPower(-1);
             }
             if (gamepad1.x) {
                 motor1.setPower(-1);
             }
             if (gamepad1.a) {
-                motor4.setPower(-1);
+                motor4.setPower(1);
             }
             if (gamepad1.dpad_right) {
                 motor1.setPower(0);

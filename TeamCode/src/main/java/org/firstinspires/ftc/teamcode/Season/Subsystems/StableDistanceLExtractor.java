@@ -46,7 +46,7 @@ public class StableDistanceLExtractor {
             23,19.5,
             24,30.0
     );
-    private final double LIMELIGHT_ANGLE = 14.2;  // degrees
+    private final double LIMELIGHT_ANGLE = 13.1;  // degrees
 
     public StableDistanceLExtractor(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");

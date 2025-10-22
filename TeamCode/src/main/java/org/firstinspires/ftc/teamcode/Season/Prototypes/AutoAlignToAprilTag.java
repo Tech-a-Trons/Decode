@@ -61,7 +61,7 @@ public class AutoAlignToAprilTag extends LinearOpMode {
             strafePower = clamp(strafePower, -0.4, 0.4);
             turnPower = clamp(turnPower, -0.3, 0.3);
 
-            if (Math.abs(distanceError) <= DISTANCE_TOLERANCE && Math.abs(angleError) <= ANGLE_TOLERANCE) {
+            if (Math.abs(distanceError) == 0 && Math.abs(angleError) <= ANGLE_TOLERANCE) {
                 stopDrive();
                 telemetry.addLine("Aligned with AprilTag");
             } else {

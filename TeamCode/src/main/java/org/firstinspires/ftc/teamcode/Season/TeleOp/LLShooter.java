@@ -1,17 +1,19 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Season.TeleOp;
+
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import org.firstinspires.ftc.teamcode.Season.Subsystems.ExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
-@TeleOp(name = "Voltstandig")
-public class Voltstandig extends LinearOpMode {
-
+public class LLShooter extends LinearOpMode {
     VoltageGet volt = new VoltageGet();
+    ExperimentalDistanceLExtractor extractor;
     DcMotor activeintake = null;
     DcMotor out1 = null;
     DcMotor out2 = null;
@@ -24,6 +26,9 @@ public class Voltstandig extends LinearOpMode {
         out2 = hardwareMap.get(DcMotor.class, "outtake2");
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
         ramp = hardwareMap.get(DcMotor.class, "ramp");
+        extractor = new ExperimentalDistanceLExtractor(hardwareMap);
+        extractor.setTelemetry(telemetry);
+        extractor.startReading();
 
         DcMotor frontLeftMotor = hardwareMap.get(DcMotor.class, "fl");
         DcMotor backLeftMotor = hardwareMap.get(DcMotor.class, "bl");
@@ -47,6 +52,9 @@ public class Voltstandig extends LinearOpMode {
             }
 
             if (gamepad1.dpad_left) {
+                Double distance = extractor.getDistance();
+                double basePower = 0.36;  // your old baseline power
+                double shootPower = 0;
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(100);
                 out1.setPower(volt.regulate(0));
@@ -55,30 +63,42 @@ public class Voltstandig extends LinearOpMode {
                 ramp.setPower(volt.regulate(0));
                 sleep(300);
                 activeintake.setPower(volt.regulate(0));
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
+                shootPower = (distance != null) ? getLaunchPower(distance) : basePower;
+                out1.setPower(volt.regulate(-shootPower));
+                out2.setPower(volt.regulate(shootPower));
                 sleep(1400);
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(50);
-                out1.setPower(volt.regulate(-0.1));
-                out2.setPower(volt.regulate(0.1));
+                double onebasepwr = 0.1;
+                shootPower = (distance != null) ? getLaunchPower(distance) : onebasepwr;
+                out1.setPower(volt.regulate(-shootPower));
+                out2.setPower(volt.regulate(shootPower));
                 ramp.setPower(volt.regulate(0));
                 sleep(100);
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
+                shootPower = (distance != null) ? getLaunchPower(distance) : basePower;
+                out1.setPower(volt.regulate(-shootPower));
+                out2.setPower(volt.regulate(shootPower));
                 sleep(1400);
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(volt.regulate(-1.0));
             }
 
             if (gamepad1.b) {
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
+                Double distance = extractor.getDistance();
+                double bbasePower = 0.36;
+                double bshootPower = (distance != null) ? getLaunchPower(distance) : bbasePower;
+
+                out1.setPower(volt.regulate(-bshootPower));
+                out2.setPower(volt.regulate(bshootPower));
             }
 
             if (gamepad1.dpad_down) {
-                out1.setPower(volt.regulate(-0.3));
-                out2.setPower(volt.regulate(0.3));
+                Double distance = extractor.getDistance();
+                double dbasePower = 0.3;
+                double dshootPower = (distance != null) ? getLaunchPower(distance) : dbasePower;
+
+                out1.setPower(volt.regulate(-dshootPower));
+                out2.setPower(volt.regulate(dshootPower));
             }
 
             if (gamepad1.x) {
@@ -120,4 +140,15 @@ public class Voltstandig extends LinearOpMode {
             telemetry.update();
         }
     }
+    private double getLaunchPower(double distanceInches) {
+        // Example linear calibration — tweak these for your robot
+        double basePower = 0.36;   // minimum to reach nearby target
+        double slope = 0.0025;      // how much power increases per inch
+
+        double scaledPower = basePower + slope * distanceInches;
+
+        // clamp power between 0 and 0.8 to protect motors
+        return Math.min(Math.max(scaledPower, 0), 0.8);
+    }
+
 }

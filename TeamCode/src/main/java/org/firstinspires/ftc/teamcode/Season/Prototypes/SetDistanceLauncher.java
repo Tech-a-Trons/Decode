@@ -89,7 +89,6 @@ public class SetDistanceLauncher extends LinearOpMode {
 
                     x=x+1;
                 }
-                break;
             } else if (Math.abs(distanceError) < 0){
                 moveMecanum(-forwardPower,strafePower,turnPower);
             } else {

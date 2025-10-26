@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
-@TeleOp(name = "Voltstandig")
-public class Voltstandig extends LinearOpMode {
+@TeleOp(name = "Segunda")
+public class Segunda extends LinearOpMode {
 
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
@@ -47,16 +47,18 @@ public class Voltstandig extends LinearOpMode {
             }
 
             if (gamepad1.dpad_left) {
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
-                sleep(1400);
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(100);
                 out1.setPower(volt.regulate(0));
                 out2.setPower(volt.regulate(0));
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(volt.regulate(0));
-                sleep(300);
+//                sleep(300);
+
+
+                sleep(100);
+            }
+            if (gamepad1.dpad_up){
                 activeintake.setPower(volt.regulate(0));
                 out1.setPower(volt.regulate(-0.36));
                 out2.setPower(volt.regulate(0.36));
@@ -66,12 +68,6 @@ public class Voltstandig extends LinearOpMode {
                 out1.setPower(volt.regulate(-0.1));
                 out2.setPower(volt.regulate(0.1));
                 ramp.setPower(volt.regulate(0));
-                sleep(100);
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
-                sleep(1400);
-                activeintake.setPower(volt.regulate(1.0));
-                ramp.setPower(volt.regulate(-1.0));
             }
 
             if (gamepad1.b) {
@@ -80,8 +76,11 @@ public class Voltstandig extends LinearOpMode {
             }
 
             if (gamepad1.dpad_down) {
-                out1.setPower(volt.regulate(-0.3));
-                out2.setPower(volt.regulate(0.3));
+                out1.setPower(volt.regulate(-0.36));
+                out2.setPower(volt.regulate(0.36));
+                sleep(1400);
+                activeintake.setPower(volt.regulate(1.0));
+                ramp.setPower(volt.regulate(-1.0));
             }
 
             if (gamepad1.x) {

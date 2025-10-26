@@ -18,7 +18,7 @@ public class Bankai extends LinearOpMode {
     //CRServo wheel = null ;
     @Override
     public void runOpMode() throws InterruptedException {
-        myControlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "voltage");
+//        myControlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "MyControlHub");
         out1 = hardwareMap.get(DcMotor.class,"outtake1");
         out2 = hardwareMap.get(DcMotor.class,"outtake2");
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
@@ -42,13 +42,13 @@ public class Bankai extends LinearOpMode {
 //        activeintake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         waitForStart();
-        double presentVoltage;
-        presentVoltage = myControlHubVoltageSensor.getVoltage();
-        telemetry.addData("Voltage: ",presentVoltage);
-
-        double powerValue = 0.5;
-        double offsetVoltage =  powerValue * (12.5/presentVoltage);
-        telemetry.addData("offset Voltage: ",offsetVoltage);
+//        double presentVoltage;
+//        presentVoltage = myControlHubVoltageSensor.getVoltage();
+//        telemetry.addData("Voltage: ",presentVoltage);
+//
+//        double powerValue = 0.5;
+//        double offsetVoltage =  powerValue * (12.5/presentVoltage);
+//        telemetry.addData("offset Voltage: ",offsetVoltage);
         while (opModeIsActive()) {
 
             if (gamepad1.a) {
@@ -56,36 +56,46 @@ public class Bankai extends LinearOpMode {
 
             }
             if (gamepad1.dpad_left){
-                out1.setPower(-.4);
-                out2.setPower(.4);
-                ramp.setPower(-1);
-                activeintake.setPower(1);
-                sleep(400);
-                out1.setPower(-.4);
-                out2.setPower(.4);
-                ramp.setPower(0);
-                activeintake.setPower(1);
-                sleep(400);
-                out1.setPower(-.45);
-                out2.setPower(.45);
-                ramp.setPower(-1);
-                activeintake.setPower(1);
-                sleep(400);
-                out1.setPower(-.45);
-                out2.setPower(.45);
-                ramp.setPower(0);
-                activeintake.setPower(1);
-                sleep(400);
-                out1.setPower(-.45);
-                out2.setPower(.45);
-                ramp.setPower(-1);
-                activeintake.setPower(1);
-                sleep(400);
-                out1.setPower(-.45);
-                out2.setPower(.45);
-                ramp.setPower(0);
-                activeintake.setPower(1);
 
+//                out2.setPower(.45);
+//                sleep(1000);
+//                wheel.setPower(1);
+                ramp.setPower(-1);
+//                activeintake.setPower(1);
+                ramp.setPower(-1);
+                sleep(100);
+                out1.setPower(-0);
+                out2.setPower(0);
+                activeintake.setPower(1);
+//                wheel.setPower(0);
+                ramp.setPower(-0);
+                sleep(300);
+                activeintake.setPower(0);
+                out1.setPower(-.45);
+                out2.setPower(.45);
+                sleep(500);
+//                wheel.setPower(1);
+                ramp.setPower(-1);
+//                activeintake.setPower(1);
+                sleep(50);
+//                wheel.setPower(0);
+                out1.setPower(-.1);
+                out2.setPower(.1);
+                ramp.setPower(-0);
+//                wheel.setPosition(0.7);
+                sleep(100);
+//                wheel.setPower(1);
+                out1.setPower(-.45);
+                out2.setPower(.45);
+                sleep(700);
+                activeintake.setPower(1);
+//                wheel.setPosition(0.9);
+                ramp.setPower(-1);
+//                sleep(400);
+////                wheel.setPower(0);
+//                out1.setPower(-.1);
+//                out2.setPower(.1);
+//                ramp.setPower(-0);
 
             }
 

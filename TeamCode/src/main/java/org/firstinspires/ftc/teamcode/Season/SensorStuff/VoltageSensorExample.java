@@ -23,8 +23,8 @@ public class VoltageSensorExample extends LinearOpMode {
         telemetry.addData("Voltage: ",presentVoltage);
 
         double powerValue = 0.5;
-        double offsetPower =  powerValue * (12.5/presentVoltage);
-        telemetry.addData("offset Voltage: ",offsetPower);
+        double offsetVoltage =  powerValue * (12.5/presentVoltage);
+        telemetry.addData("offset Voltage: ",offsetVoltage);
 
     }
 }

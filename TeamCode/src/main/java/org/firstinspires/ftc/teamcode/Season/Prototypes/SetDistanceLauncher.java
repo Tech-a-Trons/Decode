@@ -17,7 +17,7 @@ public class SetDistanceLauncher extends LinearOpMode {
     private DcMotor l1,l2;
     private StableDistanceLExtractor limelightExtractor;
 
-    private final double TARGET_DISTANCE = 48.0; // inches
+    private final double TARGET_DISTANCE = 36.0; // inches
     private final double DISTANCE_TOLERANCE = 1.0;
     private final double ANGLE_TOLERANCE = 2.0;
 
@@ -28,8 +28,8 @@ public class SetDistanceLauncher extends LinearOpMode {
         bl = hardwareMap.get(DcMotor.class, "bl");
         br = hardwareMap.get(DcMotor.class, "br");
 
-        l1 = hardwareMap.get(DcMotor.class,"l1");
-        l2 = hardwareMap.get(DcMotor.class,"l2");
+        l1 = hardwareMap.get(DcMotor.class,"outtake1");
+        l2 = hardwareMap.get(DcMotor.class,"outtake2");
 
         fl.setDirection(DcMotorSimple.Direction.REVERSE);
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -56,9 +56,9 @@ public class SetDistanceLauncher extends LinearOpMode {
             double distanceError = distance - TARGET_DISTANCE;
             double angleError = tx;
 
-            double forwardPower = (-distanceError * 0.05) * 0.5;
-            double strafePower = (-angleError * 0.03) * 0.5;
-            double turnPower = (angleError * 0.02) * 0.5;
+            double forwardPower = (-distanceError * 0.05) * 0.7;
+            double strafePower = (-angleError * 0.03) * 0.7;
+            double turnPower = (angleError * 0.02) * 0.3;
 
             forwardPower = clamp(forwardPower, -0.4, 0.4);
             strafePower = clamp(strafePower, -0.4, 0.4);
@@ -81,9 +81,9 @@ public class SetDistanceLauncher extends LinearOpMode {
                 while (x > 3) {
 
                     //Left Motor
-                    l1.setPower(-1);
+                    l1.setPower(-0.45);
                     //Right Motor
-                    l2.setPower(1);
+                    l2.setPower(0.45);
 
                     sleep(1000);
 
@@ -125,6 +125,7 @@ public class SetDistanceLauncher extends LinearOpMode {
         fr.setPower(0);
         bl.setPower(0);
         br.setPower(0);
+
     }
 
     private double clamp(double val, double min, double max) {

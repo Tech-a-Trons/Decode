@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.StableDistanceLExtractor
 
 //Niranjan's code, rotation + distance
 
-@Disabled
+
 @TeleOp(name = "AutoAlignToAprilTag", group = "Subsystems")
 public class AutoAlignToAprilTag extends LinearOpMode {
 

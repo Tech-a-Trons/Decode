@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp
-public class Teleopv3 extends LinearOpMode {
+public class Ramp6k extends LinearOpMode {
     DcMotor activeintake = null;
     DcMotor out1 = null;
     DcMotor out2 = null;
@@ -111,12 +111,12 @@ public class Teleopv3 extends LinearOpMode {
                 //intake
             }
             if (gamepad1.right_bumper){
-                ramp.setPower(-.1);
+                ramp.setPower(-.4);
                 //intake
             }
 
             if (gamepad1.left_bumper){
-                ramp.setPower(-.05);
+                ramp.setPower(-.2);
                 //holding
             }
 

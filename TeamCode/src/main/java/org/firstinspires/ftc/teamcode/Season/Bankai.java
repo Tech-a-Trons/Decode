@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp;
+package org.firstinspires.ftc.teamcode.Season;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -6,9 +6,11 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 @TeleOp
-public class Teleopv3 extends LinearOpMode {
+public class Bankai extends LinearOpMode {
+    private VoltageSensor myControlHubVoltageSensor;
     DcMotor activeintake = null;
     DcMotor out1 = null;
     DcMotor out2 = null;
@@ -16,6 +18,7 @@ public class Teleopv3 extends LinearOpMode {
     //CRServo wheel = null ;
     @Override
     public void runOpMode() throws InterruptedException {
+        myControlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "voltage");
         out1 = hardwareMap.get(DcMotor.class,"outtake1");
         out2 = hardwareMap.get(DcMotor.class,"outtake2");
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
@@ -39,59 +42,57 @@ public class Teleopv3 extends LinearOpMode {
 //        activeintake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         waitForStart();
+        double presentVoltage;
+        presentVoltage = myControlHubVoltageSensor.getVoltage();
+        telemetry.addData("Voltage: ",presentVoltage);
 
+        double powerValue = 0.5;
+        double offsetVoltage =  powerValue * (12.5/presentVoltage);
+        telemetry.addData("offset Voltage: ",offsetVoltage);
         while (opModeIsActive()) {
 
             if (gamepad1.a) {
-                activeintake.setPower(.7);
+                activeintake.setPower(1);
 
             }
             if (gamepad1.dpad_left){
-//                out1.setPower(-.45);
-//                out2.setPower(.45);
-//                sleep(1000);
-//                wheel.setPower(1);
+                out1.setPower(-.4);
+                out2.setPower(.4);
                 ramp.setPower(-1);
-//                activeintake.setPower(1);
-                ramp.setPower(-1);
-                sleep(100);
-                out1.setPower(-.1);
-                out2.setPower(.1);
-//                wheel.setPower(0);
-                ramp.setPower(-0);
-                sleep(100);
-                out1.setPower(-.45);
-                out2.setPower(.45);
-                sleep(2500);
-//                wheel.setPower(1);
-                ramp.setPower(-1);
-                sleep(100);
-//                wheel.setPower(0);
-                out1.setPower(-.1);
-                out2.setPower(.1);
-                ramp.setPower(-0);
-//                wheel.setPosition(0.7);
-                sleep(100);
-//                wheel.setPower(1);
-                out1.setPower(-.45);
-                out2.setPower(.45);
-                sleep(2500);
                 activeintake.setPower(1);
-//                wheel.setPosition(0.9);
+                sleep(400);
+                out1.setPower(-.4);
+                out2.setPower(.4);
+                ramp.setPower(0);
+                activeintake.setPower(1);
+                sleep(400);
+                out1.setPower(-.45);
+                out2.setPower(.45);
                 ramp.setPower(-1);
-//                sleep(400);
-////                wheel.setPower(0);
-//                out1.setPower(-.1);
-//                out2.setPower(.1);
-//                ramp.setPower(-0);
+                activeintake.setPower(1);
+                sleep(400);
+                out1.setPower(-.45);
+                out2.setPower(.45);
+                ramp.setPower(0);
+                activeintake.setPower(1);
+                sleep(400);
+                out1.setPower(-.45);
+                out2.setPower(.45);
+                ramp.setPower(-1);
+                activeintake.setPower(1);
+                sleep(400);
+                out1.setPower(-.45);
+                out2.setPower(.45);
+                ramp.setPower(0);
+                activeintake.setPower(1);
 
 
             }
 
             if (gamepad1.b) {
 //                activeintake.setPower(1);
-                out1.setPower(-.45);
-                out2.setPower(.45);
+                out1.setPower(-.4);
+                out2.setPower(.4);
 
                 //launching
             }

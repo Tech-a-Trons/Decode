@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.ExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
 @TeleOp(name = "TsFastSoloPls")
@@ -25,6 +26,10 @@ public class TsFastSolo extends LinearOpMode {
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
         ramp = hardwareMap.get(DcMotor.class, "ramp");
 
+        ExperimentalDistanceLExtractor ll = new ExperimentalDistanceLExtractor(hardwareMap);
+        ll.startReading();
+        ll.setTelemetry(telemetry);
+
         DcMotor frontLeftMotor = hardwareMap.get(DcMotor.class, "fl");
         DcMotor backLeftMotor = hardwareMap.get(DcMotor.class, "bl");
         DcMotor frontRightMotor = hardwareMap.get(DcMotor.class, "fr");
@@ -37,9 +42,19 @@ public class TsFastSolo extends LinearOpMode {
         frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        Double tx = ll.getTx();
+        if (tx == null) {
+            tx = 0.0;
+        }
+
         waitForStart();
 
         while (opModeIsActive()) {
+            ll.update();
+            tx = ll.getTx();
+            if (tx == null) {
+                tx = 0.0;
+            }
 
             // --- Mechanism Controls ---
             if (gamepad1.a) {
@@ -98,6 +113,31 @@ public class TsFastSolo extends LinearOpMode {
                 ramp.setPower(volt.regulate(-0.05));
             }
 
+            if (gamepad1.y) {
+                if (tx > 1.0) {
+                    frontLeftMotor.setPower(volt.regulate(0.25));
+                    frontRightMotor.setPower(volt.regulate(-0.25));
+                    backLeftMotor.setPower(volt.regulate(0.25));
+                    backRightMotor.setPower(volt.regulate(-0.25));
+                } else if (tx < -1.0) {
+                    frontLeftMotor.setPower(volt.regulate(-0.25));
+                    frontRightMotor.setPower(volt.regulate(0.25));
+                    backLeftMotor.setPower(volt.regulate(-0.25));
+                    backRightMotor.setPower(volt.regulate(0.25));
+                } else if (tx < 1.0 && tx > -1.0) {
+                    frontLeftMotor.setPower(volt.regulate(0.0));
+                    frontRightMotor.setPower(volt.regulate(0.0));
+                    backLeftMotor.setPower(volt.regulate(0.0));
+                    backRightMotor.setPower(volt.regulate(0.0));
+                } else {
+                    frontLeftMotor.setPower(volt.regulate(0.0));
+                    frontRightMotor.setPower(volt.regulate(0.0));
+                    backLeftMotor.setPower(volt.regulate(0.0));
+                    backRightMotor.setPower(volt.regulate(0.0));
+                }
+                ll.update();
+            }
+
             // --- Drivetrain Controls ---
             double y = -gamepad1.left_stick_y; // forward/back
             double x = gamepad1.left_stick_x * 1.1; // strafe
@@ -120,5 +160,6 @@ public class TsFastSolo extends LinearOpMode {
 //            telemetry.addData("Voltage", ());
             telemetry.update();
         }
+        ll.stopReading();
     }
 }

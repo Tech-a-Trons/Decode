@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static java.lang.Math.clamp;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -17,6 +19,9 @@ public class TsFastSolo extends LinearOpMode {
     DcMotor out1 = null;
     DcMotor out2 = null;
     DcMotor ramp = null;
+    DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
+    private final double TARGET_DISTANCE = 36.0; // inches
+    private final double ANGLE_TOLERANCE = 2.0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -30,10 +35,10 @@ public class TsFastSolo extends LinearOpMode {
         ll.startReading();
         ll.setTelemetry(telemetry);
 
-        DcMotor frontLeftMotor = hardwareMap.get(DcMotor.class, "fl");
-        DcMotor backLeftMotor = hardwareMap.get(DcMotor.class, "bl");
-        DcMotor frontRightMotor = hardwareMap.get(DcMotor.class, "fr");
-        DcMotor backRightMotor = hardwareMap.get(DcMotor.class, "br");
+        frontLeftMotor = hardwareMap.get(DcMotor.class, "fl");
+        backLeftMotor = hardwareMap.get(DcMotor.class, "bl");
+        frontRightMotor = hardwareMap.get(DcMotor.class, "fr");
+        backRightMotor = hardwareMap.get(DcMotor.class, "br");
 
         // Initialize voltage sensor system
         volt.init(hardwareMap);
@@ -46,15 +51,36 @@ public class TsFastSolo extends LinearOpMode {
         if (tx == null) {
             tx = 0.0;
         }
+        Double distance = ll.getEuclideanDistance();
+        if (distance == null) {
+            distance = 0.0;
+        }
 
         waitForStart();
 
         while (opModeIsActive()) {
             ll.update();
+
+            distance = ll.getEuclideanDistance();
             tx = ll.getTx();
             if (tx == null) {
                 tx = 0.0;
             }
+            if (distance == null) {
+                distance = 0.0;
+            }
+
+            double distanceError = distance - TARGET_DISTANCE;
+            double angleError = tx;
+
+            double forwardPower = (-distanceError * 0.05) * 0.5;
+            double strafePower = (-angleError * 0.03) * 0.5;
+            double turnPower = (angleError * 0.02) * 0.5;
+
+            forwardPower = clamp(forwardPower, -0.4, 0.4);
+            strafePower = clamp(strafePower, -0.4, 0.4);
+            turnPower = clamp(turnPower, -0.3, 0.3);
+
 
             // --- Mechanism Controls ---
             if (gamepad1.a) {
@@ -114,29 +140,18 @@ public class TsFastSolo extends LinearOpMode {
                 ramp.setPower(volt.regulate(-0.05));
             }
 
+            //Niranjan auto align code is here! - Pranav 10/27
+
             if (gamepad1.y) {
-                if (tx > 1.0) {
-                    frontLeftMotor.setPower(volt.regulate(0.25));
-                    frontRightMotor.setPower(volt.regulate(-0.25));
-                    backLeftMotor.setPower(volt.regulate(0.25));
-                    backRightMotor.setPower(volt.regulate(-0.25));
-                } else if (tx < -1.0) {
-                    frontLeftMotor.setPower(volt.regulate(-0.25));
-                    frontRightMotor.setPower(volt.regulate(0.25));
-                    backLeftMotor.setPower(volt.regulate(-0.25));
-                    backRightMotor.setPower(volt.regulate(0.25));
-                } else if (tx < 1.0 && tx > -1.0) {
+                if (Math.abs(distanceError) == 0 && Math.abs(angleError) <= ANGLE_TOLERANCE) {
                     frontLeftMotor.setPower(volt.regulate(0.0));
                     frontRightMotor.setPower(volt.regulate(0.0));
                     backLeftMotor.setPower(volt.regulate(0.0));
                     backRightMotor.setPower(volt.regulate(0.0));
+                    telemetry.addLine("Aligned with AprilTag");
                 } else {
-                    frontLeftMotor.setPower(volt.regulate(0.0));
-                    frontRightMotor.setPower(volt.regulate(0.0));
-                    backLeftMotor.setPower(volt.regulate(0.0));
-                    backRightMotor.setPower(volt.regulate(0.0));
+                    moveMecanum(forwardPower, strafePower, turnPower);
                 }
-                ll.update();
             }
 
             // --- Drivetrain Controls ---
@@ -162,5 +177,22 @@ public class TsFastSolo extends LinearOpMode {
             telemetry.update();
         }
         ll.stopReading();
+    }
+
+    //I added these bc they worked rly well for rotations - Pranav 10/27
+
+    private double clamp(double val, double min, double max) {
+        return Math.max(min, Math.min(max, val));
+    }
+    private void moveMecanum(double forward, double strafe, double turn) {
+        double flPower = forward + strafe + turn;
+        double frPower = forward - strafe - turn;
+        double blPower = forward - strafe + turn;
+        double brPower = forward + strafe - turn;
+
+        frontLeftMotor.setPower(flPower);
+        frontRightMotor.setPower(frPower);
+        backLeftMotor.setPower(blPower);
+        backRightMotor.setPower(brPower);
     }
 }

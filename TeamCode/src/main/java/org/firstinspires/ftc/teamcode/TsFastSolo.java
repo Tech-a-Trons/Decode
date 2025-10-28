@@ -148,7 +148,6 @@ public class TsFastSolo extends LinearOpMode {
                     frontRightMotor.setPower(volt.regulate(0.0));
                     backLeftMotor.setPower(volt.regulate(0.0));
                     backRightMotor.setPower(volt.regulate(0.0));
-                    telemetry.addLine("Aligned with AprilTag");
                 } else {
                     moveMecanum(forwardPower, strafePower, turnPower);
                 }
@@ -173,10 +172,13 @@ public class TsFastSolo extends LinearOpMode {
 
             // --- Telemetry ---
             telemetry.addData("Voltage", volt.getVoltage());
-//            telemetry.addData("Voltage", ());
             telemetry.update();
         }
         ll.stopReading();
+        frontLeftMotor.setPower(volt.regulate(0.0));
+        frontRightMotor.setPower(volt.regulate(0.0));
+        backLeftMotor.setPower(volt.regulate(0.0));
+        backRightMotor.setPower(volt.regulate(0.0));
     }
 
     //I added these bc they worked rly well for rotations - Pranav 10/27

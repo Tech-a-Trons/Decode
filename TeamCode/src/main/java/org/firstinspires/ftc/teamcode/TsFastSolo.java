@@ -20,7 +20,7 @@ public class TsFastSolo extends LinearOpMode {
     DcMotor out2 = null;
     DcMotor ramp = null;
     DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
-    private final double TARGET_DISTANCE = 36.0; // inches
+    private final double TARGET_DISTANCE = 48.0; // inches
     private final double ANGLE_TOLERANCE = 2.0;
 
     @Override
@@ -73,9 +73,9 @@ public class TsFastSolo extends LinearOpMode {
             double distanceError = distance - TARGET_DISTANCE;
             double angleError = tx;
 
-            double forwardPower = (-distanceError * 0.05) * 0.5;
-            double strafePower = (-angleError * 0.03) * 0.5;
-            double turnPower = (angleError * 0.02) * 0.5;
+            double forwardPower = (-distanceError * 0.05) * 1;
+            double strafePower = (-angleError * 0.03) * 1;
+            double turnPower = (angleError * 0.02) * 1;
 
             forwardPower = clamp(forwardPower, -0.4, 0.4);
             strafePower = clamp(strafePower, -0.4, 0.4);
@@ -114,15 +114,42 @@ public class TsFastSolo extends LinearOpMode {
             }
 
             if (gamepad1.b) {
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
+                out1.setPower(volt.regulate(-0.32));
+                out2.setPower(volt.regulate(0.32));
             }
 
             if (gamepad1.dpad_down) {
-                out1.setPower(volt.regulate(-0.3));
-                out2.setPower(volt.regulate(0.3));
+                out1.setPower(volt.regulate(0.3));
+                out2.setPower(volt.regulate(-0.3));
             }
+            if(gamepad1.left_bumper){
+                out1.setPower(volt.regulate(-0.45));
+                out2.setPower(volt.regulate(0.45));
+                sleep(800);
+                ramp.setPower(volt.regulate(-1.0));
+                sleep(100);
+                out1.setPower(volt.regulate(0));
+                out2.setPower(volt.regulate(0));
+                activeintake.setPower(volt.regulate(1.0));
+                ramp.setPower(volt.regulate(0));
+                sleep(300);
+                activeintake.setPower(volt.regulate(0));
+                out1.setPower(volt.regulate(-0.45));
+                out2.setPower(volt.regulate(0.45));
+                sleep(800);
+                ramp.setPower(volt.regulate(-1.0));
+                sleep(50);
+                out1.setPower(volt.regulate(-0.1));
+                out2.setPower(volt.regulate(0.1));
+                ramp.setPower(volt.regulate(0));
+                sleep(100);
+                out1.setPower(volt.regulate(-0.45));
+                out2.setPower(volt.regulate(0.45));
+                sleep(500);
+                activeintake.setPower(volt.regulate(1.0));
+                ramp.setPower(volt.regulate(-1.0));
 
+            }
             if (gamepad1.x) {
                 activeintake.setPower(0);
                 out1.setPower(0);
@@ -132,12 +159,6 @@ public class TsFastSolo extends LinearOpMode {
 
             if (gamepad1.right_trigger > 0.0) {
                 ramp.setPower(volt.regulate(gamepad1.right_trigger));
-            }
-            if (gamepad1.right_bumper) {
-                ramp.setPower(volt.regulate(-0.1));
-            }
-            if (gamepad1.left_bumper) {
-                ramp.setPower(volt.regulate(-0.05));
             }
 
             //Niranjan auto align code is here! - Pranav 10/27

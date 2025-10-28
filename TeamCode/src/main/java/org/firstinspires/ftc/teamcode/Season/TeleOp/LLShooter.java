@@ -1,14 +1,10 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.ExperimentalDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.ExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
 public class LLShooter extends LinearOpMode {

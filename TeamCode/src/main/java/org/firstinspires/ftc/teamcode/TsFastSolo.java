@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
-@TeleOp(name = "Voltstandig")
-public class Voltstandig extends LinearOpMode {
+@TeleOp(name = "TsFastSoloPls")
+public class TsFastSolo extends LinearOpMode {
 
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
@@ -47,9 +47,6 @@ public class Voltstandig extends LinearOpMode {
             }
 
             if (gamepad1.dpad_left) {
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
-                sleep(1400);
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(100);
                 out1.setPower(volt.regulate(0));
@@ -60,7 +57,7 @@ public class Voltstandig extends LinearOpMode {
                 activeintake.setPower(volt.regulate(0));
                 out1.setPower(volt.regulate(-0.36));
                 out2.setPower(volt.regulate(0.36));
-                sleep(1400);
+                sleep(800);
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(50);
                 out1.setPower(volt.regulate(-0.1));
@@ -69,7 +66,7 @@ public class Voltstandig extends LinearOpMode {
                 sleep(100);
                 out1.setPower(volt.regulate(-0.36));
                 out2.setPower(volt.regulate(0.36));
-                sleep(1400);
+                sleep(500);
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(volt.regulate(-1.0));
             }

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.Subsystems;
+package org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
@@ -10,12 +10,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import java.util.List;
 import java.util.Map;
 
-/**
- * FTC-Legal Limelight 3A extractor with background polling thread.
- * Includes AprilTag ID extraction using LLResultTypes.FiducialResult.
- */
-public class StableDistanceLExtractor {
-
+//New code
+public class ExperimentalDistanceLExtractor {
     private final double SMOOTHING_FACTOR = 0.2;
     private final long STALE_TIMEOUT_MS = 500; // 0.5s
 
@@ -48,7 +44,7 @@ public class StableDistanceLExtractor {
     );
     private final double LIMELIGHT_ANGLE = 16.8;  // degrees
 
-    public StableDistanceLExtractor(HardwareMap hardwareMap) {
+    public ExperimentalDistanceLExtractor(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");
         limelight.setPollRateHz(100);
         limelight.pipelineSwitch(3);

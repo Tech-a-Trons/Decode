@@ -158,6 +158,7 @@ public class Voltstandig extends LinearOpMode {
 
             // --- Telemetry ---
             telemetry.addData("Voltage", volt.getVoltage());
+//            telemetry.addData("Voltage", ());
             telemetry.update();
         }
     }

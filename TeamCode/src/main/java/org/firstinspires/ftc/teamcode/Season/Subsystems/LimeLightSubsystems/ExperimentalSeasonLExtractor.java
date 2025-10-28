@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.Subsystems;
+package org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
@@ -13,7 +13,7 @@ import java.util.List;
  * FTC-Legal Limelight 3A extractor with background polling thread.
  * Includes AprilTag ID extraction using LLResultTypes.FiducialResult.
  */
-public class StableSeasonLExtractor {
+public class ExperimentalSeasonLExtractor {
 
     private final double SMOOTHING_FACTOR = 0.2;
     private final long STALE_TIMEOUT_MS = 500; // 0.5s
@@ -38,7 +38,7 @@ public class StableSeasonLExtractor {
     private Thread pollingThread;
     private volatile boolean running = false;
 
-    public StableSeasonLExtractor(HardwareMap hardwareMap) {
+    public ExperimentalSeasonLExtractor(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");
         limelight.setPollRateHz(100);
         limelight.pipelineSwitch(1);

@@ -6,11 +6,13 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.teamcode.Season.Subsystems.ExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
 @TeleOp(name = "Voltstandig")
 public class Voltstandig extends LinearOpMode {
 
+    ExperimentalDistanceLExtractor ll = new ExperimentalDistanceLExtractor(hardwareMap);
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
     DcMotor out1 = null;
@@ -37,9 +39,20 @@ public class Voltstandig extends LinearOpMode {
         frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        Double tx = ll.getTx();
+        if (tx == null) {
+            tx = 0.0;
+        }
+
         waitForStart();
 
         while (opModeIsActive()) {
+            //Niranjan dont remove this or else the rotation wont work
+            ll.update();
+            tx = ll.getTx();
+            if (tx == null) {
+                tx = 0.0;
+            }
 
             // --- Mechanism Controls ---
             if (gamepad1.a) {
@@ -89,6 +102,31 @@ public class Voltstandig extends LinearOpMode {
                 out1.setPower(0);
                 out2.setPower(0);
                 ramp.setPower(0);
+            }
+
+            if (gamepad1.y) {
+                if (tx > 1.0) {
+                    frontLeftMotor.setPower(volt.regulate(0.5));
+                    frontRightMotor.setPower(volt.regulate(-0.5));
+                    backLeftMotor.setPower(volt.regulate(0.5));
+                    backRightMotor.setPower(volt.regulate(-0.5));
+                } else if (tx < -1.0) {
+                    frontLeftMotor.setPower(volt.regulate(-0.5));
+                    frontRightMotor.setPower(volt.regulate(0.5));
+                    backLeftMotor.setPower(volt.regulate(-0.5));
+                    backRightMotor.setPower(volt.regulate(0.5));
+                } else if (tx < 1.0 && tx > -1.0) {
+                    frontLeftMotor.setPower(volt.regulate(0.0));
+                    frontRightMotor.setPower(volt.regulate(0.0));
+                    backLeftMotor.setPower(volt.regulate(0.0));
+                    backRightMotor.setPower(volt.regulate(0.0));
+                } else {
+                    frontLeftMotor.setPower(volt.regulate(0.0));
+                    frontRightMotor.setPower(volt.regulate(0.0));
+                    backLeftMotor.setPower(volt.regulate(0.0));
+                    backRightMotor.setPower(volt.regulate(0.0));
+                }
+                ll.update();
             }
 
             if (gamepad1.right_trigger > 0.0) {

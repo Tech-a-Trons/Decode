@@ -59,6 +59,7 @@ public class TsFastSolo extends LinearOpMode {
             // --- Mechanism Controls ---
             if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
+                ramp.setPower(0.3);
             }
 
             if (gamepad1.dpad_left) {

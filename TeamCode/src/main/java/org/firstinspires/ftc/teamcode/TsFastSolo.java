@@ -20,8 +20,10 @@ public class TsFastSolo extends LinearOpMode {
     DcMotor out2 = null;
     DcMotor ramp = null;
     DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
-    private final double TARGET_DISTANCE = 48.0; // inches
-    private final double ANGLE_TOLERANCE = 2.0;
+    private final double STARGET_DISTANCE = 48.0; // inches
+    private final double SANGLE_TOLERANCE = 2.0;
+    private final double FTARGET_DISTANCE = 96.5;
+    private final double FANGLE_TOLERANCE = 27.0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -70,16 +72,26 @@ public class TsFastSolo extends LinearOpMode {
                 distance = 0.0;
             }
 
-            double distanceError = distance - TARGET_DISTANCE;
-            double angleError = tx;
+            double sdistanceError = distance - STARGET_DISTANCE;
+            double fdistanceError = distance - FTARGET_DISTANCE;
+            double sangleError = tx;
+            double fangleError = tx;
 
-            double forwardPower = (-distanceError * 0.05) * 1;
-            double strafePower = (-angleError * 0.03) * 1;
-            double turnPower = (angleError * 0.02) * 1;
+            double sforwardPower = (-sdistanceError * 0.05) * 1;
+            double shstrafePower = (-sangleError * 0.03) * 1;
+            double sturnPower = (sangleError * 0.02) * 1;
 
-            forwardPower = clamp(forwardPower, -0.4, 0.4);
-            strafePower = clamp(strafePower, -0.4, 0.4);
-            turnPower = clamp(turnPower, -0.3, 0.3);
+            double farforwardPower = (-fdistanceError * 0.05) * 1;
+            double fstrafePower = (-fangleError * 0.03) * 1;
+            double fturnPower = (fangleError * 0.02) * 1;
+
+            sforwardPower = clamp(sforwardPower, -0.4, 0.4);
+            shstrafePower = clamp(shstrafePower, -0.4, 0.4);
+            sturnPower = clamp(sturnPower, -0.3, 0.3);
+
+            farforwardPower = clamp(farforwardPower, -0.4, 0.4);
+            fstrafePower = clamp(fstrafePower, -0.4, 0.4);
+            fturnPower = clamp(fturnPower, -0.3, 0.3);
 
 
             // --- Mechanism Controls ---
@@ -164,13 +176,24 @@ public class TsFastSolo extends LinearOpMode {
             //Niranjan auto align code is here! - Pranav 10/27
 
             if (gamepad1.y) {
-                if (Math.abs(distanceError) == 0 && Math.abs(angleError) <= ANGLE_TOLERANCE) {
+                if (Math.abs(sdistanceError) == 0 && Math.abs(sangleError) <= SANGLE_TOLERANCE) {
                     frontLeftMotor.setPower(volt.regulate(0.0));
                     frontRightMotor.setPower(volt.regulate(0.0));
                     backLeftMotor.setPower(volt.regulate(0.0));
                     backRightMotor.setPower(volt.regulate(0.0));
                 } else {
-                    moveMecanum(forwardPower, strafePower, turnPower);
+                    moveMecanum(sforwardPower, shstrafePower, sturnPower);
+                }
+            }
+
+            if (gamepad1.dpad_right) {
+                if (Math.abs(fdistanceError) == 0 && Math.abs(fangleError) <= FANGLE_TOLERANCE) {
+                    frontLeftMotor.setPower(volt.regulate(0.0));
+                    frontRightMotor.setPower(volt.regulate(0.0));
+                    backLeftMotor.setPower(volt.regulate(0.0));
+                    backRightMotor.setPower(volt.regulate(0.0));
+                } else {
+                    moveMecanum(farforwardPower, fstrafePower, fturnPower);
                 }
             }
 

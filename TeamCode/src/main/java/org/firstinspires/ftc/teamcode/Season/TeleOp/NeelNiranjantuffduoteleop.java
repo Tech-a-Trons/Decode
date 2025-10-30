@@ -1,15 +1,14 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Season.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
-@TeleOp(name = "TsDuoFastPls")
-public class TsDuoFastPls extends LinearOpMode {
+@TeleOp(name = "NeelNiranjantuffduoteleop")
+public class NeelNiranjantuffduoteleop extends LinearOpMode {
 
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
@@ -47,6 +46,9 @@ public class TsDuoFastPls extends LinearOpMode {
             }
 
             if (gamepad2.dpad_left) {
+                out1.setPower(volt.regulate(-0.36));
+                out2.setPower(volt.regulate(0.36));
+                sleep(1400);
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(100);
                 out1.setPower(volt.regulate(0));
@@ -57,7 +59,7 @@ public class TsDuoFastPls extends LinearOpMode {
                 activeintake.setPower(volt.regulate(0));
                 out1.setPower(volt.regulate(-0.36));
                 out2.setPower(volt.regulate(0.36));
-                sleep(600);
+                sleep(1400);
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(50);
                 out1.setPower(volt.regulate(-0.1));
@@ -66,7 +68,7 @@ public class TsDuoFastPls extends LinearOpMode {
                 sleep(100);
                 out1.setPower(volt.regulate(-0.36));
                 out2.setPower(volt.regulate(0.36));
-                sleep(600);
+                sleep(1400);
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(volt.regulate(-1.0));
             }

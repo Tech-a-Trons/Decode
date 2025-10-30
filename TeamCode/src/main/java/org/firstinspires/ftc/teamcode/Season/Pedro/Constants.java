@@ -17,10 +17,18 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(10.5);
+            .mass(10)
+            .forwardZeroPowerAcceleration(-120)
+            .lateralZeroPowerAcceleration(-113)
+            .useSecondaryTranslationalPIDF(false)
+            .useSecondaryHeadingPIDF(false)
+            .useSecondaryDrivePIDF(false)
+            .centripetalScaling(0.0005)
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.2, 0, 0.01, 0))
+            .headingPIDFCoefficients(new PIDFCoefficients(2, 0, 0.1, 0))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.1, 0, 0, 0.04, 0));
 
     public static MecanumConstants driveConstants = new MecanumConstants()
-            .maxPower(1)
             .leftFrontMotorName("fl")
             .leftRearMotorName("bl")
             .rightFrontMotorName("fr")
@@ -29,7 +37,8 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            ;
+            .xVelocity(72.57)
+            .yVelocity(56);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
             .forwardPodY(1)
@@ -41,8 +50,8 @@ public class Constants {
                     GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD
             )
             .customEncoderResolution(13.26291192)
-            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
-            .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
+            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
+            .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
     public static PathConstraints pathConstraints = new PathConstraints(
             0.995,

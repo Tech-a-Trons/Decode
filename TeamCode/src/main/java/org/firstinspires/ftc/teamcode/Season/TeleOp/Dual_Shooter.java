@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Season.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -54,13 +54,13 @@ public class Dual_Shooter extends LinearOpMode {
             br.setPower(brPower);
 
             // Shooter/Intake controls
-            float outtakePower = gamepad1.right_trigger;  // read inside loop
+             int outtakePower = (int) 0.4;  // read inside loop
 
             if (gamepad1.dpad_left) {
-                M1.setPower(outtakePower);
+                M1.setPower(0.4);
             }
             if (gamepad1.dpad_right) {
-                M2.setPower(outtakePower);
+                M2.setPower(0.4);
             }
             if (gamepad1.x) {
                 M3.setPower(-1);

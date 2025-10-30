@@ -1,15 +1,14 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Season.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
-@TeleOp(name = "NeelNiranjantuffduoteleop")
-public class NeelNiranjantuffduoteleop extends LinearOpMode {
+@TeleOp(name = "Segunda")
+public class Segunda extends LinearOpMode {
 
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
@@ -42,21 +41,23 @@ public class NeelNiranjantuffduoteleop extends LinearOpMode {
         while (opModeIsActive()) {
 
             // --- Mechanism Controls ---
-            if (gamepad2.a) {
+            if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
             }
 
-            if (gamepad2.dpad_left) {
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
-                sleep(1400);
+            if (gamepad1.dpad_left) {
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(100);
                 out1.setPower(volt.regulate(0));
                 out2.setPower(volt.regulate(0));
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(volt.regulate(0));
-                sleep(300);
+//                sleep(300);
+
+
+                sleep(100);
+            }
+            if (gamepad1.dpad_up){
                 activeintake.setPower(volt.regulate(0));
                 out1.setPower(volt.regulate(-0.36));
                 out2.setPower(volt.regulate(0.36));
@@ -66,7 +67,14 @@ public class NeelNiranjantuffduoteleop extends LinearOpMode {
                 out1.setPower(volt.regulate(-0.1));
                 out2.setPower(volt.regulate(0.1));
                 ramp.setPower(volt.regulate(0));
-                sleep(100);
+            }
+
+            if (gamepad1.b) {
+                out1.setPower(volt.regulate(-0.36));
+                out2.setPower(volt.regulate(0.36));
+            }
+
+            if (gamepad1.dpad_down) {
                 out1.setPower(volt.regulate(-0.36));
                 out2.setPower(volt.regulate(0.36));
                 sleep(1400);
@@ -74,30 +82,20 @@ public class NeelNiranjantuffduoteleop extends LinearOpMode {
                 ramp.setPower(volt.regulate(-1.0));
             }
 
-            if (gamepad2.b) {
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
-            }
-
-            if (gamepad2.dpad_down) {
-                out1.setPower(volt.regulate(-0.3));
-                out2.setPower(volt.regulate(0.3));
-            }
-
-            if (gamepad2.x) {
+            if (gamepad1.x) {
                 activeintake.setPower(0);
                 out1.setPower(0);
                 out2.setPower(0);
                 ramp.setPower(0);
             }
 
-            if (gamepad2.right_trigger > 0.0) {
+            if (gamepad1.right_trigger > 0.0) {
                 ramp.setPower(volt.regulate(gamepad1.right_trigger));
             }
-            if (gamepad2.right_bumper) {
+            if (gamepad1.right_bumper) {
                 ramp.setPower(volt.regulate(-0.1));
             }
-            if (gamepad2.left_bumper) {
+            if (gamepad1.left_bumper) {
                 ramp.setPower(volt.regulate(-0.05));
             }
 
@@ -120,7 +118,6 @@ public class NeelNiranjantuffduoteleop extends LinearOpMode {
 
             // --- Telemetry ---
             telemetry.addData("Voltage", volt.getVoltage());
-//            telemetry.addData("Voltage", ());
             telemetry.update();
         }
     }

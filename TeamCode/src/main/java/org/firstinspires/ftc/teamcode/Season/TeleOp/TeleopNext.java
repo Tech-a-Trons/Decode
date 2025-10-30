@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Season.TeleOp;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 import static dev.nextftc.bindings.Bindings.button;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;

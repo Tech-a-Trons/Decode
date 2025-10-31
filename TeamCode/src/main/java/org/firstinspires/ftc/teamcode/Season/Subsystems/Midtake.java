@@ -6,5 +6,5 @@ import dev.nextftc.hardware.impl.MotorEx;
 public class Midtake implements Subsystem {
     public static final Midtake INSTANCE = new Midtake();
     private Midtake() { }
-    public MotorEx midtake = new MotorEx("ramp");
+    public static MotorEx newtake = new MotorEx("ramp");
 }

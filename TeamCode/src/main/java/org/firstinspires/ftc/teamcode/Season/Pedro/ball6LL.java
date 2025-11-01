@@ -25,7 +25,8 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 public class ball6LL extends NextFTCOpMode {
     private DcMotor fl, fr, bl, br;
     Double tx;
-    private final double ANGLE_TOLERANCE = 2.0;
+    private final double TARGET_DISTANCE = 52.75; // inches
+    private final double ANGLE_TOLERANCE = -5.7;
     ExperimentalDistanceLExtractor extractor;
     VoltageGet volt = new VoltageGet();
     public ball6LL() {
@@ -414,6 +415,22 @@ public class ball6LL extends NextFTCOpMode {
         Outtake.INSTANCE.outtake.setPower(0);
         Midtake.newtake.setPower(0);
         extractor.stopReading();
+    }
+
+    private void moveMecanum(double forward, double strafe, double turn) {
+        double flPower = forward + strafe + turn;
+        double frPower = forward - strafe - turn;
+        double blPower = forward - strafe + turn;
+        double brPower = forward + strafe - turn;
+
+        fl.setPower(flPower);
+        fr.setPower(frPower);
+        bl.setPower(blPower);
+        br.setPower(brPower);
+    }
+
+    private double clamp(double val, double min, double max) {
+        return Math.max(min, Math.min(max, val));
     }
 
     private void stopDrive() {

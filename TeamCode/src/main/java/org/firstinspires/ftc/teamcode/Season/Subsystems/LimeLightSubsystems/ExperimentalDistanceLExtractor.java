@@ -42,7 +42,7 @@ public class ExperimentalDistanceLExtractor {
             23,19.5,
             24,30.0
     );
-    private final double LIMELIGHT_ANGLE = 25.85;  // degrees
+    private final double LIMELIGHT_ANGLE = 26.0;  // degrees
 
     public ExperimentalDistanceLExtractor(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");

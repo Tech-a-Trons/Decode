@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.oldteleop;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-@TeleOp
+@Disabled
 public class Bankai extends LinearOpMode {
     private VoltageSensor myControlHubVoltageSensor;
     DcMotor activeintake = null;

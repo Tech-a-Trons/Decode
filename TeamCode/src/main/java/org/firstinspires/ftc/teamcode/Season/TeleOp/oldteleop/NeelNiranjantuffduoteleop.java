@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.oldteleop;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
-
+@Disabled
 @TeleOp(name = "NeelNiranjantuffduoteleop")
 public class NeelNiranjantuffduoteleop extends LinearOpMode {
 

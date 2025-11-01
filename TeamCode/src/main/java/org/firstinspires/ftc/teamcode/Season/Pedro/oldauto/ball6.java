@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.Pedro.auto;
+package org.firstinspires.ftc.teamcode.Season.Pedro.oldauto;
 
 import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Intake;

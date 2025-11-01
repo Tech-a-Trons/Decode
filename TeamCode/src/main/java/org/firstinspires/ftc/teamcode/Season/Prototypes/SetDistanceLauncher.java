@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Season.Prototypes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -8,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.StableDistanceLExtractor;
 
 //Modified AutoAlignToAprilTag
-
+@Disabled
 @TeleOp(name = "SetDistanceLauncher")
 public class SetDistanceLauncher extends LinearOpMode {
 

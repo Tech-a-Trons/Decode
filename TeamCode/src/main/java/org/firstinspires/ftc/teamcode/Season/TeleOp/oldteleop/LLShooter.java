@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.oldteleop;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.ExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
-
+@Disabled
 public class LLShooter extends LinearOpMode {
     VoltageGet volt = new VoltageGet();
     ExperimentalDistanceLExtractor extractor;

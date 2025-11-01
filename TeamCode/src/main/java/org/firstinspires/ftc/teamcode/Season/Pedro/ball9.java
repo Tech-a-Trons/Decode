@@ -18,10 +18,10 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "ball6-7", group = "Examples")
-public class ball6 extends NextFTCOpMode {
+@Autonomous(name = "ball9", group = "Examples")
+public class ball9 extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
-    public ball6() {
+    public ball9() {
         addComponents(
                 new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE),
                 BulkReadComponent.INSTANCE,
@@ -35,8 +35,8 @@ public class ball6 extends NextFTCOpMode {
     private int pathState;
 
     private final Pose startPose = new Pose(123.13, 122.08, Math.toRadians(220));
-//    private final Pose scorePose = new Pose(90, 90, Math.toRadians(215));
-private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
+    //    private final Pose scorePose = new Pose(90, 90, Math.toRadians(215));
+    private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
 
 
     private final Pose prePickup1 = new Pose(82.226, 80, Math.toRadians(0));
@@ -69,36 +69,35 @@ private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
                 .addPath(new BezierLine(pickup1Pose, scorePose))
                 .setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
                 .build();
+        grabPrePickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, prePickup2))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup2.getHeading())
+                .build();
 
-//        grabPrePickup2 = follower.pathBuilder()
-//                .addPath(new BezierLine(scorePose, prePickup2))
-//                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup2.getHeading())
-//                .build();
-//
-//        grabPickup2 = follower.pathBuilder()
-//                .addPath(new BezierLine(prePickup2, pickup2Pose))
-//                .setLinearHeadingInterpolation(prePickup2.getHeading(), pickup2Pose.getHeading())
-//                .build();
-//
-//        scorePickup2 = follower.pathBuilder()
-//                .addPath(new BezierLine(pickup2Pose, scorePose))
-//                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
-//                .build();
-//
-//        grabPrePickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(scorePose, prePickup3))
-//                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
-//                .build();
-//
-//        grabPickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(prePickup3, pickup3Pose))
-//                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
-//                .build();
-//
-//        scorePickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(pickup3Pose, scorePose))
-//                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
-//                .build();
+        grabPickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(prePickup2, pickup2Pose))
+                .setLinearHeadingInterpolation(prePickup2.getHeading(), pickup2Pose.getHeading())
+                .build();
+
+        scorePickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(pickup2Pose, scorePose))
+                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
+                .build();
+
+        grabPrePickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, prePickup3))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
+                .build();
+
+        grabPickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(prePickup3, pickup3Pose))
+                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
+                .build();
+
+        scorePickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(pickup3Pose, scorePose))
+                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
+                .build();
     }
 
     public void autonomousPathUpdate() {

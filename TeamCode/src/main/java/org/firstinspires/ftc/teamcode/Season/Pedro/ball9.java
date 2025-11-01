@@ -42,7 +42,7 @@ public class ball9 extends NextFTCOpMode {
     private final Pose prePickup1 = new Pose(82.226, 80, Math.toRadians(0));
     private final Pose prePickup2 = new Pose(80.765, 55, Math.toRadians(0));
     private final Pose prePickup3 = new Pose(85.565, 34.017, Math.toRadians(0));
-
+    private final Pose dropoff2 = new Pose(100, 55, Math.toRadians(0));
     private final Pose pickup1Pose = new Pose(125, 80, Math.toRadians(0));
     private final Pose pickup2Pose = new Pose(130, 55, Math.toRadians(0));
     private final Pose pickup3Pose = new Pose(125, 35, Math.toRadians(0));
@@ -50,6 +50,7 @@ public class ball9 extends NextFTCOpMode {
     private Path scorePreload;
     private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
     private PathChain grabPrePickup1, grabPrePickup2, grabPrePickup3;
+    private PathChain dropofftwo;
 
     public void buildPaths() {
         scorePreload = new Path(new BezierLine(startPose, scorePose));
@@ -78,10 +79,13 @@ public class ball9 extends NextFTCOpMode {
                 .addPath(new BezierLine(prePickup2, pickup2Pose))
                 .setLinearHeadingInterpolation(prePickup2.getHeading(), pickup2Pose.getHeading())
                 .build();
-
+dropofftwo = follower.pathBuilder()
+        .addPath(new BezierLine(pickup2Pose,dropoff2))
+        .setLinearHeadingInterpolation(pickup2Pose.getHeading(),dropoff2.getHeading())
+        .build();
         scorePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup2Pose, scorePose))
-                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
+                .addPath(new BezierLine(dropoff2, scorePose))
+                .setLinearHeadingInterpolation(dropoff2.getHeading(), scorePose.getHeading())
                 .build();
 
         grabPrePickup3 = follower.pathBuilder()

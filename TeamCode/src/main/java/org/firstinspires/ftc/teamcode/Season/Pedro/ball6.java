@@ -44,7 +44,7 @@ private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
     private final Pose prePickup3 = new Pose(85.565, 34.017, Math.toRadians(0));
 
     private final Pose pickup1Pose = new Pose(125, 80, Math.toRadians(0));
-    private final Pose pickup2Pose = new Pose(125, 55, Math.toRadians(0));
+    private final Pose pickup2Pose = new Pose(130, 55, Math.toRadians(0));
     private final Pose pickup3Pose = new Pose(125, 35, Math.toRadians(0));
 
     private Path scorePreload;
@@ -70,20 +70,20 @@ private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
                 .setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
                 .build();
 
-//        grabPrePickup2 = follower.pathBuilder()
-//                .addPath(new BezierLine(scorePose, prePickup2))
-//                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup2.getHeading())
-//                .build();
-//
-//        grabPickup2 = follower.pathBuilder()
-//                .addPath(new BezierLine(prePickup2, pickup2Pose))
-//                .setLinearHeadingInterpolation(prePickup2.getHeading(), pickup2Pose.getHeading())
-//                .build();
-//
-//        scorePickup2 = follower.pathBuilder()
-//                .addPath(new BezierLine(pickup2Pose, scorePose))
-//                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
-//                .build();
+        grabPrePickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, prePickup2))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup2.getHeading())
+                .build();
+
+        grabPickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(prePickup2, pickup2Pose))
+                .setLinearHeadingInterpolation(prePickup2.getHeading(), pickup2Pose.getHeading())
+                .build();
+
+        scorePickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(pickup2Pose, scorePose))
+                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
+                .build();
 
 //        grabPrePickup3 = follower.pathBuilder()
 //                .addPath(new BezierLine(scorePose, prePickup3))
@@ -137,7 +137,7 @@ private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
 
             case 4:
                 if (!follower.isBusy()) {
-                    shootThreeBalls();
+                    secondshootThreeBalls();
                     follower.followPath(grabPrePickup2, true);
                     Intake.INSTANCE.activeintake.setPower(1);
                     setPathState(5);
@@ -229,7 +229,7 @@ private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
 
-        outtake.outtake.setPower(volt.regulate(0.25));
+        outtake.outtake.setPower(volt.regulate(0.28));
         sleep(1500);
 
         midtake.newtake.setPower(volt.regulate(-1.0));

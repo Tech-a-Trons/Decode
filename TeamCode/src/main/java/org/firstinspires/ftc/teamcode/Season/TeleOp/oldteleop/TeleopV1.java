@@ -1,19 +1,17 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.oldteleop;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp
-public class Teleopv3 extends LinearOpMode {
+public class TeleopV1 extends LinearOpMode {
     DcMotor activeintake = null;
     DcMotor out1 = null;
     DcMotor out2 = null;
     DcMotor ramp = null;
-    //CRServo wheel = null ;
+//CRServo wheel = null ;
     @Override
     public void runOpMode() throws InterruptedException {
         out1 = hardwareMap.get(DcMotor.class,"outtake1");
@@ -47,22 +45,22 @@ public class Teleopv3 extends LinearOpMode {
 
             }
             if (gamepad1.dpad_left){
-//                out1.setPower(-.45);
-//                out2.setPower(.45);
-//                sleep(1000);
+                out1.setPower(-.45);
+                out2.setPower(.45);
+                sleep(1000);
 //                wheel.setPower(1);
                 ramp.setPower(-1);
-//                activeintake.setPower(1);
+                activeintake.setPower(1);
                 ramp.setPower(-1);
                 sleep(100);
                 out1.setPower(-.1);
                 out2.setPower(.1);
 //                wheel.setPower(0);
                 ramp.setPower(-0);
-                sleep(100);
-                out1.setPower(-.45);
-                out2.setPower(.45);
-                sleep(2500);
+                sleep(125);
+                out1.setPower(-.5);
+                out2.setPower(.5);
+                sleep(1000);
 //                wheel.setPower(1);
                 ramp.setPower(-1);
                 sleep(100);
@@ -73,25 +71,24 @@ public class Teleopv3 extends LinearOpMode {
 //                wheel.setPosition(0.7);
                 sleep(100);
 //                wheel.setPower(1);
-                out1.setPower(-.45);
-                out2.setPower(.45);
-                sleep(2500);
-                activeintake.setPower(1);
+                out1.setPower(-.4);
+                out2.setPower(.4);
+                sleep(1000);
 //                wheel.setPosition(0.9);
                 ramp.setPower(-1);
-//                sleep(400);
-////                wheel.setPower(0);
-//                out1.setPower(-.1);
-//                out2.setPower(.1);
-//                ramp.setPower(-0);
+                sleep(400);
+//                wheel.setPower(0);
+                out1.setPower(-.1);
+                out2.setPower(.1);
+                ramp.setPower(-0);
 
 
             }
 
             if (gamepad1.b) {
 //                activeintake.setPower(1);
-                out1.setPower(-.45);
-                out2.setPower(.45);
+                out1.setPower(-.4);
+                out2.setPower(.4);
 
                 //launching
             }
@@ -111,12 +108,12 @@ public class Teleopv3 extends LinearOpMode {
                 //intake
             }
             if (gamepad1.right_bumper){
-                ramp.setPower(-.1);
+                ramp.setPower(-.6);
                 //intake
             }
 
             if (gamepad1.left_bumper){
-                ramp.setPower(-.05);
+                ramp.setPower(-.2);
                 //holding
             }
 

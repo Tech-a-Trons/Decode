@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.Pedro;
+package org.firstinspires.ftc.teamcode.Season.Pedro.oldauto;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -9,6 +9,8 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+
+import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
 
 @Autonomous(name = "New Auto", group = "Examples")
 public class NewAuto extends OpMode {

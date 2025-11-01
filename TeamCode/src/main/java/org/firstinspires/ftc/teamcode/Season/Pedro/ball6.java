@@ -18,10 +18,10 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "6ball", group = "Examples")
-public class autofortuff extends NextFTCOpMode {
+@Autonomous(name = "ball6-7", group = "Examples")
+public class ball6 extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
-    public autofortuff() {
+    public ball6() {
         addComponents(
                 new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE),
                 BulkReadComponent.INSTANCE,
@@ -39,13 +39,13 @@ public class autofortuff extends NextFTCOpMode {
 private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
 
 
-    private final Pose prePickup1 = new Pose(82.226, 81.809, Math.toRadians(0));
+    private final Pose prePickup1 = new Pose(82.226, 80, Math.toRadians(0));
     private final Pose prePickup2 = new Pose(80.765, 55, Math.toRadians(0));
     private final Pose prePickup3 = new Pose(85.565, 34.017, Math.toRadians(0));
 
-    private final Pose pickup1Pose = new Pose(120, 84, Math.toRadians(0));
-    private final Pose pickup2Pose = new Pose(120, 55, Math.toRadians(0));
-    private final Pose pickup3Pose = new Pose(120, 35, Math.toRadians(0));
+    private final Pose pickup1Pose = new Pose(125, 80, Math.toRadians(0));
+    private final Pose pickup2Pose = new Pose(125, 55, Math.toRadians(0));
+    private final Pose pickup3Pose = new Pose(125, 35, Math.toRadians(0));
 
     private Path scorePreload;
     private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
@@ -110,7 +110,7 @@ private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
 
             case 1:
                 if (!follower.isBusy()) {
-                    // 🚀 SHOOT after preload
+                    // SHOOT after preload
                     shootThreeBalls();
 
                     follower.followPath(grabPrePickup1, true);
@@ -161,7 +161,7 @@ private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
 
             case 7:
                 if (!follower.isBusy()) {
-                    shootThreeBalls();
+                    secondshootThreeBalls();
                     follower.followPath(grabPrePickup3, true);
                     Intake.INSTANCE.activeintake.setPower(1);
                     setPathState(8);
@@ -224,6 +224,45 @@ private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
 //        midtake.newtake.setPower(0);
 //        intake.activeintake.setPower(0);
 //    }
+    private void secondshootThreeBalls() {
+        Outtake outtake = Outtake.INSTANCE;
+        Midtake midtake = Midtake.INSTANCE;
+        Intake intake = Intake.INSTANCE;
+
+        outtake.outtake.setPower(volt.regulate(0.25));
+        sleep(1500);
+
+        midtake.newtake.setPower(volt.regulate(-1.0));
+        sleep(100);
+
+        outtake.outtake.setPower(volt.regulate(0.1));
+        intake.activeintake.setPower(volt.regulate(1.0));
+        midtake.newtake.setPower(volt.regulate(0));
+        sleep(300);
+
+        intake.activeintake.setPower(volt.regulate(0));
+        outtake.outtake.setPower(volt.regulate(0.32));
+        sleep(1500);
+
+        midtake.newtake.setPower(volt.regulate(-1));
+        sleep(50);
+
+        outtake.outtake.setPower(volt.regulate(0.1));
+        midtake.newtake.setPower(volt.regulate(0));
+        sleep(100);
+
+        outtake.outtake.setPower(volt.regulate(0.34));
+        sleep(500);
+
+        intake.activeintake.setPower(volt.regulate(1.0));
+        midtake.newtake.setPower(volt.regulate(-1));
+        sleep(1000);
+
+        // Stop all
+        outtake.outtake.setPower(volt.regulate(0));
+        midtake.newtake.setPower(volt.regulate(0));
+        intake.activeintake.setPower(volt.regulate(0));
+    }
     private void shootThreeBalls() {
         Outtake outtake = Outtake.INSTANCE;
         Midtake midtake = Midtake.INSTANCE;
@@ -251,7 +290,7 @@ private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
         midtake.newtake.setPower(volt.regulate(0));
         sleep(100);
 
-        outtake.outtake.setPower(volt.regulate(0.32));
+        outtake.outtake.setPower(volt.regulate(0.34));
         sleep(500);
 
         intake.activeintake.setPower(volt.regulate(1.0));

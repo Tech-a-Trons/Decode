@@ -1,5 +1,6 @@
-package org.firstinspires.ftc.teamcode.Season.Pedro;
+package org.firstinspires.ftc.teamcode.Season.Pedro.oldauto;
 
+import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Midtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake;
@@ -11,15 +12,13 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.delays.Delay;
-import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
-
+@Disabled
 @Autonomous(name = "Movement Auto (with Intake)", group = "Examples")
 public class NextFRC extends NextFTCOpMode {
 

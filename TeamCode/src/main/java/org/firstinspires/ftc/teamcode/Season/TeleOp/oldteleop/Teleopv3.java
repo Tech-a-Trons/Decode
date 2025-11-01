@@ -1,19 +1,17 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.oldteleop;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
-
+@Disabled
 @TeleOp
-public class fourfeetdemonshotbutservo extends LinearOpMode {
+public class Teleopv3 extends LinearOpMode {
     DcMotor activeintake = null;
     DcMotor out1 = null;
     DcMotor out2 = null;
     DcMotor ramp = null;
-    Servo door = null;
     //CRServo wheel = null ;
     @Override
     public void runOpMode() throws InterruptedException {
@@ -21,7 +19,7 @@ public class fourfeetdemonshotbutservo extends LinearOpMode {
         out2 = hardwareMap.get(DcMotor.class,"outtake2");
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
         ramp = hardwareMap.get(DcMotor.class,"ramp");
-        door = hardwareMap.get(Servo.class,"wheel");
+//        wheel = hardwareMap.get(CRServo.class,"wheel");
         // Make sure your ID's match your configuration
         DcMotor frontLeftMotor = hardwareMap.dcMotor.get("fl");
         DcMotor backLeftMotor = hardwareMap.dcMotor.get("bl");
@@ -61,9 +59,9 @@ public class fourfeetdemonshotbutservo extends LinearOpMode {
 //                wheel.setPower(0);
                 ramp.setPower(-0);
                 sleep(100);
-                out1.setPower(-.4);
-                out2.setPower(.4);
-                sleep(1600);
+                out1.setPower(-.45);
+                out2.setPower(.45);
+                sleep(2500);
 //                wheel.setPower(1);
                 ramp.setPower(-1);
                 sleep(100);
@@ -74,9 +72,9 @@ public class fourfeetdemonshotbutservo extends LinearOpMode {
 //                wheel.setPosition(0.7);
                 sleep(100);
 //                wheel.setPower(1);
-                out1.setPower(-.4);
-                out2.setPower(.4);
-                sleep(1400);
+                out1.setPower(-.45);
+                out2.setPower(.45);
+                sleep(2500);
                 activeintake.setPower(1);
 //                wheel.setPosition(0.9);
                 ramp.setPower(-1);
@@ -91,8 +89,8 @@ public class fourfeetdemonshotbutservo extends LinearOpMode {
 
             if (gamepad1.b) {
 //                activeintake.setPower(1);
-                out1.setPower(-.4);
-                out2.setPower(.4);
+                out1.setPower(-.45);
+                out2.setPower(.45);
 
                 //launching
             }
@@ -112,12 +110,12 @@ public class fourfeetdemonshotbutservo extends LinearOpMode {
                 //intake
             }
             if (gamepad1.right_bumper){
-                ramp.setPower(-.6);
+                ramp.setPower(-.1);
                 //intake
             }
 
             if (gamepad1.left_bumper){
-                ramp.setPower(-.2);
+                ramp.setPower(-.05);
                 //holding
             }
 

@@ -1,7 +1,9 @@
-package org.firstinspires.ftc.teamcode.Season.Pedro;
+package org.firstinspires.ftc.teamcode.Season.Pedro.auto;
 
+import static org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake.outtake;
+
+import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Intake;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.ExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Midtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
@@ -13,29 +15,24 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "ball6-7TuffLL", group = "Examples")
-public class ball6LL extends NextFTCOpMode {
-    private DcMotor fl, fr, bl, br;
-    Double tx;
-    private final double TARGET_DISTANCE = 52.75; // inches
-    private final double ANGLE_TOLERANCE = -5.7;
-    ExperimentalDistanceLExtractor extractor;
+@Autonomous(name = "front9", group = "Examples")
+public class front9 extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
-    public ball6LL() {
+    public front9() {
         addComponents(
                 new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE
         );
     }
+
+
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
     private int pathState;
@@ -48,14 +45,15 @@ public class ball6LL extends NextFTCOpMode {
     private final Pose prePickup1 = new Pose(82.226, 80, Math.toRadians(0));
     private final Pose prePickup2 = new Pose(80.765, 55, Math.toRadians(0));
     private final Pose prePickup3 = new Pose(85.565, 34.017, Math.toRadians(0));
-
-    private final Pose pickup1Pose = new Pose(125, 80, Math.toRadians(0));
-    private final Pose pickup2Pose = new Pose(130, 55, Math.toRadians(0));
+    private final Pose dropoff2 = new Pose(100, 55, Math.toRadians(0));
+    private final Pose pickup1Pose = new Pose(123, 80, Math.toRadians(0));
+    private final Pose pickup2Pose = new Pose(127, 55, Math.toRadians(0));
     private final Pose pickup3Pose = new Pose(125, 35, Math.toRadians(0));
 
     private Path scorePreload;
     private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
     private PathChain grabPrePickup1, grabPrePickup2, grabPrePickup3;
+    private PathChain dropofftwo;
 
     public void buildPaths() {
         scorePreload = new Path(new BezierLine(startPose, scorePose));
@@ -75,36 +73,38 @@ public class ball6LL extends NextFTCOpMode {
                 .addPath(new BezierLine(pickup1Pose, scorePose))
                 .setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
                 .build();
+        grabPrePickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, prePickup2))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup2.getHeading())
+                .build();
 
-//        grabPrePickup2 = follower.pathBuilder()
-//                .addPath(new BezierLine(scorePose, prePickup2))
-//                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup2.getHeading())
-//                .build();
-//
-//        grabPickup2 = follower.pathBuilder()
-//                .addPath(new BezierLine(prePickup2, pickup2Pose))
-//                .setLinearHeadingInterpolation(prePickup2.getHeading(), pickup2Pose.getHeading())
-//                .build();
-//
-//        scorePickup2 = follower.pathBuilder()
-//                .addPath(new BezierLine(pickup2Pose, scorePose))
-//                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
-//                .build();
+        grabPickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(prePickup2, pickup2Pose))
+                .setLinearHeadingInterpolation(prePickup2.getHeading(), pickup2Pose.getHeading())
+                .build();
+dropofftwo = follower.pathBuilder()
+        .addPath(new BezierLine(pickup2Pose,dropoff2))
+        .setLinearHeadingInterpolation(pickup2Pose.getHeading(),dropoff2.getHeading())
+        .build();
+        scorePickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(dropoff2, scorePose))
+                .setLinearHeadingInterpolation(dropoff2.getHeading(), scorePose.getHeading())
+                .build();
 
-//        grabPrePickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(scorePose, prePickup3))
-//                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
-//                .build();
-//
-//        grabPickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(prePickup3, pickup3Pose))
-//                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
-//                .build();
-//
-//        scorePickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(pickup3Pose, scorePose))
-//                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
-//                .build();
+        grabPrePickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, prePickup3))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
+                .build();
+
+        grabPickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(prePickup3, pickup3Pose))
+                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
+                .build();
+
+        scorePickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(pickup3Pose, scorePose))
+                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
+                .build();
     }
 
     public void autonomousPathUpdate() {
@@ -231,55 +231,33 @@ public class ball6LL extends NextFTCOpMode {
 //        intake.activeintake.setPower(0);
 //    }
     private void secondshootThreeBalls() {
-        extractor.update();
         Outtake outtake = Outtake.INSTANCE;
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
 
-        if (tx > -5.7) {
-            fl.setPower(0.5);
-            fr.setPower(-0.5);
-            bl.setPower(0.5);
-            br.setPower(-0.5);
-        } else if (tx < -5.8) {
-            fl.setPower(-0.5);
-            fr.setPower(0.5);
-            bl.setPower(-0.5);
-            br.setPower(0.5);
-        } else if (tx < -5.8 && tx > -5.7) {
-            fl.setPower(0.0);
-            fr.setPower(0.0);
-            bl.setPower(0.0);
-            br.setPower(0.0);
-        } else {
-            stopDrive();
-            telemetry.addLine("JUNK");
-        }
-        extractor.update();
-
-        outtake.outtake.setPower(volt.regulate(0.28));
+        Outtake.outtake.setPower(volt.regulate(0.28));
         sleep(1500);
 
         midtake.newtake.setPower(volt.regulate(-1.0));
         sleep(100);
 
-        outtake.outtake.setPower(volt.regulate(0.1));
+        Outtake.outtake.setPower(volt.regulate(0.1));
         intake.activeintake.setPower(volt.regulate(1.0));
         midtake.newtake.setPower(volt.regulate(0));
         sleep(300);
 
         intake.activeintake.setPower(volt.regulate(0));
-        outtake.outtake.setPower(volt.regulate(0.32));
+        Outtake.outtake.setPower(volt.regulate(0.32));
         sleep(1500);
 
         midtake.newtake.setPower(volt.regulate(-1));
         sleep(50);
 
-        outtake.outtake.setPower(volt.regulate(0.1));
+        Outtake.outtake.setPower(volt.regulate(0.1));
         midtake.newtake.setPower(volt.regulate(0));
         sleep(100);
 
-        outtake.outtake.setPower(volt.regulate(0.34));
+        Outtake.outtake.setPower(volt.regulate(0.34));
         sleep(500);
 
         intake.activeintake.setPower(volt.regulate(1.0));
@@ -287,36 +265,14 @@ public class ball6LL extends NextFTCOpMode {
         sleep(1000);
 
         // Stop all
-        outtake.outtake.setPower(volt.regulate(0));
+        Outtake.outtake.setPower(volt.regulate(0));
         midtake.newtake.setPower(volt.regulate(0));
         intake.activeintake.setPower(volt.regulate(0));
     }
     private void shootThreeBalls() {
-        extractor.update();
         Outtake outtake = Outtake.INSTANCE;
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
-
-        if (tx > -5.7) {
-            fl.setPower(0.5);
-            fr.setPower(-0.5);
-            bl.setPower(0.5);
-            br.setPower(-0.5);
-        } else if (tx < -5.8) {
-            fl.setPower(-0.5);
-            fr.setPower(0.5);
-            bl.setPower(-0.5);
-            br.setPower(0.5);
-        } else if (tx < -5.8 && tx > -5.7) {
-            fl.setPower(0.0);
-            fr.setPower(0.0);
-            bl.setPower(0.0);
-            br.setPower(0.0);
-        } else {
-            stopDrive();
-            telemetry.addLine("JUNK");
-        }
-        extractor.update();
 
         outtake.outtake.setPower(volt.regulate(0.32));
         sleep(1500);
@@ -324,23 +280,23 @@ public class ball6LL extends NextFTCOpMode {
         midtake.newtake.setPower(volt.regulate(-1.0));
         sleep(100);
 
-        outtake.outtake.setPower(volt.regulate(0.1));
+        Outtake.outtake.setPower(volt.regulate(0.1));
         intake.activeintake.setPower(volt.regulate(1.0));
         midtake.newtake.setPower(volt.regulate(0));
         sleep(300);
 
         intake.activeintake.setPower(volt.regulate(0));
-        outtake.outtake.setPower(volt.regulate(0.32));
+        Outtake.outtake.setPower(volt.regulate(0.32));
         sleep(1500);
 
         midtake.newtake.setPower(volt.regulate(-1));
         sleep(50);
 
-        outtake.outtake.setPower(volt.regulate(0.1));
+        Outtake.outtake.setPower(volt.regulate(0.1));
         midtake.newtake.setPower(volt.regulate(0));
         sleep(100);
 
-        outtake.outtake.setPower(volt.regulate(0.34));
+        Outtake.outtake.setPower(volt.regulate(0.34));
         sleep(500);
 
         intake.activeintake.setPower(volt.regulate(1.0));
@@ -348,7 +304,7 @@ public class ball6LL extends NextFTCOpMode {
         sleep(1000);
 
         // Stop all
-        outtake.outtake.setPower(volt.regulate(0));
+        Outtake.outtake.setPower(volt.regulate(0));
         midtake.newtake.setPower(volt.regulate(0));
         intake.activeintake.setPower(volt.regulate(0));
     }
@@ -361,12 +317,7 @@ public class ball6LL extends NextFTCOpMode {
     @Override
     public void onUpdate() {
         follower.update();
-        extractor.update();
         autonomousPathUpdate();
-
-        if (tx == null) {
-            tx = 0.0;
-        }
 
         telemetry.addData("Path State", pathState);
         telemetry.addData("X", follower.getPose().getX());
@@ -382,22 +333,6 @@ public class ball6LL extends NextFTCOpMode {
         opmodeTimer.resetTimer();
         volt.init(hardwareMap);
 
-        fl = hardwareMap.get(DcMotor.class, "fl");
-        fr = hardwareMap.get(DcMotor.class, "fr");
-        bl = hardwareMap.get(DcMotor.class, "bl");
-        br = hardwareMap.get(DcMotor.class, "br");
-
-        fl.setDirection(DcMotorSimple.Direction.REVERSE);
-        bl.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        extractor = new ExperimentalDistanceLExtractor(hardwareMap);
-        extractor.setTelemetry(telemetry);
-        extractor.startReading();
-        tx = extractor.getTx();
-        if (tx == null) {
-            tx = 0.0;
-        }
-
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
         buildPaths();
@@ -412,31 +347,8 @@ public class ball6LL extends NextFTCOpMode {
 
     @Override public void onStop() {
         Intake.INSTANCE.activeintake.setPower(0);
-        Outtake.INSTANCE.outtake.setPower(0);
+        outtake.setPower(0);
         Midtake.newtake.setPower(0);
-        extractor.stopReading();
     }
 
-    private void moveMecanum(double forward, double strafe, double turn) {
-        double flPower = forward + strafe + turn;
-        double frPower = forward - strafe - turn;
-        double blPower = forward - strafe + turn;
-        double brPower = forward + strafe - turn;
-
-        fl.setPower(flPower);
-        fr.setPower(frPower);
-        bl.setPower(blPower);
-        br.setPower(brPower);
-    }
-
-    private double clamp(double val, double min, double max) {
-        return Math.max(min, Math.min(max, val));
-    }
-
-    private void stopDrive() {
-        fl.setPower(0);
-        fr.setPower(0);
-        bl.setPower(0);
-        br.setPower(0);
-    }
 }

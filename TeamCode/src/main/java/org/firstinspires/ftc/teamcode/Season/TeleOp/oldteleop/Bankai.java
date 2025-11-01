@@ -1,14 +1,15 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.oldteleop;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-@TeleOp
-public class Ramp6k extends LinearOpMode {
+@Disabled
+public class Bankai extends LinearOpMode {
+    private VoltageSensor myControlHubVoltageSensor;
     DcMotor activeintake = null;
     DcMotor out1 = null;
     DcMotor out2 = null;
@@ -16,6 +17,7 @@ public class Ramp6k extends LinearOpMode {
     //CRServo wheel = null ;
     @Override
     public void runOpMode() throws InterruptedException {
+//        myControlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "MyControlHub");
         out1 = hardwareMap.get(DcMotor.class,"outtake1");
         out2 = hardwareMap.get(DcMotor.class,"outtake2");
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
@@ -39,15 +41,21 @@ public class Ramp6k extends LinearOpMode {
 //        activeintake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         waitForStart();
-
+//        double presentVoltage;
+//        presentVoltage = myControlHubVoltageSensor.getVoltage();
+//        telemetry.addData("Voltage: ",presentVoltage);
+//
+//        double powerValue = 0.5;
+//        double offsetVoltage =  powerValue * (12.5/presentVoltage);
+//        telemetry.addData("offset Voltage: ",offsetVoltage);
         while (opModeIsActive()) {
 
             if (gamepad1.a) {
-                activeintake.setPower(.7);
+                activeintake.setPower(1);
 
             }
             if (gamepad1.dpad_left){
-//                out1.setPower(-.45);
+
 //                out2.setPower(.45);
 //                sleep(1000);
 //                wheel.setPower(1);
@@ -55,17 +63,20 @@ public class Ramp6k extends LinearOpMode {
 //                activeintake.setPower(1);
                 ramp.setPower(-1);
                 sleep(100);
-                out1.setPower(-.1);
-                out2.setPower(.1);
+                out1.setPower(-0);
+                out2.setPower(0);
+                activeintake.setPower(1);
 //                wheel.setPower(0);
                 ramp.setPower(-0);
-                sleep(100);
+                sleep(300);
+                activeintake.setPower(0);
                 out1.setPower(-.45);
                 out2.setPower(.45);
-                sleep(2500);
+                sleep(500);
 //                wheel.setPower(1);
                 ramp.setPower(-1);
-                sleep(100);
+//                activeintake.setPower(1);
+                sleep(50);
 //                wheel.setPower(0);
                 out1.setPower(-.1);
                 out2.setPower(.1);
@@ -75,7 +86,7 @@ public class Ramp6k extends LinearOpMode {
 //                wheel.setPower(1);
                 out1.setPower(-.45);
                 out2.setPower(.45);
-                sleep(2500);
+                sleep(700);
                 activeintake.setPower(1);
 //                wheel.setPosition(0.9);
                 ramp.setPower(-1);
@@ -85,13 +96,12 @@ public class Ramp6k extends LinearOpMode {
 //                out2.setPower(.1);
 //                ramp.setPower(-0);
 
-
             }
 
             if (gamepad1.b) {
 //                activeintake.setPower(1);
-                out1.setPower(-.45);
-                out2.setPower(.45);
+                out1.setPower(-.4);
+                out2.setPower(.4);
 
                 //launching
             }
@@ -111,12 +121,12 @@ public class Ramp6k extends LinearOpMode {
                 //intake
             }
             if (gamepad1.right_bumper){
-                ramp.setPower(-.4);
+                ramp.setPower(-.1);
                 //intake
             }
 
             if (gamepad1.left_bumper){
-                ramp.setPower(-.2);
+                ramp.setPower(-.05);
                 //holding
             }
 

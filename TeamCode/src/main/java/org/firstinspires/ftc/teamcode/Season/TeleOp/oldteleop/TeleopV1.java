@@ -1,22 +1,20 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.oldteleop;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
-
+@Disabled
 @TeleOp
-public class Bankai extends LinearOpMode {
-    private VoltageSensor myControlHubVoltageSensor;
+public class TeleopV1 extends LinearOpMode {
     DcMotor activeintake = null;
     DcMotor out1 = null;
     DcMotor out2 = null;
     DcMotor ramp = null;
-    //CRServo wheel = null ;
+//CRServo wheel = null ;
     @Override
     public void runOpMode() throws InterruptedException {
-//        myControlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "MyControlHub");
         out1 = hardwareMap.get(DcMotor.class,"outtake1");
         out2 = hardwareMap.get(DcMotor.class,"outtake2");
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
@@ -40,42 +38,33 @@ public class Bankai extends LinearOpMode {
 //        activeintake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         waitForStart();
-//        double presentVoltage;
-//        presentVoltage = myControlHubVoltageSensor.getVoltage();
-//        telemetry.addData("Voltage: ",presentVoltage);
-//
-//        double powerValue = 0.5;
-//        double offsetVoltage =  powerValue * (12.5/presentVoltage);
-//        telemetry.addData("offset Voltage: ",offsetVoltage);
+
         while (opModeIsActive()) {
 
             if (gamepad1.a) {
-                activeintake.setPower(1);
+                activeintake.setPower(.7);
 
             }
             if (gamepad1.dpad_left){
-
-//                out2.setPower(.45);
-//                sleep(1000);
-//                wheel.setPower(1);
-                ramp.setPower(-1);
-//                activeintake.setPower(1);
-                ramp.setPower(-1);
-                sleep(100);
-                out1.setPower(-0);
-                out2.setPower(0);
-                activeintake.setPower(1);
-//                wheel.setPower(0);
-                ramp.setPower(-0);
-                sleep(300);
-                activeintake.setPower(0);
                 out1.setPower(-.45);
                 out2.setPower(.45);
-                sleep(500);
+                sleep(1000);
 //                wheel.setPower(1);
                 ramp.setPower(-1);
-//                activeintake.setPower(1);
-                sleep(50);
+                activeintake.setPower(1);
+                ramp.setPower(-1);
+                sleep(100);
+                out1.setPower(-.1);
+                out2.setPower(.1);
+//                wheel.setPower(0);
+                ramp.setPower(-0);
+                sleep(125);
+                out1.setPower(-.5);
+                out2.setPower(.5);
+                sleep(1000);
+//                wheel.setPower(1);
+                ramp.setPower(-1);
+                sleep(100);
 //                wheel.setPower(0);
                 out1.setPower(-.1);
                 out2.setPower(.1);
@@ -83,17 +72,17 @@ public class Bankai extends LinearOpMode {
 //                wheel.setPosition(0.7);
                 sleep(100);
 //                wheel.setPower(1);
-                out1.setPower(-.45);
-                out2.setPower(.45);
-                sleep(700);
-                activeintake.setPower(1);
+                out1.setPower(-.4);
+                out2.setPower(.4);
+                sleep(1000);
 //                wheel.setPosition(0.9);
                 ramp.setPower(-1);
-//                sleep(400);
-////                wheel.setPower(0);
-//                out1.setPower(-.1);
-//                out2.setPower(.1);
-//                ramp.setPower(-0);
+                sleep(400);
+//                wheel.setPower(0);
+                out1.setPower(-.1);
+                out2.setPower(.1);
+                ramp.setPower(-0);
+
 
             }
 
@@ -120,12 +109,12 @@ public class Bankai extends LinearOpMode {
                 //intake
             }
             if (gamepad1.right_bumper){
-                ramp.setPower(-.1);
+                ramp.setPower(-.6);
                 //intake
             }
 
             if (gamepad1.left_bumper){
-                ramp.setPower(-.05);
+                ramp.setPower(-.2);
                 //holding
             }
 

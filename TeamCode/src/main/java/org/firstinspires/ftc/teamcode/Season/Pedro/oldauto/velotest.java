@@ -1,5 +1,6 @@
-package org.firstinspires.ftc.teamcode.Season.Pedro;
+package org.firstinspires.ftc.teamcode.Season.Pedro.oldauto;
 
+import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Midtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake;
@@ -12,16 +13,18 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "ball6-7", group = "Examples")
-public class ball6 extends NextFTCOpMode {
+@Disabled
+@Autonomous(name = "velotest", group = "Examples")
+public class velotest extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
-    public ball6() {
+    public velotest() {
         addComponents(
                 new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE),
                 BulkReadComponent.INSTANCE,
@@ -35,14 +38,14 @@ public class ball6 extends NextFTCOpMode {
     private int pathState;
 
     private final Pose startPose = new Pose(123.13, 122.08, Math.toRadians(220));
-//    private final Pose scorePose = new Pose(90, 90, Math.toRadians(215));
-private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
+    //    private final Pose scorePose = new Pose(90, 90, Math.toRadians(215));
+    private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
 
 
     private final Pose prePickup1 = new Pose(82.226, 80, Math.toRadians(0));
     private final Pose prePickup2 = new Pose(80.765, 55, Math.toRadians(0));
     private final Pose prePickup3 = new Pose(85.565, 34.017, Math.toRadians(0));
-
+    private final Pose dropoff2 = new Pose(120, 55, Math.toRadians(0));
     private final Pose pickup1Pose = new Pose(125, 80, Math.toRadians(0));
     private final Pose pickup2Pose = new Pose(130, 55, Math.toRadians(0));
     private final Pose pickup3Pose = new Pose(125, 35, Math.toRadians(0));
@@ -50,6 +53,7 @@ private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
     private Path scorePreload;
     private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
     private PathChain grabPrePickup1, grabPrePickup2, grabPrePickup3;
+    private PathChain dropofftwo;
 
     public void buildPaths() {
         scorePreload = new Path(new BezierLine(startPose, scorePose));
@@ -69,36 +73,38 @@ private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
                 .addPath(new BezierLine(pickup1Pose, scorePose))
                 .setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
                 .build();
+        grabPrePickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, prePickup2))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup2.getHeading())
+                .build();
 
-//        grabPrePickup2 = follower.pathBuilder()
-//                .addPath(new BezierLine(scorePose, prePickup2))
-//                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup2.getHeading())
-//                .build();
-//
-//        grabPickup2 = follower.pathBuilder()
-//                .addPath(new BezierLine(prePickup2, pickup2Pose))
-//                .setLinearHeadingInterpolation(prePickup2.getHeading(), pickup2Pose.getHeading())
-//                .build();
-//
-//        scorePickup2 = follower.pathBuilder()
-//                .addPath(new BezierLine(pickup2Pose, scorePose))
-//                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
-//                .build();
-//
-//        grabPrePickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(scorePose, prePickup3))
-//                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
-//                .build();
-//
-//        grabPickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(prePickup3, pickup3Pose))
-//                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
-//                .build();
-//
-//        scorePickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(pickup3Pose, scorePose))
-//                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
-//                .build();
+        grabPickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(prePickup2, pickup2Pose))
+                .setLinearHeadingInterpolation(prePickup2.getHeading(), pickup2Pose.getHeading())
+                .build();
+        dropofftwo = follower.pathBuilder()
+                .addPath(new BezierLine(pickup2Pose,dropoff2))
+                .setLinearHeadingInterpolation(pickup2Pose.getHeading(),dropoff2.getHeading())
+                .build();
+        scorePickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(dropoff2, scorePose))
+                .setLinearHeadingInterpolation(dropoff2.getHeading(), scorePose.getHeading())
+                .build();
+
+        grabPrePickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, prePickup3))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
+                .build();
+
+        grabPickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(prePickup3, pickup3Pose))
+                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
+                .build();
+
+        scorePickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(pickup3Pose, scorePose))
+                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
+                .build();
     }
 
     public void autonomousPathUpdate() {
@@ -229,7 +235,7 @@ private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
 
-        outtake.outtake.setPower(volt.regulate(0.28));
+        outtake.INSTANCE.setShooterSpeed();
         sleep(1500);
 
         midtake.newtake.setPower(volt.regulate(-1.0));
@@ -241,7 +247,7 @@ private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
         sleep(300);
 
         intake.activeintake.setPower(volt.regulate(0));
-        outtake.outtake.setPower(volt.regulate(0.32));
+        outtake.INSTANCE.setShooterSpeed();
         sleep(1500);
 
         midtake.newtake.setPower(volt.regulate(-1));
@@ -251,7 +257,7 @@ private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
         midtake.newtake.setPower(volt.regulate(0));
         sleep(100);
 
-        outtake.outtake.setPower(volt.regulate(0.34));
+        outtake.INSTANCE.setShooterSpeed();
         sleep(500);
 
         intake.activeintake.setPower(volt.regulate(1.0));
@@ -268,8 +274,8 @@ private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
 
-        outtake.outtake.setPower(volt.regulate(0.32));
-        sleep(1500);
+        outtake.INSTANCE.setShooterSpeed();
+        sleep(700);
 
         midtake.newtake.setPower(volt.regulate(-1.0));
         sleep(100);
@@ -280,8 +286,8 @@ private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
         sleep(300);
 
         intake.activeintake.setPower(volt.regulate(0));
-        outtake.outtake.setPower(volt.regulate(0.32));
-        sleep(1500);
+        outtake.INSTANCE.setShooterSpeed();
+        sleep(700);
 
         midtake.newtake.setPower(volt.regulate(-1));
         sleep(50);
@@ -290,12 +296,12 @@ private final Pose scorePose = new Pose(88, 88, Math.toRadians(217.5));
         midtake.newtake.setPower(volt.regulate(0));
         sleep(100);
 
-        outtake.outtake.setPower(volt.regulate(0.34));
-        sleep(500);
+        outtake.INSTANCE.setShooterSpeed();
+        sleep(600);
 
         intake.activeintake.setPower(volt.regulate(1.0));
         midtake.newtake.setPower(volt.regulate(-1));
-        sleep(1000);
+        sleep(500);
 
         // Stop all
         outtake.outtake.setPower(volt.regulate(0));

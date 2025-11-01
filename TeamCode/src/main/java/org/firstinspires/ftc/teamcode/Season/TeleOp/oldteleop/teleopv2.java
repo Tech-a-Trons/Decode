@@ -1,14 +1,13 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.oldteleop;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
-
+@Disabled
 @TeleOp
-public class fourfeetdemonshot extends LinearOpMode {
+public class teleopv2 extends LinearOpMode {
     DcMotor activeintake = null;
     DcMotor out1 = null;
     DcMotor out2 = null;
@@ -47,14 +46,14 @@ public class fourfeetdemonshot extends LinearOpMode {
 
             }
             if (gamepad1.dpad_left){
-//                out1.setPower(-.45);
-//                out2.setPower(.45);
-//                sleep(1000);
+                out1.setPower(-.4);
+                out2.setPower(.4);
+                sleep(700);
 //                wheel.setPower(1);
                 ramp.setPower(-1);
-//                activeintake.setPower(1);
+                activeintake.setPower(1);
                 ramp.setPower(-1);
-                sleep(100);
+                sleep(50);
                 out1.setPower(-.1);
                 out2.setPower(.1);
 //                wheel.setPower(0);
@@ -62,10 +61,10 @@ public class fourfeetdemonshot extends LinearOpMode {
                 sleep(100);
                 out1.setPower(-.4);
                 out2.setPower(.4);
-                sleep(1600);
+                sleep(1000);
 //                wheel.setPower(1);
                 ramp.setPower(-1);
-                sleep(100);
+                sleep(200);
 //                wheel.setPower(0);
                 out1.setPower(-.1);
                 out2.setPower(.1);
@@ -75,15 +74,14 @@ public class fourfeetdemonshot extends LinearOpMode {
 //                wheel.setPower(1);
                 out1.setPower(-.4);
                 out2.setPower(.4);
-                sleep(1400);
-                activeintake.setPower(1);
+                sleep(1000);
 //                wheel.setPosition(0.9);
                 ramp.setPower(-1);
-//                sleep(400);
-////                wheel.setPower(0);
-//                out1.setPower(-.1);
-//                out2.setPower(.1);
-//                ramp.setPower(-0);
+                sleep(400);
+//                wheel.setPower(0);
+                out1.setPower(0);
+                out2.setPower(0);
+                ramp.setPower(-0);
 
 
             }

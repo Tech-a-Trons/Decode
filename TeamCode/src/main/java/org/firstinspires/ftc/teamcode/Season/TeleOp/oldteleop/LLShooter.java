@@ -1,16 +1,16 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.oldteleop;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.ExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
-
-@TeleOp(name = "NeelNiranjantuffduoteleop")
-public class NeelNiranjantuffduoteleop extends LinearOpMode {
-
+@Disabled
+public class LLShooter extends LinearOpMode {
     VoltageGet volt = new VoltageGet();
+    ExperimentalDistanceLExtractor extractor;
     DcMotor activeintake = null;
     DcMotor out1 = null;
     DcMotor out2 = null;
@@ -23,6 +23,9 @@ public class NeelNiranjantuffduoteleop extends LinearOpMode {
         out2 = hardwareMap.get(DcMotor.class, "outtake2");
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
         ramp = hardwareMap.get(DcMotor.class, "ramp");
+        extractor = new ExperimentalDistanceLExtractor(hardwareMap);
+        extractor.setTelemetry(telemetry);
+        extractor.startReading();
 
         DcMotor frontLeftMotor = hardwareMap.get(DcMotor.class, "fl");
         DcMotor backLeftMotor = hardwareMap.get(DcMotor.class, "bl");
@@ -41,14 +44,14 @@ public class NeelNiranjantuffduoteleop extends LinearOpMode {
         while (opModeIsActive()) {
 
             // --- Mechanism Controls ---
-            if (gamepad2.a) {
+            if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
             }
 
-            if (gamepad2.dpad_left) {
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
-                sleep(1400);
+            if (gamepad1.dpad_left) {
+                Double distance = extractor.getDistance();
+                double basePower = 0.36;  // your old baseline power
+                double shootPower = 0;
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(100);
                 out1.setPower(volt.regulate(0));
@@ -57,46 +60,58 @@ public class NeelNiranjantuffduoteleop extends LinearOpMode {
                 ramp.setPower(volt.regulate(0));
                 sleep(300);
                 activeintake.setPower(volt.regulate(0));
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
+                shootPower = (distance != null) ? getLaunchPower(distance) : basePower;
+                out1.setPower(volt.regulate(-shootPower));
+                out2.setPower(volt.regulate(shootPower));
                 sleep(1400);
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(50);
-                out1.setPower(volt.regulate(-0.1));
-                out2.setPower(volt.regulate(0.1));
+                double onebasepwr = 0.1;
+                shootPower = (distance != null) ? getLaunchPower(distance) : onebasepwr;
+                out1.setPower(volt.regulate(-shootPower));
+                out2.setPower(volt.regulate(shootPower));
                 ramp.setPower(volt.regulate(0));
                 sleep(100);
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
+                shootPower = (distance != null) ? getLaunchPower(distance) : basePower;
+                out1.setPower(volt.regulate(-shootPower));
+                out2.setPower(volt.regulate(shootPower));
                 sleep(1400);
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(volt.regulate(-1.0));
             }
 
-            if (gamepad2.b) {
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
+            if (gamepad1.b) {
+                Double distance = extractor.getDistance();
+                double bbasePower = 0.36;
+                double bshootPower = (distance != null) ? getLaunchPower(distance) : bbasePower;
+
+                out1.setPower(volt.regulate(-bshootPower));
+                out2.setPower(volt.regulate(bshootPower));
             }
 
-            if (gamepad2.dpad_down) {
-                out1.setPower(volt.regulate(-0.3));
-                out2.setPower(volt.regulate(0.3));
+            if (gamepad1.dpad_down) {
+                Double distance = extractor.getDistance();
+                double dbasePower = 0.3;
+                double dshootPower = (distance != null) ? getLaunchPower(distance) : dbasePower;
+
+                out1.setPower(volt.regulate(-dshootPower));
+                out2.setPower(volt.regulate(dshootPower));
             }
 
-            if (gamepad2.x) {
+            if (gamepad1.x) {
                 activeintake.setPower(0);
                 out1.setPower(0);
                 out2.setPower(0);
                 ramp.setPower(0);
             }
 
-            if (gamepad2.right_trigger > 0.0) {
+            if (gamepad1.right_trigger > 0.0) {
                 ramp.setPower(volt.regulate(gamepad1.right_trigger));
             }
-            if (gamepad2.right_bumper) {
+            if (gamepad1.right_bumper) {
                 ramp.setPower(volt.regulate(-0.1));
             }
-            if (gamepad2.left_bumper) {
+            if (gamepad1.left_bumper) {
                 ramp.setPower(volt.regulate(-0.05));
             }
 
@@ -119,8 +134,18 @@ public class NeelNiranjantuffduoteleop extends LinearOpMode {
 
             // --- Telemetry ---
             telemetry.addData("Voltage", volt.getVoltage());
-//            telemetry.addData("Voltage", ());
             telemetry.update();
         }
     }
+    private double getLaunchPower(double distanceInches) {
+        // Example linear calibration — tweak these for your robot
+        double basePower = 0.36;   // minimum to reach nearby target
+        double slope = 0.0025;      // how much power increases per inch
+
+        double scaledPower = basePower + slope * distanceInches;
+
+        // clamp power between 0 and 0.8 to protect motors
+        return Math.min(Math.max(scaledPower, 0), 0.8);
+    }
+
 }

@@ -1,5 +1,6 @@
-package org.firstinspires.ftc.teamcode.Season.Pedro;
+package org.firstinspires.ftc.teamcode.Season.Pedro.oldauto;
 
+import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Midtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake;
@@ -12,16 +13,17 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
-
-@Autonomous(name = "ball9", group = "Examples")
-public class ball9 extends NextFTCOpMode {
+@Disabled
+@Autonomous(name = "fast9", group = "Examples")
+public class fast9 extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
-    public ball9() {
+    public fast9() {
         addComponents(
                 new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE),
                 BulkReadComponent.INSTANCE,
@@ -42,7 +44,7 @@ public class ball9 extends NextFTCOpMode {
     private final Pose prePickup1 = new Pose(82.226, 80, Math.toRadians(0));
     private final Pose prePickup2 = new Pose(80.765, 55, Math.toRadians(0));
     private final Pose prePickup3 = new Pose(85.565, 34.017, Math.toRadians(0));
-
+    private final Pose dropoff2 = new Pose(120, 55, Math.toRadians(0));
     private final Pose pickup1Pose = new Pose(125, 80, Math.toRadians(0));
     private final Pose pickup2Pose = new Pose(130, 55, Math.toRadians(0));
     private final Pose pickup3Pose = new Pose(125, 35, Math.toRadians(0));
@@ -50,6 +52,7 @@ public class ball9 extends NextFTCOpMode {
     private Path scorePreload;
     private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
     private PathChain grabPrePickup1, grabPrePickup2, grabPrePickup3;
+    private PathChain dropofftwo;
 
     public void buildPaths() {
         scorePreload = new Path(new BezierLine(startPose, scorePose));
@@ -78,10 +81,13 @@ public class ball9 extends NextFTCOpMode {
                 .addPath(new BezierLine(prePickup2, pickup2Pose))
                 .setLinearHeadingInterpolation(prePickup2.getHeading(), pickup2Pose.getHeading())
                 .build();
-
+        dropofftwo = follower.pathBuilder()
+                .addPath(new BezierLine(pickup2Pose,dropoff2))
+                .setLinearHeadingInterpolation(pickup2Pose.getHeading(),dropoff2.getHeading())
+                .build();
         scorePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup2Pose, scorePose))
-                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
+                .addPath(new BezierLine(dropoff2, scorePose))
+                .setLinearHeadingInterpolation(dropoff2.getHeading(), scorePose.getHeading())
                 .build();
 
         grabPrePickup3 = follower.pathBuilder()

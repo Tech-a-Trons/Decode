@@ -25,16 +25,15 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "TUFFfront9LL", group = "Examples")
-public class front9LL extends NextFTCOpMode {
+@Autonomous(name = "UnstableAutoLLTUFFFF", group = "Examples")
+public class UnstableAutoLL extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
     private DcMotor fl, fr, bl, br;
-    private ExperimentalDistanceLExtractor extractor;
-    private final double TARGET_DISTANCE = 52.0; // inches
-    private final double ANGLE_TOLERANCE = -5.75;
+    private ExperimentalDistanceLExtractor limelightExtractor;
+    private final double TARGET_DISTANCE = 53.65; // inches
+    private final double ANGLE_TOLERANCE = 4.2;
 
-
-    public front9LL() {
+    public UnstableAutoLL() {
         addComponents(
                 new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE),
                 BulkReadComponent.INSTANCE,
@@ -245,8 +244,38 @@ public class front9LL extends NextFTCOpMode {
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
 
+        limelightExtractor.update();
+
+        Double distance = limelightExtractor.getEuclideanDistance();
+        Double tx = limelightExtractor.getTx();
+
+        if (distance == null || tx == null) {
+            stopDrive();
+            telemetry.addLine("No AprilTag detected");
+            telemetry.update();
+        }
+
+        double distanceError = distance - TARGET_DISTANCE;
+        double angleError = tx;
+
+        double forwardPower = (-distanceError * 0.05) * 0.5;
+        double strafePower = (-angleError * 0.03) * 0.5;
+        double turnPower = (angleError * 0.02) * 0.5;
+
+        forwardPower = clamp(forwardPower, -0.6, 0.6);
+        strafePower = clamp(strafePower, -0.6, 0.6);
+        turnPower = clamp(turnPower, -0.6, 0.6);
+
+        if (Math.abs(distanceError) == 0 && Math.abs(angleError) <= ANGLE_TOLERANCE) {
+            stopDrive();
+            telemetry.addLine("Aligned with AprilTag");
+        } else {
+            moveMecanum(forwardPower, strafePower, turnPower);
+            limelightExtractor.update();
+        }
+
         Outtake.outtake.setPower(volt.regulate(0.28));
-        sleep(1500);
+        sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1.0));
         sleep(100);
@@ -258,7 +287,7 @@ public class front9LL extends NextFTCOpMode {
 
         intake.activeintake.setPower(volt.regulate(0));
         Outtake.outtake.setPower(volt.regulate(0.32));
-        sleep(1500);
+        sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1));
         sleep(50);
@@ -268,11 +297,11 @@ public class front9LL extends NextFTCOpMode {
         sleep(100);
 
         Outtake.outtake.setPower(volt.regulate(0.34));
-        sleep(500);
+        sleep(400);
 
         intake.activeintake.setPower(volt.regulate(1.0));
         midtake.newtake.setPower(volt.regulate(-1));
-        sleep(1000);
+        sleep(900);
 
         // Stop all
         Outtake.outtake.setPower(volt.regulate(0));
@@ -284,8 +313,39 @@ public class front9LL extends NextFTCOpMode {
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
 
+        limelightExtractor.update();
+
+        Double distance = limelightExtractor.getEuclideanDistance();
+        Double tx = limelightExtractor.getTx();
+
+        if (distance == null || tx == null) {
+            stopDrive();
+            telemetry.addLine("No AprilTag detected");
+            telemetry.update();
+        }
+
+        double distanceError = distance - TARGET_DISTANCE;
+        double angleError = tx;
+
+        double forwardPower = (-distanceError * 0.05) * 0.5;
+        double strafePower = (-angleError * 0.03) * 0.5;
+        double turnPower = (angleError * 0.02) * 0.5;
+
+        forwardPower = clamp(forwardPower, -0.6, 0.6);
+        strafePower = clamp(strafePower, -0.6, 0.6);
+        turnPower = clamp(turnPower, -0.6, 0.6);
+
+        if (Math.abs(distanceError) == 0 && Math.abs(angleError) <= ANGLE_TOLERANCE) {
+            stopDrive();
+            telemetry.addLine("Aligned with AprilTag");
+        } else {
+            moveMecanum(forwardPower, strafePower, turnPower);
+            limelightExtractor.update();
+        }
+
+
         outtake.outtake.setPower(volt.regulate(0.32));
-        sleep(1500);
+        sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1.0));
         sleep(100);
@@ -297,7 +357,7 @@ public class front9LL extends NextFTCOpMode {
 
         intake.activeintake.setPower(volt.regulate(0));
         Outtake.outtake.setPower(volt.regulate(0.32));
-        sleep(1500);
+        sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1));
         sleep(50);
@@ -307,11 +367,11 @@ public class front9LL extends NextFTCOpMode {
         sleep(100);
 
         Outtake.outtake.setPower(volt.regulate(0.34));
-        sleep(500);
+        sleep(400);
 
         intake.activeintake.setPower(volt.regulate(1.0));
         midtake.newtake.setPower(volt.regulate(-1));
-        sleep(1000);
+        sleep(900);
 
         // Stop all
         Outtake.outtake.setPower(volt.regulate(0));
@@ -328,6 +388,8 @@ public class front9LL extends NextFTCOpMode {
     public void onUpdate() {
         follower.update();
         autonomousPathUpdate();
+
+        limelightExtractor.update();
 
         telemetry.addData("Path State", pathState);
         telemetry.addData("X", follower.getPose().getX());
@@ -351,30 +413,51 @@ public class front9LL extends NextFTCOpMode {
         fl.setDirection(DcMotorSimple.Direction.REVERSE);
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        extractor = new ExperimentalDistanceLExtractor(hardwareMap);
-        extractor.setTelemetry(telemetry);
-        extractor.startReading();
+        limelightExtractor = new ExperimentalDistanceLExtractor(hardwareMap);
+        limelightExtractor.setTelemetry(telemetry);
+        limelightExtractor.startReading();
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
         buildPaths();
     }
 
-    @Override public void onWaitForStart() {}
+    @Override public void onWaitForStart() {
+
+    }
 
     @Override public void onStartButtonPressed() {
         opmodeTimer.resetTimer();
         setPathState(0);
-
-        extractor.update();
     }
 
     @Override public void onStop() {
         Intake.INSTANCE.activeintake.setPower(0);
         outtake.setPower(0);
         Midtake.newtake.setPower(0);
+    }
 
-        extractor.stopReading();
+    private void moveMecanum(double forward, double strafe, double turn) {
+        double flPower = forward + strafe + turn;
+        double frPower = forward - strafe - turn;
+        double blPower = forward - strafe + turn;
+        double brPower = forward + strafe - turn;
+
+        fl.setPower(flPower);
+        fr.setPower(frPower);
+        bl.setPower(blPower);
+        br.setPower(brPower);
+    }
+
+    private void stopDrive() {
+        fl.setPower(0);
+        fr.setPower(0);
+        bl.setPower(0);
+        br.setPower(0);
+    }
+
+    private double clamp(double val, double min, double max) {
+        return Math.max(min, Math.min(max, val));
     }
 
 }

@@ -6,7 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-@Disabled
+import com.qualcomm.robotcore.hardware.Servo;
+
 @TeleOp(name = "Dual Shooter", group = "Linear Opmode")
 public class Dual_Shooter extends LinearOpMode {
 
@@ -25,6 +26,7 @@ public class Dual_Shooter extends LinearOpMode {
         DcMotor br = hardwareMap.get(DcMotor.class, "br");
 
         //Servos
+        Servo S3 = hardwareMap.get(Servo.class,"Lever");
         CRServo S2 = hardwareMap.get(CRServo.class, "BootKicker2.2");
         CRServo S1 = hardwareMap.get(CRServo.class, "BootKicker2.1");
 
@@ -60,13 +62,21 @@ public class Dual_Shooter extends LinearOpMode {
             if (gamepad1.dpad_left) {
                 M1.setPower(0.4);
             }
+            if (gamepad1.dpad_up){
+                S3.setPosition(0.5);
+            }
+            if (gamepad1.dpad_down){
+                S3.setPosition(0);
+            }
             if (gamepad1.dpad_right) {
                 M2.setPower(0.4);
             }
             if (gamepad1.x) {
                 M3.setPower(-1);
             }
-
+            if (gamepad1.left_bumper){
+                S3.setPosition(1);
+            }
             if (gamepad1.b) {
 //                M4.setPower(-1);
                 S1.setPower(-1);
@@ -87,12 +97,12 @@ public class Dual_Shooter extends LinearOpMode {
             telemetry.addData("Outtake Power", outtakePower);
             telemetry.update();
 
-            if(gamepad1.dpad_up){
-                M1.setPower(-0.2);
-                M2.setPower(-0.2);
-                S2.setPower(0.3);
-                S1.setPower(0.3);
-            }
+//            if(gamepad1.dpad_up){
+//                M1.setPower(-0.2);
+//                M2.setPower(-0.2);
+//                S2.setPower(0.3);
+//                S1.setPower(0.3);
+//            }
         }
     }
 }

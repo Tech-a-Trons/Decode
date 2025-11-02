@@ -19,8 +19,8 @@ public class TsFastSolo extends LinearOpMode {
     DcMotor out2 = null;
     DcMotor ramp = null;
     DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
-    private final double STARGET_DISTANCE = 48.0; // inches
-    private final double SANGLE_TOLERANCE = 2.0;
+    private final double STARGET_DISTANCE = 56.0; // inches
+    private final double SANGLE_TOLERANCE = -5.7;
     private final double FTARGET_DISTANCE = 96.5;
     private final double FANGLE_TOLERANCE = 27.0;
 

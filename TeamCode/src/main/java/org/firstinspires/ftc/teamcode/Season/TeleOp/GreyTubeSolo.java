@@ -21,10 +21,10 @@ public class GreyTubeSolo extends LinearOpMode {
     DcMotor out2 = null;
     DcMotor ramp = null;
     DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
-    private final double STARGET_DISTANCE = 56.0; // inches
-    private final double SANGLE_TOLERANCE = -5.7;
-    private final double FTARGET_DISTANCE = 96.5;
-    private final double FANGLE_TOLERANCE = 27.0;
+    private final double STARGET_DISTANCE = 50.1; // inches
+    private final double SANGLE_TOLERANCE = 2.6;
+//    private final double FTARGET_DISTANCE = 96.5;
+//    private final double FANGLE_TOLERANCE = 27.0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -74,25 +74,25 @@ public class GreyTubeSolo extends LinearOpMode {
             }
 
             double sdistanceError = distance - STARGET_DISTANCE;
-            double fdistanceError = distance - FTARGET_DISTANCE;
+            //double fdistanceError = distance - FTARGET_DISTANCE;
             double sangleError = tx;
-            double fangleError = tx;
+            //double fangleError = tx;
 
             double sforwardPower = (-sdistanceError * 0.05) * 1;
             double shstrafePower = (-sangleError * 0.03) * 1;
             double sturnPower = (sangleError * 0.02) * 1;
 
-            double farforwardPower = (-fdistanceError * 0.05) * 1;
-            double fstrafePower = (-fangleError * 0.03) * 1;
-            double fturnPower = (fangleError * 0.02) * 1;
+//            double farforwardPower = (-fdistanceError * 0.05) * 1;
+//            double fstrafePower = (-fangleError * 0.03) * 1;
+//            double fturnPower = (fangleError * 0.02) * 1;
 
             sforwardPower = clamp(sforwardPower, -0.4, 0.4);
             shstrafePower = clamp(shstrafePower, -0.4, 0.4);
             sturnPower = clamp(sturnPower, -0.3, 0.3);
 
-            farforwardPower = clamp(farforwardPower, -0.4, 0.4);
-            fstrafePower = clamp(fstrafePower, -0.4, 0.4);
-            fturnPower = clamp(fturnPower, -0.3, 0.3);
+//            farforwardPower = clamp(farforwardPower, -0.4, 0.4);
+//            fstrafePower = clamp(fstrafePower, -0.4, 0.4);
+//            fturnPower = clamp(fturnPower, -0.3, 0.3);
 
 
             // --- Mechanism Controls ---
@@ -200,16 +200,16 @@ public class GreyTubeSolo extends LinearOpMode {
                 }
             }
 
-            if (gamepad1.dpad_right) {
-                if (Math.abs(fdistanceError) == 0 && Math.abs(fangleError) <= FANGLE_TOLERANCE) {
-                    frontLeftMotor.setPower(volt.regulate(0.0));
-                    frontRightMotor.setPower(volt.regulate(0.0));
-                    backLeftMotor.setPower(volt.regulate(0.0));
-                    backRightMotor.setPower(volt.regulate(0.0));
-                } else {
-                    moveMecanum(farforwardPower, fstrafePower, fturnPower);
-                }
-            }
+//            if (gamepad1.dpad_right) {
+//                if (Math.abs(fdistanceError) == 0 && Math.abs(fangleError) <= FANGLE_TOLERANCE) {
+//                    frontLeftMotor.setPower(volt.regulate(0.0));
+//                    frontRightMotor.setPower(volt.regulate(0.0));
+//                    backLeftMotor.setPower(volt.regulate(0.0));
+//                    backRightMotor.setPower(volt.regulate(0.0));
+//                } else {
+//                    moveMecanum(farforwardPower, fstrafePower, fturnPower);
+//                }
+//            }
 
             // --- Drivetrain Controls ---
             double y = -gamepad1.left_stick_y; // forward/back

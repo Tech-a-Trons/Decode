@@ -2,10 +2,11 @@ package org.firstinspires.ftc.teamcode.Personal.Pranav.ObjectDetection.ColorSens
 
 import android.graphics.Color;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
-
+@Disabled
 @TeleOp
 public class ColorSensorGreen extends LinearOpMode {
 

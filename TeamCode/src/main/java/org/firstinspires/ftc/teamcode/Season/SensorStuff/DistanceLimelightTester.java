@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Season.SensorStuff;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -8,6 +9,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.Stab
 
 //To test
 
+@Disabled
 @TeleOp
 public class DistanceLimelightTester extends LinearOpMode {
 

@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.Personal.Pranav.ObjectDetection.Limelight;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
 
+@Disabled
 @TeleOp (name = "P1Example")
 
 public class P1LimelightExample extends LinearOpMode {

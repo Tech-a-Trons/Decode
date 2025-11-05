@@ -21,6 +21,7 @@
 
 package org.firstinspires.ftc.teamcode.Personal.Pranav.ObjectDetection.Examples;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -34,6 +35,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.TimestampedOpenCvPipeline;
 
+@Disabled
 @TeleOp
 public class TimestampedPipelineExample extends LinearOpMode
 {

@@ -21,6 +21,7 @@
 
 package org.firstinspires.ftc.teamcode.Personal.Pranav.ObjectDetection.Examples;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -39,6 +40,8 @@ import org.openftc.easyopencv.OpenCvTrackerApiPipeline;
  * In this sample, we demonstrate how to use the {@link OpenCvTrackerApiPipeline()}
  * class to run multiple {@link OpenCvTracker} instances on each frame from the camera.
  */
+
+@Disabled
 @TeleOp
 public class TrackerApiExample extends LinearOpMode
 {

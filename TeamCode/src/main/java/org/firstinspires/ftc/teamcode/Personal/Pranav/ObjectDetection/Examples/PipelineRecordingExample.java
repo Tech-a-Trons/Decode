@@ -21,6 +21,7 @@
 
 package org.firstinspires.ftc.teamcode.Personal.Pranav.ObjectDetection.Examples;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -40,6 +41,8 @@ import org.openftc.easyopencv.PipelineRecordingParameters;
  * when the viewport is tapped. The statistics box will turn red to indicate that
  * recording is active.
  */
+
+@Disabled
 @TeleOp
 public class PipelineRecordingExample extends LinearOpMode
 {

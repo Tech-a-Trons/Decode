@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.Stab
 
 //Niranjan's code, rotation + distance
 
-//@Disabled
+@Disabled
 @TeleOp(name = "AutoAlignToAprilTag", group = "Subsystems")
 public class AutoAlignToAprilTag extends LinearOpMode {
 

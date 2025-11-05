@@ -258,7 +258,7 @@ public class greytubefront9 extends NextFTCOpMode {
 
 //        Outtake.outtake.setPower(volt.regulate(0.1));
 //        midtake.newtake.setPower(volt.regulate(0));
-        sleep(100);
+        sleep(200);
 
         Outtake.outtake.setPower(volt.regulate(0.48));
         sleep(100);
@@ -297,7 +297,7 @@ public class greytubefront9 extends NextFTCOpMode {
 
 //        Outtake.outtake.setPower(volt.regulate(0.1));
 //        midtake.newtake.setPower(volt.regulate(0));
-        sleep(100);
+        sleep(200);
         Outtake.outtake.setPower(volt.regulate(0.48));
         sleep(100);
 

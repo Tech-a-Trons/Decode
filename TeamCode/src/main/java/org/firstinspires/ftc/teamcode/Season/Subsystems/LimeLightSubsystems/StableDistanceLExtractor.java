@@ -38,7 +38,8 @@ public class StableDistanceLExtractor {
 
     private Thread pollingThread;
     private volatile boolean running = false;
-    private final double LIMELIGHT_HEIGHT = 11.0; // inches
+    //private final double LIMELIGHT_HEIGHT = 11.0; // inches originl
+    private final double LIMELIGHT_HEIGHT = 4.9;
     private final Map<Integer, Double> tagHeights = Map.of(
             20, 30.0,   // Goal tag height in inches
             21, 19.5,    // Obelisk tag height
@@ -46,7 +47,8 @@ public class StableDistanceLExtractor {
             23,19.5,
             24,30.0
     );
-    private final double LIMELIGHT_ANGLE = 25.85;  // degrees
+    //private final double LIMELIGHT_ANGLE = 25.85;  // ORIGINAL degrees
+    private final double LIMELIGHT_ANGLE = 45;
 
     public StableDistanceLExtractor(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");

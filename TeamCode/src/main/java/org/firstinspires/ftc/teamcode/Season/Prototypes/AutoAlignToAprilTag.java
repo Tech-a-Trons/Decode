@@ -10,14 +10,14 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.Stab
 
 //Niranjan's code, rotation + distance
 
-@Disabled
+//@Disabled
 @TeleOp(name = "AutoAlignToAprilTag", group = "Subsystems")
 public class AutoAlignToAprilTag extends LinearOpMode {
 
     private DcMotor fl, fr, bl, br;
     private StableDistanceLExtractor limelightExtractor;
 
-    private final double TARGET_DISTANCE = 10.0; // inches
+    private final double TARGET_DISTANCE = 50.0; // inches
     private final double DISTANCE_TOLERANCE = 1.0;
     private final double ANGLE_TOLERANCE = 2.0;
 
@@ -65,7 +65,8 @@ public class AutoAlignToAprilTag extends LinearOpMode {
                 stopDrive();
                 telemetry.addLine("Aligned with AprilTag");
             } else {
-                moveMecanum(forwardPower, strafePower, turnPower);
+                // uncomment
+                //moveMecanum(forwardPower, strafePower, turnPower);
             }
 
             telemetry.addData("Distance", distance);

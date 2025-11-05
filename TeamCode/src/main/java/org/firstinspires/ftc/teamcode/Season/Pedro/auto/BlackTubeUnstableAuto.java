@@ -21,10 +21,10 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "UnstableAuto", group = "Examples")
-public class UnstableAuto extends NextFTCOpMode {
+@Autonomous(name = "BlackTubeUnstableAuto", group = "Examples")
+public class BlackTubeUnstableAuto extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
-    public UnstableAuto() {
+    public BlackTubeUnstableAuto() {
         addComponents(
                 new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE),
                 BulkReadComponent.INSTANCE,
@@ -235,7 +235,7 @@ public class UnstableAuto extends NextFTCOpMode {
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
 
-        Outtake.outtake.setPower(volt.regulate(0.28));
+        Outtake.outtake.setPower(volt.regulate(0.36));
         sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1.0));
@@ -247,7 +247,7 @@ public class UnstableAuto extends NextFTCOpMode {
         sleep(300);
 
         intake.activeintake.setPower(volt.regulate(0));
-        Outtake.outtake.setPower(volt.regulate(0.32));
+        Outtake.outtake.setPower(volt.regulate(0.36));
         sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1));
@@ -257,7 +257,7 @@ public class UnstableAuto extends NextFTCOpMode {
         midtake.newtake.setPower(volt.regulate(0));
         sleep(100);
 
-        Outtake.outtake.setPower(volt.regulate(0.34));
+        Outtake.outtake.setPower(volt.regulate(0.36));
         sleep(400);
 
         intake.activeintake.setPower(volt.regulate(1.0));
@@ -274,7 +274,7 @@ public class UnstableAuto extends NextFTCOpMode {
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
 
-        outtake.outtake.setPower(volt.regulate(0.32));
+        outtake.outtake.setPower(volt.regulate(0.36));
         sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1.0));
@@ -286,7 +286,7 @@ public class UnstableAuto extends NextFTCOpMode {
         sleep(300);
 
         intake.activeintake.setPower(volt.regulate(0));
-        Outtake.outtake.setPower(volt.regulate(0.32));
+        Outtake.outtake.setPower(volt.regulate(0.36));
         sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1));
@@ -296,7 +296,7 @@ public class UnstableAuto extends NextFTCOpMode {
         midtake.newtake.setPower(volt.regulate(0));
         sleep(100);
 
-        Outtake.outtake.setPower(volt.regulate(0.34));
+        Outtake.outtake.setPower(volt.regulate(0.36));
         sleep(400);
 
         intake.activeintake.setPower(volt.regulate(1.0));

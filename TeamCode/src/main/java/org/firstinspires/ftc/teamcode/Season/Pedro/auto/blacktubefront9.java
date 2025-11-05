@@ -21,10 +21,10 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "front9", group = "Examples")
-public class front9 extends NextFTCOpMode {
+@Autonomous(name = "blacktubefront9", group = "Examples")
+public class blacktubefront9 extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
-    public front9() {
+    public blacktubefront9() {
         addComponents(
                 new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE),
                 BulkReadComponent.INSTANCE,

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp;
 
+import static org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake.outtake;
 import static java.lang.Math.clamp;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -8,10 +9,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.ExperimentalDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
-@TeleOp(name = "TsFastSoloPls")
-public class TsFastSolo extends LinearOpMode {
+@TeleOp(name = "GreyTubeSolo")
+public class GreyTubeSolo extends LinearOpMode {
 
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
@@ -100,33 +102,46 @@ public class TsFastSolo extends LinearOpMode {
             }
 
             if (gamepad1.dpad_left) {
+                out1.setPower(volt.regulate(-0.43));
+                out2.setPower(volt.regulate(0.43));
+                sleep(1000);
+
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(100);
+
+//        Outtake.outtake.setPower(volt.regulate(0.1));
+                activeintake.setPower(volt.regulate(1.0));
+                ramp.setPower(volt.regulate(0));
+                sleep(100);
+
+                activeintake.setPower(volt.regulate(0));
+                out1.setPower(volt.regulate(-0.43));
+                out2.setPower(volt.regulate(0.43));
+                sleep(100);
+
+                ramp.setPower(volt.regulate(-1));
+//        sleep(50);
+
+//        Outtake.outtake.setPower(volt.regulate(0.1));
+//        midtake.newtake.setPower(volt.regulate(0));
+                sleep(100);
+                out1.setPower(volt.regulate(-0.48));
+                out2.setPower(volt.regulate(0.48));
+                sleep(100);
+                activeintake.setPower(volt.regulate(1.0));
+               ramp.setPower(volt.regulate(-1));
+                sleep(1000);
+
+                // Stop all
                 out1.setPower(volt.regulate(0));
                 out2.setPower(volt.regulate(0));
-                activeintake.setPower(volt.regulate(1.0));
-                ramp.setPower(volt.regulate(0));
-                sleep(300);
+               ramp.setPower(volt.regulate(0));
                 activeintake.setPower(volt.regulate(0));
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
-                sleep(800);
-                ramp.setPower(volt.regulate(-1.0));
-                sleep(50);
-                out1.setPower(volt.regulate(-0.1));
-                out2.setPower(volt.regulate(0.1));
-                ramp.setPower(volt.regulate(0));
-                sleep(100);
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
-                sleep(500);
-                activeintake.setPower(volt.regulate(1.0));
-                ramp.setPower(volt.regulate(-1.0));
             }
 
             if (gamepad1.b) {
-                out1.setPower(volt.regulate(-0.32));
-                out2.setPower(volt.regulate(0.32));
+                out1.setPower(volt.regulate(-0.36));
+                out2.setPower(volt.regulate(0.36));
             }
 
             if (gamepad1.dpad_down) {

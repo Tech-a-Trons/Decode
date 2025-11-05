@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.Stab
 
 //To test
 
-@TeleOp (name = "ExperimentalDistanceLExtractor")
+@TeleOp (name = "ExperimentalDistanceLTester")
 public class ExperimentDistanceLTester extends LinearOpMode {
 
     public Limelight3A limelight;

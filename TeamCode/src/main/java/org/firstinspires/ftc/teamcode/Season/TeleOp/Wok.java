@@ -12,8 +12,8 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.Expe
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
-@TeleOp(name = "GreyTubeSolo")
-public class GreyTubeSolo extends LinearOpMode {
+@TeleOp(name = "Wok")
+public class Wok extends LinearOpMode {
 
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
@@ -129,13 +129,13 @@ public class GreyTubeSolo extends LinearOpMode {
                 out2.setPower(volt.regulate(0.48));
                 sleep(100);
                 activeintake.setPower(volt.regulate(1.0));
-               ramp.setPower(volt.regulate(-1));
+                ramp.setPower(volt.regulate(-1));
                 sleep(1000);
 
                 // Stop all
                 out1.setPower(volt.regulate(0));
                 out2.setPower(volt.regulate(0));
-               ramp.setPower(volt.regulate(0));
+                ramp.setPower(volt.regulate(0));
                 activeintake.setPower(volt.regulate(0));
             }
 
@@ -195,42 +195,6 @@ public class GreyTubeSolo extends LinearOpMode {
                     frontRightMotor.setPower(volt.regulate(0.0));
                     backLeftMotor.setPower(volt.regulate(0.0));
                     backRightMotor.setPower(volt.regulate(0.0));
-                    sleep(100);
-                    out1.setPower(volt.regulate(-0.43));
-                    out2.setPower(volt.regulate(0.43));
-                    sleep(1000);
-
-                    ramp.setPower(volt.regulate(-1.0));
-                    sleep(100);
-
-//        Outtake.outtake.setPower(volt.regulate(0.1));
-                    activeintake.setPower(volt.regulate(1.0));
-                    ramp.setPower(volt.regulate(0));
-                    sleep(100);
-
-                    activeintake.setPower(volt.regulate(0));
-                    out1.setPower(volt.regulate(-0.43));
-                    out2.setPower(volt.regulate(0.43));
-                    sleep(100);
-
-                    ramp.setPower(volt.regulate(-1));
-//        sleep(50);
-
-//        Outtake.outtake.setPower(volt.regulate(0.1));
-//        midtake.newtake.setPower(volt.regulate(0));
-                    sleep(100);
-                    out1.setPower(volt.regulate(-0.48));
-                    out2.setPower(volt.regulate(0.48));
-                    sleep(100);
-                    activeintake.setPower(volt.regulate(1.0));
-                    ramp.setPower(volt.regulate(-1));
-                    sleep(1000);
-
-                    // Stop all
-                    out1.setPower(volt.regulate(0));
-                    out2.setPower(volt.regulate(0));
-                    ramp.setPower(volt.regulate(0));
-                    activeintake.setPower(volt.regulate(0));
 
                 } else {
                     moveMecanum(sforwardPower, shstrafePower, sturnPower);

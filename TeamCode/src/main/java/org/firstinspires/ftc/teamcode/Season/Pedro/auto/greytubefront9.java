@@ -308,7 +308,7 @@ public class greytubefront9 extends NextFTCOpMode {
         // Stop all
         Outtake.outtake.setPower(volt.regulate(0));
         midtake.newtake.setPower(volt.regulate(0));
-        intake.activeintake.setPower(volt.regulate(0));
+    intake.activeintake.setPower(volt.regulate(0));
     }
 
     public void setPathState(int pState) {

@@ -15,17 +15,16 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
-@Disabled
-@Autonomous(name = "greytubefront9", group = "Examples")
-public class greytubefront9 extends NextFTCOpMode {
+
+@Autonomous(name = "GreyTube12", group = "Examples")
+public class GreyTube12 extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
-    public greytubefront9() {
+    public GreyTube12() {
         addComponents(
                 new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE),
                 BulkReadComponent.INSTANCE,
@@ -168,37 +167,37 @@ public class greytubefront9 extends NextFTCOpMode {
                 }
                 break;
 
-//            case 7:
-//                if (!follower.isBusy()) {
-//                    secondshootThreeBalls();
-//                    follower.followPath(grabPrePickup3, true);
-//                    Intake.INSTANCE.activeintake.setPower(1);
-//                    setPathState(8);
-//                }
-//                break;
-//
-//            case 8:
-//                if (!follower.isBusy()) {
-//                    follower.followPath(grabPickup3, true);
-//                    setPathState(9);
-//                }
-//                break;
-//
-//            case 9:
-//                if (!follower.isBusy()) {
-//                    Intake.INSTANCE.activeintake.setPower(0);
-//                    follower.followPath(scorePickup3, true);
-////                    shootThreeBalls();
-//                    setPathState(10);
-//                }
-//                break;
-//
-//            case 10:
-//                if (!follower.isBusy()) {
-//                    secondshootThreeBalls();
-//                    setPathState(-1);
-//                }
-//                break;
+            case 7:
+                if (!follower.isBusy()) {
+                    secondshootThreeBalls();
+                    follower.followPath(grabPrePickup3, true);
+                    Intake.INSTANCE.activeintake.setPower(1);
+                    setPathState(8);
+                }
+                break;
+
+            case 8:
+                if (!follower.isBusy()) {
+                    follower.followPath(grabPickup3, true);
+                    setPathState(9);
+                }
+                break;
+
+            case 9:
+                if (!follower.isBusy()) {
+                    Intake.INSTANCE.activeintake.setPower(0);
+                    follower.followPath(scorePickup3, true);
+//                    shootThreeBalls();
+                    setPathState(10);
+                }
+                break;
+
+            case 10:
+                if (!follower.isBusy()) {
+                    secondshootThreeBalls();
+                    setPathState(-1);
+                }
+                break;
         }
     }
 
@@ -309,7 +308,7 @@ public class greytubefront9 extends NextFTCOpMode {
         // Stop all
         Outtake.outtake.setPower(volt.regulate(0));
         midtake.newtake.setPower(volt.regulate(0));
-    intake.activeintake.setPower(volt.regulate(0));
+        intake.activeintake.setPower(volt.regulate(0));
     }
 
     public void setPathState(int pState) {

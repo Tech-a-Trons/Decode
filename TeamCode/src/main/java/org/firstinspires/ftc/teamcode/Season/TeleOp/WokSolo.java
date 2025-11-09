@@ -12,8 +12,8 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.Expe
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
-@TeleOp(name = "Wok")
-public class Wok extends LinearOpMode {
+@TeleOp(name = "WokSolo")
+public class WokSolo extends LinearOpMode {
 
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
@@ -100,13 +100,13 @@ public class Wok extends LinearOpMode {
 //                activeintake.setPower(volt.regulate(1.0));
 //                ramp.setPower(0.3);
 //            }
-            if (gamepad2.a) {
+            if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(0.3);
             }
 
 
-            if (gamepad2.dpad_left) {out1.setPower(volt.regulate(-0.43));
+            if (gamepad1.dpad_left) {out1.setPower(volt.regulate(-0.43));
                 out2.setPower(volt.regulate(0.43));
                 sleep(1000);
 
@@ -143,7 +143,7 @@ public class Wok extends LinearOpMode {
                 activeintake.setPower(volt.regulate(0));
             }
 
-            if (gamepad2.b) {
+            if (gamepad1.b) {
                 out1.setPower(volt.regulate(0.46));
                 out2.setPower(volt.regulate(-0.46));
             }
@@ -184,7 +184,7 @@ public class Wok extends LinearOpMode {
                 ramp.setPower(volt.regulate(-1.0));
 
             }
-            if (gamepad2.x) {
+            if (gamepad1.x) {
                 activeintake.setPower(0);
                 out1.setPower(0);
                 out2.setPower(0);

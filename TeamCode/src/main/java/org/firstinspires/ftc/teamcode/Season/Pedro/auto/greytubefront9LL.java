@@ -29,7 +29,7 @@ public class greytubefront9LL extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
     private DcMotor fl, fr, bl, br;
     private ExperimentalDistanceLExtractor limelightExtractor;
-    private final double TARGET_DISTANCE = 53.01; // inches
+    private final double TARGET_DISTANCE = 53.01; // inches - second pos 40.24 - third pos 64.54
     private final double ANGLE_TOLERANCE = 1.57;
     public greytubefront9LL() {
         addComponents(

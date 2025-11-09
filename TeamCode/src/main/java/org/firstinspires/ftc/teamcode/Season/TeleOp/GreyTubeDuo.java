@@ -12,8 +12,8 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.Expe
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
-@TeleOp(name = "GreyTubeSolo")
-public class GreyTubeSolo extends LinearOpMode {
+@TeleOp(name = "GreyTubeDuo")
+public class GreyTubeDuo extends LinearOpMode {
 
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
@@ -96,12 +96,12 @@ public class GreyTubeSolo extends LinearOpMode {
 
 
             // --- Mechanism Controls ---
-            if (gamepad1.a) {
+            if (gamepad2.a) {
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(0.3);
             }
 
-            if (gamepad1.dpad_left) {
+            if (gamepad2.dpad_left) {
                 out1.setPower(volt.regulate(-0.43));
                 out2.setPower(volt.regulate(0.43));
                 sleep(1000);
@@ -129,26 +129,26 @@ public class GreyTubeSolo extends LinearOpMode {
                 out2.setPower(volt.regulate(0.48));
                 sleep(100);
                 activeintake.setPower(volt.regulate(1.0));
-               ramp.setPower(volt.regulate(-1));
+                ramp.setPower(volt.regulate(-1));
                 sleep(1000);
 
                 // Stop all
                 out1.setPower(volt.regulate(0));
                 out2.setPower(volt.regulate(0));
-               ramp.setPower(volt.regulate(0));
+                ramp.setPower(volt.regulate(0));
                 activeintake.setPower(volt.regulate(0));
             }
 
-            if (gamepad1.b) {
+            if (gamepad2.b) {
                 out1.setPower(volt.regulate(-0.36));
                 out2.setPower(volt.regulate(0.36));
             }
 
-            if (gamepad1.dpad_down) {
+            if (gamepad2.dpad_down) {
                 out1.setPower(volt.regulate(0.3));
                 out2.setPower(volt.regulate(-0.3));
             }
-            if(gamepad1.left_bumper){
+            if(gamepad2.left_bumper){
                 out1.setPower(volt.regulate(-0.45));
                 out2.setPower(volt.regulate(0.45));
                 sleep(800);
@@ -176,62 +176,25 @@ public class GreyTubeSolo extends LinearOpMode {
                 ramp.setPower(volt.regulate(-1.0));
 
             }
-            if (gamepad1.x) {
+            if (gamepad2.x) {
                 activeintake.setPower(0);
                 out1.setPower(0);
                 out2.setPower(0);
                 ramp.setPower(0);
             }
 
-            if (gamepad1.right_trigger > 0.0) {
+            if (gamepad2.right_trigger > 0.0) {
                 ramp.setPower(volt.regulate(gamepad1.right_trigger));
             }
 
             //Niranjan auto align code is here! - Pranav 10/27
 
-            if (gamepad1.y) {
+            if (gamepad2.y) {
                 if (Math.abs(sdistanceError) == 0 && Math.abs(sangleError) <= SANGLE_TOLERANCE) {
                     frontLeftMotor.setPower(volt.regulate(0.0));
                     frontRightMotor.setPower(volt.regulate(0.0));
                     backLeftMotor.setPower(volt.regulate(0.0));
                     backRightMotor.setPower(volt.regulate(0.0));
-                    sleep(100);
-                    out1.setPower(volt.regulate(-0.43));
-                    out2.setPower(volt.regulate(0.43));
-                    sleep(1000);
-
-                    ramp.setPower(volt.regulate(-1.0));
-                    sleep(100);
-
-//        Outtake.outtake.setPower(volt.regulate(0.1));
-                    activeintake.setPower(volt.regulate(1.0));
-                    ramp.setPower(volt.regulate(0));
-                    sleep(100);
-
-                    activeintake.setPower(volt.regulate(0));
-                    out1.setPower(volt.regulate(-0.43));
-                    out2.setPower(volt.regulate(0.43));
-                    sleep(100);
-
-                    ramp.setPower(volt.regulate(-1));
-//        sleep(50);
-
-//        Outtake.outtake.setPower(volt.regulate(0.1));
-//        midtake.newtake.setPower(volt.regulate(0));
-                    sleep(100);
-                    out1.setPower(volt.regulate(-0.48));
-                    out2.setPower(volt.regulate(0.48));
-                    sleep(100);
-                    activeintake.setPower(volt.regulate(1.0));
-                    ramp.setPower(volt.regulate(-1));
-                    sleep(1000);
-
-                    // Stop all
-                    out1.setPower(volt.regulate(0));
-                    out2.setPower(volt.regulate(0));
-                    ramp.setPower(volt.regulate(0));
-                    activeintake.setPower(volt.regulate(0));
-
                 } else {
                     moveMecanum(sforwardPower, shstrafePower, sturnPower);
                 }

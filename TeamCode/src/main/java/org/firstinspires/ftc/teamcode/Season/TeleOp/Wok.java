@@ -21,8 +21,8 @@ public class Wok extends LinearOpMode {
     DcMotor out2 = null;
     DcMotor ramp = null;
     DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
-    private final double STARGET_DISTANCE = 45.1; // inches
-    private final double SANGLE_TOLERANCE = 2.6;
+    private final double STARGET_DISTANCE = 53.01; // inches
+    private final double SANGLE_TOLERANCE = 1.57;
 //    private final double FTARGET_DISTANCE = 96.5;
 //    private final double FANGLE_TOLERANCE = 27.0;
 
@@ -96,17 +96,13 @@ public class Wok extends LinearOpMode {
 
 
             // --- Mechanism Controls ---
-//            if (gamepad2.a) {
-//                activeintake.setPower(volt.regulate(1.0));
-//                ramp.setPower(0.3);
-//            }
-            if (gamepad2.a) {
+            if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(0.3);
             }
 
-
-            if (gamepad2.dpad_left) {out1.setPower(volt.regulate(-0.43));
+            if (gamepad1.dpad_left) {
+                out1.setPower(volt.regulate(-0.43));
                 out2.setPower(volt.regulate(0.43));
                 sleep(1000);
 
@@ -129,12 +125,12 @@ public class Wok extends LinearOpMode {
 //        Outtake.outtake.setPower(volt.regulate(0.1));
 //        midtake.newtake.setPower(volt.regulate(0));
                 sleep(100);
-                out1.setPower(volt.regulate(-0.46));
-                out2.setPower(volt.regulate(0.46));
+                out1.setPower(volt.regulate(-0.48));
+                out2.setPower(volt.regulate(0.48));
                 sleep(100);
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(volt.regulate(-1));
-                sleep(1500);
+                sleep(1000);
 
                 // Stop all
                 out1.setPower(volt.regulate(0));
@@ -143,13 +139,9 @@ public class Wok extends LinearOpMode {
                 activeintake.setPower(volt.regulate(0));
             }
 
-            if (gamepad2.b) {
-                out1.setPower(volt.regulate(0.46));
-                out2.setPower(volt.regulate(-0.46));
-            }
             if (gamepad1.b) {
-                out1.setPower(volt.regulate(0.46));
-                out2.setPower(volt.regulate(-0.46));
+                out1.setPower(volt.regulate(-0.36));
+                out2.setPower(volt.regulate(0.36));
             }
 
             if (gamepad1.dpad_down) {
@@ -184,7 +176,7 @@ public class Wok extends LinearOpMode {
                 ramp.setPower(volt.regulate(-1.0));
 
             }
-            if (gamepad2.x) {
+            if (gamepad1.x) {
                 activeintake.setPower(0);
                 out1.setPower(0);
                 out2.setPower(0);
@@ -197,7 +189,7 @@ public class Wok extends LinearOpMode {
 
             //Niranjan auto align code is here! - Pranav 10/27
 
-            if (gamepad2.y) {
+            if (gamepad1.y) {
                 if (Math.abs(sdistanceError) == 0 && Math.abs(sangleError) <= SANGLE_TOLERANCE) {
                     frontLeftMotor.setPower(volt.regulate(0.0));
                     frontRightMotor.setPower(volt.regulate(0.0));

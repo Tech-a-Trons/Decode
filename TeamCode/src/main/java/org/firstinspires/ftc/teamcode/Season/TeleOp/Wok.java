@@ -21,8 +21,8 @@ public class Wok extends LinearOpMode {
     DcMotor out2 = null;
     DcMotor ramp = null;
     DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
-    private final double STARGET_DISTANCE = 53.01; // inches
-    private final double SANGLE_TOLERANCE = 1.57;
+    private final double STARGET_DISTANCE = 50.1; // inches
+    private final double SANGLE_TOLERANCE = 2.6;
 //    private final double FTARGET_DISTANCE = 96.5;
 //    private final double FANGLE_TOLERANCE = 27.0;
 

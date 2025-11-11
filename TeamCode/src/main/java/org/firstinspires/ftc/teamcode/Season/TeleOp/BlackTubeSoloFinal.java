@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Season.TeleOp;
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake.outtake;
 import static java.lang.Math.clamp;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,9 +12,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.ExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
-
-@TeleOp(name = "Nindroid")
-public class Nindroid extends LinearOpMode {
+@Disabled
+@TeleOp(name = "BlackTubeSoloFinal")
+public class BlackTubeSoloFinal extends LinearOpMode {
 
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
@@ -21,8 +22,8 @@ public class Nindroid extends LinearOpMode {
     DcMotor out2 = null;
     DcMotor ramp = null;
     DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
-    private final double STARGET_DISTANCE = 45.1; // inches
-    private final double SANGLE_TOLERANCE = 2.6;
+    private final double STARGET_DISTANCE = 40; // inches
+    private final double SANGLE_TOLERANCE = 1.57;
 //    private final double FTARGET_DISTANCE = 96.5;
 //    private final double FANGLE_TOLERANCE = 27.0;
 
@@ -96,18 +97,14 @@ public class Nindroid extends LinearOpMode {
 
 
             // --- Mechanism Controls ---
-//            if (gamepad2.a) {
-//                activeintake.setPower(volt.regulate(1.0));
-//                ramp.setPower(0.3);
-//            }
             if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
-                ramp.setPower(0.3);
+                ramp.setPower(0.5);
             }
 
-
-            if (gamepad1.dpad_left) {out1.setPower(volt.regulate(-0.43));
-                out2.setPower(volt.regulate(0.43));
+            if (gamepad1.dpad_left) {
+                out1.setPower(volt.regulate(-0.37));
+                out2.setPower(volt.regulate(0.37));
                 sleep(1000);
 
                 ramp.setPower(volt.regulate(-1.0));
@@ -119,8 +116,8 @@ public class Nindroid extends LinearOpMode {
                 sleep(100);
 
                 activeintake.setPower(volt.regulate(0));
-                out1.setPower(volt.regulate(-0.43));
-                out2.setPower(volt.regulate(0.43));
+                out1.setPower(volt.regulate(-0.34));
+                out2.setPower(volt.regulate(0.34));
                 sleep(100);
 
                 ramp.setPower(volt.regulate(-1));
@@ -129,8 +126,8 @@ public class Nindroid extends LinearOpMode {
 //        Outtake.outtake.setPower(volt.regulate(0.1));
 //        midtake.newtake.setPower(volt.regulate(0));
                 sleep(100);
-                out1.setPower(volt.regulate(-0.46));
-                out2.setPower(volt.regulate(0.46));
+                out1.setPower(volt.regulate(-0.34));
+                out2.setPower(volt.regulate(0.34));
                 sleep(100);
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(volt.regulate(-1));
@@ -143,22 +140,18 @@ public class Nindroid extends LinearOpMode {
                 activeintake.setPower(volt.regulate(0));
             }
 
-            if (gamepad1.b) {
-                out1.setPower(volt.regulate(0.46));
-                out2.setPower(volt.regulate(-0.46));
-            }
-            if (gamepad1.b) {
-                out1.setPower(volt.regulate(0.46));
-                out2.setPower(volt.regulate(-0.46));
+            if (gamepad2.b) {
+                out1.setPower(volt.regulate(-0.36));
+                out2.setPower(volt.regulate(0.36));
             }
 
-            if (gamepad1.dpad_down) {
+            if (gamepad2.dpad_down) {
                 out1.setPower(volt.regulate(0.3));
                 out2.setPower(volt.regulate(-0.3));
             }
-            if(gamepad1.left_bumper){
-                out1.setPower(volt.regulate(-0.45));
-                out2.setPower(volt.regulate(0.45));
+            if(gamepad2.left_bumper){
+                out1.setPower(volt.regulate(-0.3));
+                out2.setPower(volt.regulate(0.3));
                 sleep(800);
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(100);
@@ -168,8 +161,8 @@ public class Nindroid extends LinearOpMode {
                 ramp.setPower(volt.regulate(0));
                 sleep(300);
                 activeintake.setPower(volt.regulate(0));
-                out1.setPower(volt.regulate(-0.45));
-                out2.setPower(volt.regulate(0.45));
+                out1.setPower(volt.regulate(-0.3));
+                out2.setPower(volt.regulate(0.3));
                 sleep(800);
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(50);
@@ -177,8 +170,8 @@ public class Nindroid extends LinearOpMode {
                 out2.setPower(volt.regulate(0.1));
                 ramp.setPower(volt.regulate(0));
                 sleep(100);
-                out1.setPower(volt.regulate(-0.45));
-                out2.setPower(volt.regulate(0.45));
+                out1.setPower(volt.regulate(-0.3));
+                out2.setPower(volt.regulate(0.3));
                 sleep(500);
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(volt.regulate(-1.0));
@@ -191,13 +184,13 @@ public class Nindroid extends LinearOpMode {
                 ramp.setPower(0);
             }
 
-            if (gamepad1.right_trigger > 0.0) {
+            if (gamepad2.right_trigger > 0.0) {
                 ramp.setPower(volt.regulate(gamepad1.right_trigger));
             }
 
             //Niranjan auto align code is here! - Pranav 10/27
 
-            if (gamepad2.y) {
+            if (gamepad1.y) {
                 if (Math.abs(sdistanceError) == 0 && Math.abs(sangleError) <= SANGLE_TOLERANCE) {
                     frontLeftMotor.setPower(volt.regulate(0.0));
                     frontRightMotor.setPower(volt.regulate(0.0));

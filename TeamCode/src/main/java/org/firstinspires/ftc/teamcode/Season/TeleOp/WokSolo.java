@@ -187,7 +187,7 @@ public class WokSolo extends LinearOpMode {
                 ramp.setPower(volt.regulate(gamepad1.right_trigger));
             }
 
-            //Niranjan auto align code is here! - Pranav 10/27
+            //Auto Align Code
 
             if (gamepad1.y) {
                 if (Math.abs(sdistanceError) == 0 && Math.abs(sangleError) <= SANGLE_TOLERANCE) {

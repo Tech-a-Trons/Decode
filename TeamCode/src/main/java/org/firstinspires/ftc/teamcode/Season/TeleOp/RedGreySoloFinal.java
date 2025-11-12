@@ -1,8 +1,7 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp.oldteleop;
+package org.firstinspires.ftc.teamcode.Season.TeleOp;
 
 import static java.lang.Math.clamp;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,9 +10,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
-@TeleOp(name = "Wok")
-@Disabled
-public class Wok extends LinearOpMode {
+@TeleOp(name = "RedGreySoloFinal")
+public class RedGreySoloFinal extends LinearOpMode {
 
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
@@ -21,8 +19,8 @@ public class Wok extends LinearOpMode {
     DcMotor out2 = null;
     DcMotor ramp = null;
     DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
-    private final double STARGET_DISTANCE = 50.1; // inches
-    private final double SANGLE_TOLERANCE = 2.6;
+    private final double STARGET_DISTANCE = 40.1; // inches
+    private final double SANGLE_TOLERANCE = 1.57;
 //    private final double FTARGET_DISTANCE = 96.5;
 //    private final double FANGLE_TOLERANCE = 27.0;
 
@@ -102,8 +100,8 @@ public class Wok extends LinearOpMode {
             }
 
             if (gamepad1.dpad_left) {
-                out1.setPower(volt.regulate(-0.43));
-                out2.setPower(volt.regulate(0.43));
+                out1.setPower(volt.regulate(-0.41));
+                out2.setPower(volt.regulate(0.41));
                 sleep(1000);
 
                 ramp.setPower(volt.regulate(-1.0));
@@ -115,8 +113,8 @@ public class Wok extends LinearOpMode {
                 sleep(100);
 
                 activeintake.setPower(volt.regulate(0));
-                out1.setPower(volt.regulate(-0.43));
-                out2.setPower(volt.regulate(0.43));
+                out1.setPower(volt.regulate(-0.41));
+                out2.setPower(volt.regulate(0.41));
                 sleep(100);
 
                 ramp.setPower(volt.regulate(-1));
@@ -125,18 +123,11 @@ public class Wok extends LinearOpMode {
 //        Outtake.outtake.setPower(volt.regulate(0.1));
 //        midtake.newtake.setPower(volt.regulate(0));
                 sleep(100);
-                out1.setPower(volt.regulate(-0.48));
-                out2.setPower(volt.regulate(0.48));
+                out1.setPower(volt.regulate(-0.43));
+                out2.setPower(volt.regulate(0.43));
                 sleep(100);
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(volt.regulate(-1));
-                sleep(1000);
-
-                // Stop all
-                out1.setPower(volt.regulate(0));
-                out2.setPower(volt.regulate(0));
-                ramp.setPower(volt.regulate(0));
-                activeintake.setPower(volt.regulate(0));
             }
 
             if (gamepad1.b) {
@@ -187,7 +178,7 @@ public class Wok extends LinearOpMode {
                 ramp.setPower(volt.regulate(gamepad1.right_trigger));
             }
 
-            //Auto Align Code
+            //Niranjan auto align code is here! - Pranav 10/27
 
             if (gamepad1.y) {
                 if (Math.abs(sdistanceError) == 0 && Math.abs(sangleError) <= SANGLE_TOLERANCE) {

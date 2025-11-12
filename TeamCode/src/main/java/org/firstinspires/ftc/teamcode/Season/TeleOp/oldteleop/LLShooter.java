@@ -5,12 +5,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.ExperimentalDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 @Disabled
 public class LLShooter extends LinearOpMode {
     VoltageGet volt = new VoltageGet();
-    ExperimentalDistanceLExtractor extractor;
+    RedExperimentalDistanceLExtractor extractor;
     DcMotor activeintake = null;
     DcMotor out1 = null;
     DcMotor out2 = null;
@@ -23,7 +23,7 @@ public class LLShooter extends LinearOpMode {
         out2 = hardwareMap.get(DcMotor.class, "outtake2");
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
         ramp = hardwareMap.get(DcMotor.class, "ramp");
-        extractor = new ExperimentalDistanceLExtractor(hardwareMap);
+        extractor = new RedExperimentalDistanceLExtractor(hardwareMap);
         extractor.setTelemetry(telemetry);
         extractor.startReading();
 

@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp;
 
-import static org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake.outtake;
 import static java.lang.Math.clamp;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -8,13 +7,14 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.ExperimentalDistanceLExtractor;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.ExperimentalGreenAndPurple;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
-@TeleOp(name = "GreySoloFinal")
-public class GreySoloFinal extends LinearOpMode {
+@TeleOp(name = "RedGreySoloFinal")
+public class RedGreySoloSensorFinal extends LinearOpMode {
 
+    ExperimentalGreenAndPurple sensor;
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
     DcMotor out1 = null;
@@ -34,9 +34,11 @@ public class GreySoloFinal extends LinearOpMode {
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
         ramp = hardwareMap.get(DcMotor.class, "ramp");
 
-        ExperimentalDistanceLExtractor ll = new ExperimentalDistanceLExtractor(hardwareMap);
+        RedExperimentalDistanceLExtractor ll = new RedExperimentalDistanceLExtractor(hardwareMap);
         ll.startReading();
         ll.setTelemetry(telemetry);
+
+        sensor = new ExperimentalGreenAndPurple();
 
         frontLeftMotor = hardwareMap.get(DcMotor.class, "fl");
         backLeftMotor = hardwareMap.get(DcMotor.class, "bl");
@@ -248,5 +250,21 @@ public class GreySoloFinal extends LinearOpMode {
         frontRightMotor.setPower(frPower);
         backLeftMotor.setPower(blPower);
         backRightMotor.setPower(brPower);
+    }
+
+    public String countBalls() {
+        int artifactcounter = 0;
+
+        while (artifactcounter <= 3) {
+            if (sensor.gethue() != 0 && sensor.getsat() != 0 && sensor.getval() != 0) {
+                artifactcounter +=1;
+            }
+        }
+
+        if (artifactcounter == 3) {
+            activeintake.setPower(0);
+
+        }
+        return null;
     }
 }

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 //New code
-public class ExperimentalDistanceLExtractor {
+public class RedExperimentalDistanceLExtractor {
     private final double SMOOTHING_FACTOR = 0.2;
     private final long STALE_TIMEOUT_MS = 500; // 0.5s
 
@@ -44,7 +44,7 @@ public class ExperimentalDistanceLExtractor {
     );
     private final double LIMELIGHT_ANGLE = 28.05;  // degrees (change if needed)
 
-    public ExperimentalDistanceLExtractor(HardwareMap hardwareMap) {
+    public RedExperimentalDistanceLExtractor(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");
         limelight.setPollRateHz(100);
         limelight.pipelineSwitch(3);

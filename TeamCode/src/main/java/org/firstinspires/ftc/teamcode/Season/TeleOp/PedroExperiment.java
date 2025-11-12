@@ -14,7 +14,7 @@
 //import com.qualcomm.robotcore.hardware.DcMotorSimple;
 //
 //import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
-//import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.ExperimentalDistanceLExtractor;
+//import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 //import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 //
 //import java.util.function.Supplier;
@@ -45,7 +45,7 @@
 //        activeintake = hardwareMap.get(DcMotor.class, "activeintake");
 //        ramp = hardwareMap.get(DcMotor.class, "ramp");
 //
-//        ExperimentalDistanceLExtractor ll = new ExperimentalDistanceLExtractor(hardwareMap);
+//        RedExperimentalDistanceLExtractor ll = new RedExperimentalDistanceLExtractor(hardwareMap);
 //        ll.startReading();
 //        ll.setTelemetry(telemetry);
 //

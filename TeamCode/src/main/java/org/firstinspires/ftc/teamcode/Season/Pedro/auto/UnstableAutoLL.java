@@ -4,8 +4,7 @@ import static org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake.outtake;
 
 import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Intake;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.ExperimentalDistanceLExtractor;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.StableDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Midtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
@@ -31,7 +30,7 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 public class UnstableAutoLL extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
     private DcMotor fl, fr, bl, br;
-    private ExperimentalDistanceLExtractor limelightExtractor;
+    private RedExperimentalDistanceLExtractor limelightExtractor;
     private final double TARGET_DISTANCE = 50.1; // inches
     private final double ANGLE_TOLERANCE = 2.6;
 
@@ -414,7 +413,7 @@ public class UnstableAutoLL extends NextFTCOpMode {
         fl.setDirection(DcMotorSimple.Direction.REVERSE);
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        limelightExtractor = new ExperimentalDistanceLExtractor(hardwareMap);
+        limelightExtractor = new RedExperimentalDistanceLExtractor(hardwareMap);
         limelightExtractor.setTelemetry(telemetry);
         limelightExtractor.startReading();
 

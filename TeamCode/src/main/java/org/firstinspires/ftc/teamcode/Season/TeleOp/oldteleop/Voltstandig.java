@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.ExperimentalDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 @Disabled
 @TeleOp(name = "Voltstandig")
@@ -24,7 +24,7 @@ public class Voltstandig extends LinearOpMode {
         out2 = hardwareMap.get(DcMotor.class, "outtake2");
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
         ramp = hardwareMap.get(DcMotor.class, "ramp");
-        ExperimentalDistanceLExtractor ll = new ExperimentalDistanceLExtractor(hardwareMap);
+        RedExperimentalDistanceLExtractor ll = new RedExperimentalDistanceLExtractor(hardwareMap);
         ll.startReading();
 
         DcMotor frontLeftMotor = hardwareMap.get(DcMotor.class, "fl");

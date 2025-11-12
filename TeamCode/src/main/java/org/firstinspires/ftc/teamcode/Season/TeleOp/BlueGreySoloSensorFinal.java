@@ -8,12 +8,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.ExperimentalGreenAndPurple;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
-@TeleOp(name = "RedGreySoloSensorFinal")
-public class RedGreySoloSensorFinal extends LinearOpMode {
-
+@TeleOp(name = "BlueGreySoloSensorFinal")
+public class BlueGreySoloSensorFinal extends LinearOpMode {
     ExperimentalGreenAndPurple sensor;
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
@@ -35,7 +35,7 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
         ramp = hardwareMap.get(DcMotor.class, "ramp");
 
-        RedExperimentalDistanceLExtractor ll = new RedExperimentalDistanceLExtractor(hardwareMap);
+        BlueExperimentalDistanceLExtractor ll = new BlueExperimentalDistanceLExtractor(hardwareMap);
         ll.startReading();
         ll.setTelemetry(telemetry);
 

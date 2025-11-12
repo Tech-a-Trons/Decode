@@ -1,7 +1,8 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.oldteleop;
 
 import static java.lang.Math.clamp;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,8 +11,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.ExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
-@TeleOp(name = "BlackTubeDuo")
-public class BlackTubeDuo extends LinearOpMode {
+@TeleOp(name = "BlackTubeSolo")
+@Disabled
+public class BlackTubeSolo extends LinearOpMode {
 
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
@@ -94,12 +96,12 @@ public class BlackTubeDuo extends LinearOpMode {
 
 
             // --- Mechanism Controls ---
-            if (gamepad2.a) {
+            if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(0.3);
             }
 
-            if (gamepad2.dpad_left) {
+            if (gamepad1.dpad_left) {
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(100);
                 out1.setPower(volt.regulate(0));
@@ -124,16 +126,16 @@ public class BlackTubeDuo extends LinearOpMode {
                 ramp.setPower(volt.regulate(-1.0));
             }
 
-            if (gamepad2.b) {
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
+            if (gamepad1.b) {
+                out1.setPower(volt.regulate(-0.32));
+                out2.setPower(volt.regulate(0.32));
             }
 
-            if (gamepad2.dpad_down) {
+            if (gamepad1.dpad_down) {
                 out1.setPower(volt.regulate(0.3));
                 out2.setPower(volt.regulate(-0.3));
             }
-            if(gamepad2.left_bumper){
+            if(gamepad1.left_bumper){
                 out1.setPower(volt.regulate(-0.45));
                 out2.setPower(volt.regulate(0.45));
                 sleep(800);
@@ -149,7 +151,7 @@ public class BlackTubeDuo extends LinearOpMode {
                 out2.setPower(volt.regulate(0.45));
                 sleep(800);
                 ramp.setPower(volt.regulate(-1.0));
-                sleep(150);
+                sleep(50);
                 out1.setPower(volt.regulate(-0.1));
                 out2.setPower(volt.regulate(0.1));
                 ramp.setPower(volt.regulate(0));
@@ -161,20 +163,20 @@ public class BlackTubeDuo extends LinearOpMode {
                 ramp.setPower(volt.regulate(-1.0));
 
             }
-            if (gamepad2.x) {
+            if (gamepad1.x) {
                 activeintake.setPower(0);
                 out1.setPower(0);
                 out2.setPower(0);
                 ramp.setPower(0);
             }
 
-            if (gamepad2.right_trigger > 0.0) {
+            if (gamepad1.right_trigger > 0.0) {
                 ramp.setPower(volt.regulate(gamepad1.right_trigger));
             }
 
             //Niranjan auto align code is here! - Pranav 10/27
 
-            if (gamepad2.y) {
+            if (gamepad1.y) {
                 if (Math.abs(sdistanceError) == 0 && Math.abs(sangleError) <= SANGLE_TOLERANCE) {
                     frontLeftMotor.setPower(volt.regulate(0.0));
                     frontRightMotor.setPower(volt.regulate(0.0));
@@ -185,7 +187,7 @@ public class BlackTubeDuo extends LinearOpMode {
                 }
             }
 
-            if (gamepad2.dpad_right) {
+            if (gamepad1.dpad_right) {
                 if (Math.abs(fdistanceError) == 0 && Math.abs(fangleError) <= FANGLE_TOLERANCE) {
                     frontLeftMotor.setPower(volt.regulate(0.0));
                     frontRightMotor.setPower(volt.regulate(0.0));

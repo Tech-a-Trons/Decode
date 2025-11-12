@@ -1,17 +1,20 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp;
 
+import static org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake.outtake;
 import static java.lang.Math.clamp;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.ExperimentalDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
-
-@TeleOp(name = "BlackTubeSolo")
-public class BlackTubeSolo extends LinearOpMode {
+@Disabled
+@TeleOp(name = "BlackTubeDuoFinal")
+public class BlackTubeDuoFinal extends LinearOpMode {
 
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
@@ -19,10 +22,10 @@ public class BlackTubeSolo extends LinearOpMode {
     DcMotor out2 = null;
     DcMotor ramp = null;
     DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
-    private final double STARGET_DISTANCE = 56.0; // inches
-    private final double SANGLE_TOLERANCE = -5.7;
-    private final double FTARGET_DISTANCE = 96.5;
-    private final double FANGLE_TOLERANCE = 27.0;
+    private final double STARGET_DISTANCE = 40; // inches
+    private final double SANGLE_TOLERANCE = 1.57;
+//    private final double FTARGET_DISTANCE = 96.5;
+//    private final double FANGLE_TOLERANCE = 27.0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -72,70 +75,83 @@ public class BlackTubeSolo extends LinearOpMode {
             }
 
             double sdistanceError = distance - STARGET_DISTANCE;
-            double fdistanceError = distance - FTARGET_DISTANCE;
+            //double fdistanceError = distance - FTARGET_DISTANCE;
             double sangleError = tx;
-            double fangleError = tx;
+            //double fangleError = tx;
 
             double sforwardPower = (-sdistanceError * 0.05) * 1;
             double shstrafePower = (-sangleError * 0.03) * 1;
             double sturnPower = (sangleError * 0.02) * 1;
 
-            double farforwardPower = (-fdistanceError * 0.05) * 1;
-            double fstrafePower = (-fangleError * 0.03) * 1;
-            double fturnPower = (fangleError * 0.02) * 1;
+//            double farforwardPower = (-fdistanceError * 0.05) * 1;
+//            double fstrafePower = (-fangleError * 0.03) * 1;
+//            double fturnPower = (fangleError * 0.02) * 1;
 
             sforwardPower = clamp(sforwardPower, -0.4, 0.4);
             shstrafePower = clamp(shstrafePower, -0.4, 0.4);
             sturnPower = clamp(sturnPower, -0.3, 0.3);
 
-            farforwardPower = clamp(farforwardPower, -0.4, 0.4);
-            fstrafePower = clamp(fstrafePower, -0.4, 0.4);
-            fturnPower = clamp(fturnPower, -0.3, 0.3);
+//            farforwardPower = clamp(farforwardPower, -0.4, 0.4);
+//            fstrafePower = clamp(fstrafePower, -0.4, 0.4);
+//            fturnPower = clamp(fturnPower, -0.3, 0.3);
 
 
             // --- Mechanism Controls ---
-            if (gamepad1.a) {
+            if (gamepad2.a) {
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(0.3);
             }
 
-            if (gamepad1.dpad_left) {
+            if (gamepad2.dpad_left) {
+                out1.setPower(volt.regulate(-0.37));
+                out2.setPower(volt.regulate(0.37));
+                sleep(1000);
+
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(100);
+
+//        Outtake.outtake.setPower(volt.regulate(0.1));
+                activeintake.setPower(volt.regulate(1.0));
+                ramp.setPower(volt.regulate(0));
+                sleep(100);
+
+                activeintake.setPower(volt.regulate(0));
+                out1.setPower(volt.regulate(-0.34));
+                out2.setPower(volt.regulate(0.34));
+                sleep(100);
+
+                ramp.setPower(volt.regulate(-1));
+//        sleep(50);
+
+//        Outtake.outtake.setPower(volt.regulate(0.1));
+//        midtake.newtake.setPower(volt.regulate(0));
+                sleep(100);
+                out1.setPower(volt.regulate(-0.34));
+                out2.setPower(volt.regulate(0.34));
+                sleep(100);
+                activeintake.setPower(volt.regulate(1.0));
+                ramp.setPower(volt.regulate(-1));
+                sleep(1000);
+
+                // Stop all
                 out1.setPower(volt.regulate(0));
                 out2.setPower(volt.regulate(0));
-                activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(volt.regulate(0));
-                sleep(300);
                 activeintake.setPower(volt.regulate(0));
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
-                sleep(800);
-                ramp.setPower(volt.regulate(-1.0));
-                sleep(50);
-                out1.setPower(volt.regulate(-0.1));
-                out2.setPower(volt.regulate(0.1));
-                ramp.setPower(volt.regulate(0));
-                sleep(100);
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
-                sleep(500);
-                activeintake.setPower(volt.regulate(1.0));
-                ramp.setPower(volt.regulate(-1.0));
             }
 
-            if (gamepad1.b) {
-                out1.setPower(volt.regulate(-0.32));
-                out2.setPower(volt.regulate(0.32));
+            if (gamepad2.b) {
+                out1.setPower(volt.regulate(-0.36));
+                out2.setPower(volt.regulate(0.36));
             }
 
-            if (gamepad1.dpad_down) {
+            if (gamepad2.dpad_down) {
                 out1.setPower(volt.regulate(0.3));
                 out2.setPower(volt.regulate(-0.3));
             }
-            if(gamepad1.left_bumper){
-                out1.setPower(volt.regulate(-0.45));
-                out2.setPower(volt.regulate(0.45));
+            if(gamepad2.left_bumper){
+                out1.setPower(volt.regulate(-0.3));
+                out2.setPower(volt.regulate(0.3));
                 sleep(800);
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(100);
@@ -145,8 +161,8 @@ public class BlackTubeSolo extends LinearOpMode {
                 ramp.setPower(volt.regulate(0));
                 sleep(300);
                 activeintake.setPower(volt.regulate(0));
-                out1.setPower(volt.regulate(-0.45));
-                out2.setPower(volt.regulate(0.45));
+                out1.setPower(volt.regulate(-0.3));
+                out2.setPower(volt.regulate(0.3));
                 sleep(800);
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(50);
@@ -154,47 +170,48 @@ public class BlackTubeSolo extends LinearOpMode {
                 out2.setPower(volt.regulate(0.1));
                 ramp.setPower(volt.regulate(0));
                 sleep(100);
-                out1.setPower(volt.regulate(-0.45));
-                out2.setPower(volt.regulate(0.45));
+                out1.setPower(volt.regulate(-0.3));
+                out2.setPower(volt.regulate(0.3));
                 sleep(500);
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(volt.regulate(-1.0));
 
             }
-            if (gamepad1.x) {
+            if (gamepad2.x) {
                 activeintake.setPower(0);
                 out1.setPower(0);
                 out2.setPower(0);
                 ramp.setPower(0);
             }
 
-            if (gamepad1.right_trigger > 0.0) {
+            if (gamepad2.right_trigger > 0.0) {
                 ramp.setPower(volt.regulate(gamepad1.right_trigger));
             }
 
             //Niranjan auto align code is here! - Pranav 10/27
 
-            if (gamepad1.y) {
+            if (gamepad2.y) {
                 if (Math.abs(sdistanceError) == 0 && Math.abs(sangleError) <= SANGLE_TOLERANCE) {
                     frontLeftMotor.setPower(volt.regulate(0.0));
                     frontRightMotor.setPower(volt.regulate(0.0));
                     backLeftMotor.setPower(volt.regulate(0.0));
                     backRightMotor.setPower(volt.regulate(0.0));
+
                 } else {
                     moveMecanum(sforwardPower, shstrafePower, sturnPower);
                 }
             }
 
-            if (gamepad1.dpad_right) {
-                if (Math.abs(fdistanceError) == 0 && Math.abs(fangleError) <= FANGLE_TOLERANCE) {
-                    frontLeftMotor.setPower(volt.regulate(0.0));
-                    frontRightMotor.setPower(volt.regulate(0.0));
-                    backLeftMotor.setPower(volt.regulate(0.0));
-                    backRightMotor.setPower(volt.regulate(0.0));
-                } else {
-                    moveMecanum(farforwardPower, fstrafePower, fturnPower);
-                }
-            }
+//            if (gamepad1.dpad_right) {
+//                if (Math.abs(fdistanceError) == 0 && Math.abs(fangleError) <= FANGLE_TOLERANCE) {
+//                    frontLeftMotor.setPower(volt.regulate(0.0));
+//                    frontRightMotor.setPower(volt.regulate(0.0));
+//                    backLeftMotor.setPower(volt.regulate(0.0));
+//                    backRightMotor.setPower(volt.regulate(0.0));
+//                } else {
+//                    moveMecanum(farforwardPower, fstrafePower, fturnPower);
+//                }
+//            }
 
             // --- Drivetrain Controls ---
             double y = -gamepad1.left_stick_y; // forward/back

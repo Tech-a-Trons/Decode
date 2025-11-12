@@ -1,19 +1,19 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.oldteleop;
 
-import static org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake.outtake;
 import static java.lang.Math.clamp;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.ExperimentalDistanceLExtractor;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
-@TeleOp(name = "GreyTubeDuo")
-public class GreyTubeDuo extends LinearOpMode {
+@TeleOp(name = "Nindroid")
+@Disabled
+public class Nindroid extends LinearOpMode {
 
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
@@ -21,7 +21,7 @@ public class GreyTubeDuo extends LinearOpMode {
     DcMotor out2 = null;
     DcMotor ramp = null;
     DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
-    private final double STARGET_DISTANCE = 50.1; // inches
+    private final double STARGET_DISTANCE = 45.1; // inches
     private final double SANGLE_TOLERANCE = 2.6;
 //    private final double FTARGET_DISTANCE = 96.5;
 //    private final double FANGLE_TOLERANCE = 27.0;
@@ -96,13 +96,17 @@ public class GreyTubeDuo extends LinearOpMode {
 
 
             // --- Mechanism Controls ---
-            if (gamepad2.a) {
+//            if (gamepad2.a) {
+//                activeintake.setPower(volt.regulate(1.0));
+//                ramp.setPower(0.3);
+//            }
+            if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(0.3);
             }
 
-            if (gamepad2.dpad_left) {
-                out1.setPower(volt.regulate(-0.43));
+
+            if (gamepad1.dpad_left) {out1.setPower(volt.regulate(-0.43));
                 out2.setPower(volt.regulate(0.43));
                 sleep(1000);
 
@@ -125,12 +129,12 @@ public class GreyTubeDuo extends LinearOpMode {
 //        Outtake.outtake.setPower(volt.regulate(0.1));
 //        midtake.newtake.setPower(volt.regulate(0));
                 sleep(100);
-                out1.setPower(volt.regulate(-0.48));
-                out2.setPower(volt.regulate(0.48));
+                out1.setPower(volt.regulate(-0.46));
+                out2.setPower(volt.regulate(0.46));
                 sleep(100);
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(volt.regulate(-1));
-                sleep(1000);
+                sleep(1500);
 
                 // Stop all
                 out1.setPower(volt.regulate(0));
@@ -139,16 +143,20 @@ public class GreyTubeDuo extends LinearOpMode {
                 activeintake.setPower(volt.regulate(0));
             }
 
-            if (gamepad2.b) {
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
+            if (gamepad1.b) {
+                out1.setPower(volt.regulate(0.46));
+                out2.setPower(volt.regulate(-0.46));
+            }
+            if (gamepad1.b) {
+                out1.setPower(volt.regulate(0.46));
+                out2.setPower(volt.regulate(-0.46));
             }
 
-            if (gamepad2.dpad_down) {
+            if (gamepad1.dpad_down) {
                 out1.setPower(volt.regulate(0.3));
                 out2.setPower(volt.regulate(-0.3));
             }
-            if(gamepad2.left_bumper){
+            if(gamepad1.left_bumper){
                 out1.setPower(volt.regulate(-0.45));
                 out2.setPower(volt.regulate(0.45));
                 sleep(800);
@@ -176,14 +184,14 @@ public class GreyTubeDuo extends LinearOpMode {
                 ramp.setPower(volt.regulate(-1.0));
 
             }
-            if (gamepad2.x) {
+            if (gamepad1.x) {
                 activeintake.setPower(0);
                 out1.setPower(0);
                 out2.setPower(0);
                 ramp.setPower(0);
             }
 
-            if (gamepad2.right_trigger > 0.0) {
+            if (gamepad1.right_trigger > 0.0) {
                 ramp.setPower(volt.regulate(gamepad1.right_trigger));
             }
 
@@ -195,6 +203,7 @@ public class GreyTubeDuo extends LinearOpMode {
                     frontRightMotor.setPower(volt.regulate(0.0));
                     backLeftMotor.setPower(volt.regulate(0.0));
                     backRightMotor.setPower(volt.regulate(0.0));
+
                 } else {
                     moveMecanum(sforwardPower, shstrafePower, sturnPower);
                 }

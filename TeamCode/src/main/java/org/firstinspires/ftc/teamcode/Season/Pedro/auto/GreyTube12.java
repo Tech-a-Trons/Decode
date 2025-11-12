@@ -48,7 +48,7 @@ public class GreyTube12 extends NextFTCOpMode {
     private final Pose dropoff2 = new Pose(100, 54, Math.toRadians(0)); //55
     private final Pose pickup1Pose = new Pose(123, 80, Math.toRadians(0));
     private final Pose pickup2Pose = new Pose(127.5, 52, Math.toRadians(0));
-    private final Pose pickup3Pose = new Pose(127.5, 33, Math.toRadians(0));
+    private final Pose pickup3Pose = new Pose(127.5, 32, Math.toRadians(0));
 
     private Path scorePreload;
 

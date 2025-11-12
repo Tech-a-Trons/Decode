@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Season.Subsystems;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+
 import android.graphics.Color;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -11,8 +13,11 @@ public class ExperimentalGreenAndPurple {
     float chue;
     float csat;
     float cval;
+    ColorSensor sensor;
 
     public String Getcolor(ColorSensor sensor) {
+        sensor = hardwareMap.get(ColorSensor.class, "ColorSensor");
+
         int red = sensor.red();
         int green = sensor.green();
         int blue = sensor.blue();
@@ -80,4 +85,5 @@ public class ExperimentalGreenAndPurple {
     public float getval() {
         return cval;
     }
+    public String getColor() {return Getcolor(sensor);}
 }

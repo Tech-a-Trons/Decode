@@ -4,22 +4,24 @@ import static java.lang.Math.clamp;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.ExperimentalGreenAndPurple;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
 @TeleOp(name = "BlueGreySoloSensorFinal")
 public class BlueGreySoloSensorFinal extends LinearOpMode {
-    ExperimentalGreenAndPurple sensor;
+
+    ExperimentalGreenAndPurple colorparser;
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
     DcMotor out1 = null;
     DcMotor out2 = null;
     DcMotor ramp = null;
+    ColorSensor sensor;
     DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
     private final double STARGET_DISTANCE = 40.1; // inches
     int artifactcounter = 0;
@@ -35,11 +37,13 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
         ramp = hardwareMap.get(DcMotor.class, "ramp");
 
-        BlueExperimentalDistanceLExtractor ll = new BlueExperimentalDistanceLExtractor(hardwareMap);
+        sensor = hardwareMap.get(ColorSensor.class, "ColorSensor");
+
+        RedExperimentalDistanceLExtractor ll = new RedExperimentalDistanceLExtractor(hardwareMap);
         ll.startReading();
         ll.setTelemetry(telemetry);
 
-        sensor = new ExperimentalGreenAndPurple();
+        colorparser = new ExperimentalGreenAndPurple();
 
         frontLeftMotor = hardwareMap.get(DcMotor.class, "fl");
         backLeftMotor = hardwareMap.get(DcMotor.class, "bl");
@@ -100,9 +104,9 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
 
             // --- Mechanism Controls ---
             if (gamepad1.a) {
-                countBalls();
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(0.3);
+                countBalls();
             }
 
             if (gamepad1.dpad_left) {
@@ -259,9 +263,8 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
     }
 
     public String countBalls() {
-
         while (artifactcounter <= 3) {
-            if (sensor.gethue() != 0 && sensor.getsat() != 0 && sensor.getval() != 0) {
+            if (colorparser.getColor() == "purple" || colorparser.getColor() == "green") {
                 artifactcounter +=1;
             }
         }

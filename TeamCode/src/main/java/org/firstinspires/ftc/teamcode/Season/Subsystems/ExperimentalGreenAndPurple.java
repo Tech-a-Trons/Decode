@@ -62,8 +62,8 @@ public class ExperimentalGreenAndPurple {
         // ----------------------------
         // 3️⃣ Secondary heuristics
         // ----------------------------
-        // If blue is highest and red moderate → likely purple
-        if (blue >= green | green-blue == 3 && green > red && total > 100) return "purple";
+        // If blue is highest and green moderate → likely purple
+        if (blue >= green | green - blue == 3 && green > red && total > 100) return "purple";
 
         // If green is clearly highest → likely green
         if (green > red && green > blue && total > 100) return "green";

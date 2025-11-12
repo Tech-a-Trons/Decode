@@ -4,8 +4,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.ExperimentalDistanceLExtractor;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.StableDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 
 //To test
 
@@ -13,11 +12,11 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.Stab
 public class ExperimentDistanceLTester extends LinearOpMode {
 
     public Limelight3A limelight;
-    ExperimentalDistanceLExtractor ll;
+    RedExperimentalDistanceLExtractor ll;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        ll = new ExperimentalDistanceLExtractor(hardwareMap);
+        ll = new RedExperimentalDistanceLExtractor(hardwareMap);
 
         telemetry.addLine("Connecting to Limelight...");
         telemetry.update();

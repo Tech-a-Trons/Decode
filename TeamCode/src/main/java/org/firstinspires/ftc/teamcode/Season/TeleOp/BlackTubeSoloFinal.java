@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp;
 
-import static org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake.outtake;
 import static java.lang.Math.clamp;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -9,8 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.ExperimentalDistanceLExtractor;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 @Disabled
 @TeleOp(name = "BlackTubeSoloFinal")
@@ -35,7 +33,7 @@ public class BlackTubeSoloFinal extends LinearOpMode {
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
         ramp = hardwareMap.get(DcMotor.class, "ramp");
 
-        ExperimentalDistanceLExtractor ll = new ExperimentalDistanceLExtractor(hardwareMap);
+        RedExperimentalDistanceLExtractor ll = new RedExperimentalDistanceLExtractor(hardwareMap);
         ll.startReading();
         ll.setTelemetry(telemetry);
 

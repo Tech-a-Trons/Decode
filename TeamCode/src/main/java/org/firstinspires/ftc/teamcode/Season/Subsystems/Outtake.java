@@ -31,7 +31,7 @@ public class Outtake implements Subsystem {
 
         return new RunToVelocity(
                 controller,
-                600,
+                400,
                 5
         ).requires(this);
     }

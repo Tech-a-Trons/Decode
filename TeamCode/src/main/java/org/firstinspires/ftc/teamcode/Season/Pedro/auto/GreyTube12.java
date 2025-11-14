@@ -39,7 +39,7 @@ public class GreyTube12 extends NextFTCOpMode {
 
     private final Pose startPose = new Pose(123.13, 122.08, Math.toRadians(220));
     //    private final Pose scorePose = new Pose(90, 90, Math.toRadians(215));
-    private final Pose scorePose = new Pose(88, 88, Math.toRadians(220));
+    private final Pose scorePose = new Pose(88, 88, Math.toRadians(215));
 
 
     private final Pose prePickup1 = new Pose(80, 80, Math.toRadians(0));
@@ -48,7 +48,7 @@ public class GreyTube12 extends NextFTCOpMode {
     private final Pose dropoff2 = new Pose(100, 54, Math.toRadians(0)); //55
     private final Pose pickup1Pose = new Pose(123, 80, Math.toRadians(0));
     private final Pose pickup2Pose = new Pose(127.5, 52, Math.toRadians(0));
-    private final Pose pickup3Pose = new Pose(127.5, 32, Math.toRadians(0));
+    private final Pose pickup3Pose = new Pose(126, 32, Math.toRadians(0));
 
     private Path scorePreload;
 
@@ -114,7 +114,6 @@ public class GreyTube12 extends NextFTCOpMode {
         switch (pathState) {
             case 0:
                 follower.followPath(scorePreload, true);
-
                 setPathState(1);
 
                 break;
@@ -133,6 +132,8 @@ public class GreyTube12 extends NextFTCOpMode {
             case 2:
                 if (!follower.isBusy()) {
                     Intake.INSTANCE.activeintake.setPower(1);
+                    Midtake.INSTANCE.newtake.setPower(0.3);
+                    follower.setMaxPower(0.8);
                     follower.followPath(grabPickup1, true);
                     setPathState(3);
                 }
@@ -140,7 +141,7 @@ public class GreyTube12 extends NextFTCOpMode {
 
             case 3:
                 if (!follower.isBusy()) {
-
+                    follower.setMaxPower(1);
                     Intake.INSTANCE.activeintake.setPower(0);
 //                    Outtake.INSTANCE.outtake.setPower(0.1);
                     follower.followPath(scorePickup1, true);
@@ -153,19 +154,23 @@ public class GreyTube12 extends NextFTCOpMode {
                     secondshootThreeBalls();
                     follower.followPath(grabPrePickup2, true);
                     Intake.INSTANCE.activeintake.setPower(1);
+                    Midtake.INSTANCE.newtake.setPower(0.3);
                     setPathState(5);
                 }
                 break;
 
             case 5:
                 if (!follower.isBusy()) {
+                    follower.setMaxPower(0.8);
                     follower.followPath(grabPickup2, true);
+                    follower.setMaxPower(1);
                     setPathState(6);
                 }
                 break;
 
             case 6:
                 if (!follower.isBusy()) {
+                    Midtake.INSTANCE.newtake.setPower(0);
                     Intake.INSTANCE.activeintake.setPower(0);
 //                    Outtake.INSTANCE.outtake.setPower(0.1);
                     follower.followPath(scorePickup2, true);
@@ -178,6 +183,7 @@ public class GreyTube12 extends NextFTCOpMode {
                     secondshootThreeBalls();
                     follower.followPath(grabPrePickup3, true);
                     Intake.INSTANCE.activeintake.setPower(1);
+                    Midtake.INSTANCE.newtake.setPower(0.3);
                     setPathState(8);
                 }
                 break;
@@ -191,6 +197,7 @@ public class GreyTube12 extends NextFTCOpMode {
 
             case 9:
                 if (!follower.isBusy()) {
+                    Midtake.INSTANCE.newtake.setPower(0);
                     Intake.INSTANCE.activeintake.setPower(0);
                     follower.followPath(scorePickup3, true);
 //                    shootThreeBalls();
@@ -245,7 +252,7 @@ public class GreyTube12 extends NextFTCOpMode {
         Intake intake = Intake.INSTANCE;
 
         outtake.outtake.setPower(volt.regulate(0.42)); // out1
-        sleep(700);
+        sleep(800);
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
         sleep(50);
@@ -277,9 +284,8 @@ public class GreyTube12 extends NextFTCOpMode {
         Outtake outtake = Outtake.INSTANCE;
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
-
-        outtake.outtake.setPower(volt.regulate(0.41)); // out1
-        sleep(700);
+        outtake.outtake.setPower(volt.regulate(0.42)); // out1
+        sleep(800);
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
         sleep(50);

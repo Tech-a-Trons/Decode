@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.har
 import android.graphics.Color;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.I2cAddr;
 
 //Make changes here
 //For color sensor
@@ -13,14 +14,83 @@ public class ExperimentalGreenAndPurple {
     float chue;
     float csat;
     float cval;
-    ColorSensor sensor;
+    ColorSensor colorsensor = new ColorSensor() {
+        @Override
+        public int red() {
+            return 0;
+        }
 
-    public String Getcolor(ColorSensor sensor) {
-        sensor = hardwareMap.get(ColorSensor.class, "ColorSensor");
+        @Override
+        public int green() {
+            return 0;
+        }
 
-        int red = sensor.red();
-        int green = sensor.green();
-        int blue = sensor.blue();
+        @Override
+        public int blue() {
+            return 0;
+        }
+
+        @Override
+        public int alpha() {
+            return 0;
+        }
+
+        @Override
+        public int argb() {
+            return 0;
+        }
+
+        @Override
+        public void enableLed(boolean enable) {
+
+        }
+
+        @Override
+        public void setI2cAddress(I2cAddr newAddress) {
+
+        }
+
+        @Override
+        public I2cAddr getI2cAddress() {
+            return null;
+        }
+
+        @Override
+        public Manufacturer getManufacturer() {
+            return null;
+        }
+
+        @Override
+        public String getDeviceName() {
+            return "";
+        }
+
+        @Override
+        public String getConnectionInfo() {
+            return "";
+        }
+
+        @Override
+        public int getVersion() {
+            return 0;
+        }
+
+        @Override
+        public void resetDeviceConfigurationForOpMode() {
+
+        }
+
+        @Override
+        public void close() {
+
+        }
+    };
+    public String Getcolor() {
+        colorsensor = hardwareMap.get(ColorSensor.class, "ColorSensor");
+
+        int red = colorsensor.red();
+        int green = colorsensor.green();
+        int blue = colorsensor.blue();
 
         int total = red + green + blue;
         if (total == 0) return null; // avoid divide-by-zero
@@ -85,5 +155,6 @@ public class ExperimentalGreenAndPurple {
     public float getval() {
         return cval;
     }
-    public String getColor() {return Getcolor(sensor);}
+
+    public String getColor() {return Getcolor();}
 }

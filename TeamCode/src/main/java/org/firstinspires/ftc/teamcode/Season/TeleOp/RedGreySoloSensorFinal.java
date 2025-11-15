@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp;
 
-import static java.lang.Math.clamp;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -118,7 +116,7 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
             if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(0.3);
-                countBalls();
+                //countBalls();
 
             }
 
@@ -302,25 +300,25 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
         backRightMotor.setPower(brPower);
     }
 
-    public int countBalls() {
-        String colorGet = colorparser.getColor();
-        if (colorGet == null) {
-            colorGet = "VALUE";
-        }
-        while (artifactcounter < 3) {
-            if (colorGet == "purple" || colorGet == "green") {
-                artifactcounter += 1;
-            } else if (colorGet == "VALUE") {
-
-            } else {
-
-            }
-        }
-
-        if (artifactcounter == 3) {
-            activeintake.setPower(0);
-//            ramp.setPower(0);
-        }
-        return artifactcounter;
-    }
+//    public int countBalls() {
+//        String colorGet = colorparser.getColor();
+//        if (colorGet == null) {
+//            colorGet = "VALUE";
+//        }
+//        while (artifactcounter < 3) {
+//            if (colorGet == "purple" || colorGet == "green") {
+//                artifactcounter += 1;
+//            } else if (colorGet == "VALUE") {
+//
+//            } else {
+//
+//            }
+//        }
+//
+//        if (artifactcounter == 3) {
+//            activeintake.setPower(0);
+////            ramp.setPower(0);
+//        }
+//        return artifactcounter;
+//    }
 }

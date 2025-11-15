@@ -20,7 +20,7 @@ public class ColorSensorTesting extends LinearOpMode {
         countBalls();
         telemetry.addData("Ball count: ", artifactcounter);
     }
-    public int countBalls() {
+    public void countBalls() {
         while (artifactcounter < 3) {
             if (colorparser.getColor() == "purple" || colorparser.getColor() == "green") {
                 artifactcounter +=1;
@@ -28,8 +28,6 @@ public class ColorSensorTesting extends LinearOpMode {
         }
 
         if (artifactcounter == 3) {
-            return artifactcounter;
         }
-        return artifactcounter;
     }
 }

@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.Season.Prototypes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.ExperimentalGreenAndPurple;
 
+@TeleOp
 public class ColorSensorTesting extends LinearOpMode {
 
     ExperimentalGreenAndPurple colorparser;

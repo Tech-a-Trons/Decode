@@ -23,7 +23,7 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
     DcMotor out2 = null;
     DcMotor ramp = null;
     ColorSensor sensor;
-    DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
+    DcMotor frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
     int artifactcounter = 0;
     private final double STARGET_DISTANCE = 40.1; // inches
     private final double SANGLE_TOLERANCE = 1.57;
@@ -119,6 +119,7 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(0.3);
                 countBalls();
+
             }
 
             if (gamepad1.dpad_left) {
@@ -173,7 +174,7 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
                 out1.setPower(volt.regulate(0.3));
                 out2.setPower(volt.regulate(-0.3));
             }
-            if(gamepad1.left_bumper){
+            if (gamepad1.left_bumper) {
                 artifactcounter -= 3;
                 if (artifactcounter < 0) {
                     artifactcounter = 0;
@@ -288,6 +289,7 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
     private double clamp(double val, double min, double max) {
         return Math.max(min, Math.min(max, val));
     }
+
     private void moveMecanum(double forward, double strafe, double turn) {
         double flPower = forward + strafe + turn;
         double frPower = forward - strafe - turn;
@@ -300,14 +302,14 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
         backRightMotor.setPower(brPower);
     }
 
-    public String countBalls() {
+    public int countBalls() {
         String colorGet = colorparser.getColor();
         if (colorGet == null) {
             colorGet = "VALUE";
         }
         while (artifactcounter < 3) {
             if (colorGet == "purple" || colorGet == "green") {
-                artifactcounter +=1;
+                artifactcounter += 1;
             } else if (colorGet == "VALUE") {
 
             } else {
@@ -317,8 +319,8 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
 
         if (artifactcounter == 3) {
             activeintake.setPower(0);
-            ramp.setPower(0);
+//            ramp.setPower(0);
         }
-        return null;
+        return artifactcounter;
     }
 }

@@ -300,7 +300,7 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
         backRightMotor.setPower(brPower);
     }
 
-    public String countBalls() {
+    public int countBalls() {
         String colorGet = colorparser.getColor();
         if (colorGet == null) {
             colorGet = "VALUE";
@@ -317,8 +317,8 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
 
         if (artifactcounter == 3) {
             activeintake.setPower(0);
-            ramp.setPower(0);
+            //ramp.setPower(0);
         }
-        return null;
+        return artifactcounter;
     }
 }

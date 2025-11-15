@@ -153,32 +153,34 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
                 out2.setPower(volt.regulate(-0.3));
             }
             if(gamepad1.left_bumper){
-                artifactcounter = 0;
-                out1.setPower(volt.regulate(-0.45));
-                out2.setPower(volt.regulate(0.45));
-                sleep(800);
+                out1.setPower(volt.regulate(-0.6));
+                out2.setPower(volt.regulate(0.6));
+                sleep(1000);
+
                 ramp.setPower(volt.regulate(-1.0));
                 sleep(100);
-                out1.setPower(volt.regulate(0));
-                out2.setPower(volt.regulate(0));
+
+//        Outtake.outtake.setPower(volt.regulate(0.1));
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(volt.regulate(0));
-                sleep(300);
+                sleep(100);
+
                 activeintake.setPower(volt.regulate(0));
-                out1.setPower(volt.regulate(-0.45));
-                out2.setPower(volt.regulate(0.45));
-                sleep(800);
-                ramp.setPower(volt.regulate(-1.0));
-                sleep(50);
-                out1.setPower(volt.regulate(-0.1));
-                out2.setPower(volt.regulate(0.1));
-                ramp.setPower(volt.regulate(0));
+                out1.setPower(volt.regulate(-0.6));
+                out2.setPower(volt.regulate(0.6));
                 sleep(100);
-                out1.setPower(volt.regulate(-0.45));
-                out2.setPower(volt.regulate(0.45));
-                sleep(500);
+
+                ramp.setPower(volt.regulate(-1));
+//        sleep(50);
+
+//        Outtake.outtake.setPower(volt.regulate(0.1));
+//        midtake.newtake.setPower(volt.regulate(0));
+                sleep(100);
+                out1.setPower(volt.regulate(-0.6));
+                out2.setPower(volt.regulate(0.6));
+                sleep(100);
                 activeintake.setPower(volt.regulate(1.0));
-                ramp.setPower(volt.regulate(-1.0));
+                ramp.setPower(volt.regulate(-1));
 
             }
             if (gamepad1.x) {

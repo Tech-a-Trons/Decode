@@ -24,7 +24,7 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
     DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
     int artifactcounter = 0;
     private final double STARGET_DISTANCE = 42.97; // inches
-    private final double SANGLE_TOLERANCE = -0.86;
+    private final double SANGLE_TOLERANCE = -1.8;
 //    private final double MTARGET_DISTANCE = 2838; // PLACEHOLDER
 //    private final double MANGLE_TOLERANCE = 134; // PLACEHOLDER
     private final double FTARGET_DISTANCE = 115.30; // PLACEHOLDER

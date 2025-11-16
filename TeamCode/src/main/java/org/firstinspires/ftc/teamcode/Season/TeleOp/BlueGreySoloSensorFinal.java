@@ -20,7 +20,7 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
     DcMotor out1 = null;
     DcMotor out2 = null;
     DcMotor ramp = null;
-    ColorSensor sensor;
+    //ColorSensor sensor;
     DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
     int artifactcounter = 0;
     private final double STARGET_DISTANCE = 42.97; // inches
@@ -38,7 +38,7 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
         ramp = hardwareMap.get(DcMotor.class, "ramp");
 
-        sensor = hardwareMap.get(ColorSensor.class, "ColorSensor");
+        //sensor = hardwareMap.get(ColorSensor.class, "ColorSensor");
 
         BlueExperimentalDistanceLExtractor ll = new BlueExperimentalDistanceLExtractor(hardwareMap);
         ll.startReading();

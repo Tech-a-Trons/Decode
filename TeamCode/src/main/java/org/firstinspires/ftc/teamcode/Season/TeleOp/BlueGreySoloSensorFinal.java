@@ -27,8 +27,8 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
     private final double SANGLE_TOLERANCE = -1.8;
 //    private final double MTARGET_DISTANCE = 2838; // PLACEHOLDER
 //    private final double MANGLE_TOLERANCE = 134; // PLACEHOLDER
-    private final double FTARGET_DISTANCE = 115.30; // PLACEHOLDER
-    private final double FANGLE_TOLERANCE = 3.06; // PLACEHOLDER
+    private final double FTARGET_DISTANCE = 112.21;
+    private final double FANGLE_TOLERANCE = 3.47;
 
     @Override
     public void runOpMode() throws InterruptedException {

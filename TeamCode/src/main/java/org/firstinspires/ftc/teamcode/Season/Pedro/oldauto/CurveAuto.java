@@ -1,6 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.Pedro.auto;
-
-import static org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake.outtake;
+package org.firstinspires.ftc.teamcode.Season.Pedro.oldauto;
 
 import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Intake;
@@ -13,15 +11,15 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
-import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
-
+@Disabled
 @Autonomous(name = "CurveAuto", group = "Examples")
 public class CurveAuto extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();

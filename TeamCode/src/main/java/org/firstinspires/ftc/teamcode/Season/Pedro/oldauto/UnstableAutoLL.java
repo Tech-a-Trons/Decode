@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.Pedro.auto;
+package org.firstinspires.ftc.teamcode.Season.Pedro.oldauto;
 
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake.outtake;
 
@@ -16,6 +16,7 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
@@ -24,14 +25,16 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "greytubefrontLL", group = "Examples")
-public class greytubefront9LL extends NextFTCOpMode {
+@Disabled
+@Autonomous(name = "UnstableAutoLLTUFFFF", group = "Examples")
+public class UnstableAutoLL extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
     private DcMotor fl, fr, bl, br;
     private RedExperimentalDistanceLExtractor limelightExtractor;
-    private final double TARGET_DISTANCE = 53.01; // inches - second pos 40.24 - third pos 67.9
-    private final double ANGLE_TOLERANCE = 1.57; // 3rd angle - -0.52
-    public greytubefront9LL() {
+    private final double TARGET_DISTANCE = 50.1; // inches
+    private final double ANGLE_TOLERANCE = 2.6;
+
+    public UnstableAutoLL() {
         addComponents(
                 new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE),
                 BulkReadComponent.INSTANCE,
@@ -50,12 +53,12 @@ public class greytubefront9LL extends NextFTCOpMode {
 
 
     private final Pose prePickup1 = new Pose(82.226, 80, Math.toRadians(0));
-    private final Pose prePickup2 = new Pose(80.765, 54, Math.toRadians(0)); //55
-    private final Pose prePickup3 = new Pose(85.565, 33, Math.toRadians(0));
-    private final Pose dropoff2 = new Pose(100, 54, Math.toRadians(0)); //55
+    private final Pose prePickup2 = new Pose(80.765, 55, Math.toRadians(0));
+    private final Pose prePickup3 = new Pose(85.565, 34.017, Math.toRadians(0));
+    private final Pose dropoff2 = new Pose(100, 55, Math.toRadians(0));
     private final Pose pickup1Pose = new Pose(123, 80, Math.toRadians(0));
-    private final Pose pickup2Pose = new Pose(127, 52, Math.toRadians(0));
-    private final Pose pickup3Pose = new Pose(124, 33, Math.toRadians(0));
+    private final Pose pickup2Pose = new Pose(127, 55, Math.toRadians(0));
+    private final Pose pickup3Pose = new Pose(125, 35, Math.toRadians(0));
 
     private Path scorePreload;
     private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
@@ -143,7 +146,6 @@ public class greytubefront9LL extends NextFTCOpMode {
                 if (!follower.isBusy()) {
 
                     Intake.INSTANCE.activeintake.setPower(0);
-                    Outtake.INSTANCE.outtake.setPower(0.1);
                     follower.followPath(scorePickup1, true);
                     setPathState(4);
                 }
@@ -168,7 +170,6 @@ public class greytubefront9LL extends NextFTCOpMode {
             case 6:
                 if (!follower.isBusy()) {
                     Intake.INSTANCE.activeintake.setPower(0);
-                    Outtake.INSTANCE.outtake.setPower(0.1);
                     follower.followPath(scorePickup2, true);
                     setPathState(7);
                 }
@@ -194,14 +195,13 @@ public class greytubefront9LL extends NextFTCOpMode {
                 if (!follower.isBusy()) {
                     Intake.INSTANCE.activeintake.setPower(0);
                     follower.followPath(scorePickup3, true);
-//                    shootThreeBalls();
+                    shootThreeBalls();
                     setPathState(10);
                 }
                 break;
 
             case 10:
                 if (!follower.isBusy()) {
-                    secondshootThreeBalls();
                     setPathState(-1);
                 }
                 break;
@@ -275,34 +275,34 @@ public class greytubefront9LL extends NextFTCOpMode {
             limelightExtractor.update();
         }
 
-        outtake.outtake.setPower(volt.regulate(0.44));
-        sleep(1000);
+        Outtake.outtake.setPower(volt.regulate(0.28));
+        sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1.0));
         sleep(100);
 
-//        Outtake.outtake.setPower(volt.regulate(0.1));
+        Outtake.outtake.setPower(volt.regulate(0.1));
         intake.activeintake.setPower(volt.regulate(1.0));
+        midtake.newtake.setPower(volt.regulate(0));
+        sleep(300);
+
+        intake.activeintake.setPower(volt.regulate(0));
+        Outtake.outtake.setPower(volt.regulate(0.32));
+        sleep(1400);
+
+        midtake.newtake.setPower(volt.regulate(-1));
+        sleep(50);
+
+        Outtake.outtake.setPower(volt.regulate(0.1));
         midtake.newtake.setPower(volt.regulate(0));
         sleep(100);
 
-        intake.activeintake.setPower(volt.regulate(0));
-        Outtake.outtake.setPower(volt.regulate(0.42));
-        sleep(100);
-
-        midtake.newtake.setPower(volt.regulate(-1));
-//        sleep(50);
-
-//        Outtake.outtake.setPower(volt.regulate(0.1));
-//        midtake.newtake.setPower(volt.regulate(0));
-        sleep(100);
-
-        Outtake.outtake.setPower(volt.regulate(0.48));
-        sleep(100);
+        Outtake.outtake.setPower(volt.regulate(0.34));
+        sleep(400);
 
         intake.activeintake.setPower(volt.regulate(1.0));
         midtake.newtake.setPower(volt.regulate(-1));
-        sleep(1000);
+        sleep(900);
 
         // Stop all
         Outtake.outtake.setPower(volt.regulate(0));
@@ -344,33 +344,34 @@ public class greytubefront9LL extends NextFTCOpMode {
             limelightExtractor.update();
         }
 
-        outtake.outtake.setPower(volt.regulate(0.44));
-        sleep(1000);
+        outtake.outtake.setPower(volt.regulate(0.32));
+        sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1.0));
         sleep(100);
 
-//        Outtake.outtake.setPower(volt.regulate(0.1));
+        Outtake.outtake.setPower(volt.regulate(0.1));
         intake.activeintake.setPower(volt.regulate(1.0));
+        midtake.newtake.setPower(volt.regulate(0));
+        sleep(300);
+
+        intake.activeintake.setPower(volt.regulate(0));
+        Outtake.outtake.setPower(volt.regulate(0.32));
+        sleep(1400);
+
+        midtake.newtake.setPower(volt.regulate(-1));
+        sleep(50);
+
+        Outtake.outtake.setPower(volt.regulate(0.1));
         midtake.newtake.setPower(volt.regulate(0));
         sleep(100);
 
-        intake.activeintake.setPower(volt.regulate(0));
-        Outtake.outtake.setPower(volt.regulate(0.42));
-        sleep(100);
-
-        midtake.newtake.setPower(volt.regulate(-1));
-//        sleep(50);
-
-//        Outtake.outtake.setPower(volt.regulate(0.1));
-//        midtake.newtake.setPower(volt.regulate(0));
-        sleep(100);
-        Outtake.outtake.setPower(volt.regulate(0.48));
-        sleep(100);
+        Outtake.outtake.setPower(volt.regulate(0.34));
+        sleep(400);
 
         intake.activeintake.setPower(volt.regulate(1.0));
         midtake.newtake.setPower(volt.regulate(-1));
-        sleep(1000);
+        sleep(900);
 
         // Stop all
         Outtake.outtake.setPower(volt.regulate(0));
@@ -421,7 +422,9 @@ public class greytubefront9LL extends NextFTCOpMode {
         buildPaths();
     }
 
-    @Override public void onWaitForStart() {}
+    @Override public void onWaitForStart() {
+
+    }
 
     @Override public void onStartButtonPressed() {
         opmodeTimer.resetTimer();
@@ -432,7 +435,6 @@ public class greytubefront9LL extends NextFTCOpMode {
         Intake.INSTANCE.activeintake.setPower(0);
         outtake.setPower(0);
         Midtake.newtake.setPower(0);
-        limelightExtractor.stopReading();
     }
 
     private void moveMecanum(double forward, double strafe, double turn) {

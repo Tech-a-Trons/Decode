@@ -21,10 +21,10 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "greytubefront9", group = "Examples")
-public class greytubefront9 extends NextFTCOpMode {
+@Autonomous(name = "RedAutoFar", group = "Examples")
+public class RedAutoFar extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
-    public greytubefront9() {
+    public RedAutoFar() {
         addComponents(
                 new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE),
                 BulkReadComponent.INSTANCE,
@@ -37,18 +37,18 @@ public class greytubefront9 extends NextFTCOpMode {
     private Timer pathTimer, opmodeTimer;
     private int pathState;
 
-    private final Pose startPose = new Pose(123.13, 122.08, Math.toRadians(220));
+    private final Pose startPose = new Pose(57.000, 8.000, Math.toRadians(270)).mirror();
     //    private final Pose scorePose = new Pose(90, 90, Math.toRadians(215));
-    private final Pose scorePose = new Pose(88, 88, Math.toRadians(220));
+    private final Pose scorePose = new Pose(76, 19, Math.toRadians(304)).mirror();
 
 
-    private final Pose prePickup1 = new Pose(80, 80, Math.toRadians(0));
-    private final Pose prePickup2 = new Pose(80.765, 54, Math.toRadians(0)); //55
-    private final Pose prePickup3 = new Pose(85.565, 33, Math.toRadians(0));
-    private final Pose dropoff2 = new Pose(100, 54, Math.toRadians(0)); //55
-    private final Pose pickup1Pose = new Pose(123, 80, Math.toRadians(0));
-    private final Pose pickup2Pose = new Pose(127, 52, Math.toRadians(0));
-    private final Pose pickup3Pose = new Pose(127, 33, Math.toRadians(0));
+    private final Pose prePickup1 = new Pose(48.500, 31, Math.toRadians(180)).mirror();
+    private final Pose prePickup2 = new Pose(48, 52, Math.toRadians(180)).mirror(); //55
+    private final Pose prePickup3 = new Pose(46.5, 84, Math.toRadians(180)).mirror();
+    //    private final Pose dropoff2 = new Pose(100, 54, Math.toRadians(180)); //55
+    private final Pose pickup1Pose = new Pose(9.000, 31, Math.toRadians(180)).mirror();
+    private final Pose pickup2Pose = new Pose(9, 52, Math.toRadians(180)).mirror();
+    private final Pose pickup3Pose = new Pose(12, 84, Math.toRadians(180)).mirror();
 
     private Path scorePreload;
 
@@ -64,7 +64,7 @@ public class greytubefront9 extends NextFTCOpMode {
 
         grabPrePickup1 = follower.pathBuilder()
                 .addPath(new BezierLine(scorePose, prePickup1))
-                .setLinearHeadingInterpolation(220, 0)
+                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup1.getHeading())
                 .build();
 
         grabPickup1 = follower.pathBuilder()
@@ -85,13 +85,13 @@ public class greytubefront9 extends NextFTCOpMode {
                 .addPath(new BezierLine(prePickup2, pickup2Pose))
                 .setLinearHeadingInterpolation(prePickup2.getHeading(), pickup2Pose.getHeading())
                 .build();
-        dropofftwo = follower.pathBuilder()
-                .addPath(new BezierLine(pickup2Pose,dropoff2))
-                .setLinearHeadingInterpolation(pickup2Pose.getHeading(),dropoff2.getHeading())
-                .build();
+//        dropofftwo = follower.pathBuilder()
+//                .addPath(new BezierLine(pickup2Pose,dropoff2))
+//                .setLinearHeadingInterpolation(pickup2Pose.getHeading(),dropoff2.getHeading())
+//                .build();
         scorePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(dropoff2, scorePose))
-                .setLinearHeadingInterpolation(dropoff2.getHeading(), scorePose.getHeading())
+                .addPath(new BezierLine(pickup2Pose, scorePose))
+                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
                 .build();
 
         grabPrePickup3 = follower.pathBuilder()
@@ -114,7 +114,6 @@ public class greytubefront9 extends NextFTCOpMode {
         switch (pathState) {
             case 0:
                 follower.followPath(scorePreload, true);
-
                 setPathState(1);
 
                 break;
@@ -133,6 +132,8 @@ public class greytubefront9 extends NextFTCOpMode {
             case 2:
                 if (!follower.isBusy()) {
                     Intake.INSTANCE.activeintake.setPower(1);
+                    Midtake.INSTANCE.newtake.setPower(0.3);
+                    follower.setMaxPower(0.8);
                     follower.followPath(grabPickup1, true);
                     setPathState(3);
                 }
@@ -140,7 +141,7 @@ public class greytubefront9 extends NextFTCOpMode {
 
             case 3:
                 if (!follower.isBusy()) {
-
+                    follower.setMaxPower(1);
                     Intake.INSTANCE.activeintake.setPower(0);
 //                    Outtake.INSTANCE.outtake.setPower(0.1);
                     follower.followPath(scorePickup1, true);
@@ -153,19 +154,23 @@ public class greytubefront9 extends NextFTCOpMode {
                     secondshootThreeBalls();
                     follower.followPath(grabPrePickup2, true);
                     Intake.INSTANCE.activeintake.setPower(1);
+                    Midtake.INSTANCE.newtake.setPower(0.3);
                     setPathState(5);
                 }
                 break;
 
             case 5:
                 if (!follower.isBusy()) {
+                    follower.setMaxPower(0.8);
                     follower.followPath(grabPickup2, true);
+                    follower.setMaxPower(1);
                     setPathState(6);
                 }
                 break;
 
             case 6:
                 if (!follower.isBusy()) {
+                    Midtake.INSTANCE.newtake.setPower(0);
                     Intake.INSTANCE.activeintake.setPower(0);
 //                    Outtake.INSTANCE.outtake.setPower(0.1);
                     follower.followPath(scorePickup2, true);
@@ -178,6 +183,7 @@ public class greytubefront9 extends NextFTCOpMode {
                     secondshootThreeBalls();
                     follower.followPath(grabPrePickup3, true);
                     Intake.INSTANCE.activeintake.setPower(1);
+                    Midtake.INSTANCE.newtake.setPower(0.3);
                     setPathState(8);
                 }
                 break;
@@ -191,6 +197,7 @@ public class greytubefront9 extends NextFTCOpMode {
 
             case 9:
                 if (!follower.isBusy()) {
+                    Midtake.INSTANCE.newtake.setPower(0);
                     Intake.INSTANCE.activeintake.setPower(0);
                     follower.followPath(scorePickup3, true);
 //                    shootThreeBalls();
@@ -243,30 +250,29 @@ public class greytubefront9 extends NextFTCOpMode {
         Outtake outtake = Outtake.INSTANCE;
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
-
-        outtake.outtake.setPower(volt.regulate(0.41)); // out1
-        sleep(1000);
+        outtake.outtake.setPower(volt.regulate(0.6)); // out1
+        sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
-        sleep(100);
+        sleep(50);
 
         intake.activeintake.setPower(volt.regulate(1.0)); // activeintake
         midtake.newtake.setPower(volt.regulate(0)); // ramp stop
-        sleep(100);
+        sleep(300);
 
         intake.activeintake.setPower(volt.regulate(0));
-        outtake.outtake.setPower(volt.regulate(0.41)); // out1 again
-        sleep(100);
+        outtake.outtake.setPower(volt.regulate(0.601)); // out1 again
+        sleep(300);
 
         midtake.newtake.setPower(volt.regulate(-1)); // ramp again
-        sleep(100);
+        sleep(300);
 
-        outtake.outtake.setPower(volt.regulate(0.43)); // slightly stronger outtake
-        sleep(100);
+        outtake.outtake.setPower(volt.regulate(0.602)); // slightly stronger outtake
+        sleep(300);
 
         intake.activeintake.setPower(volt.regulate(1.0));
         midtake.newtake.setPower(volt.regulate(-1)); // ramp
-        sleep(1000);
+        sleep(2000);
 
 // Stop all
         outtake.outtake.setPower(volt.regulate(0));
@@ -274,38 +280,33 @@ public class greytubefront9 extends NextFTCOpMode {
         intake.activeintake.setPower(volt.regulate(0));
     }
     private void shootThreeBalls() {
+
         Outtake outtake = Outtake.INSTANCE;
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
-
-        outtake.outtake.setPower(volt.regulate(0.41)); // out1
-        sleep(1000);
+        outtake.outtake.setPower(volt.regulate(0.63)); // out1
+        sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
-        sleep(100);
+        sleep(50);
 
         intake.activeintake.setPower(volt.regulate(1.0)); // activeintake
         midtake.newtake.setPower(volt.regulate(0)); // ramp stop
-        sleep(100);
+        sleep(300);
 
         intake.activeintake.setPower(volt.regulate(0));
-        outtake.outtake.setPower(volt.regulate(0.41)); // out1 again
-        sleep(100);
+        outtake.outtake.setPower(volt.regulate(0.601)); // out1 again
+        sleep(300);
 
         midtake.newtake.setPower(volt.regulate(-1)); // ramp again
-        sleep(100);
+        sleep(300);
 
-        outtake.outtake.setPower(volt.regulate(0.43)); // slightly stronger outtake
-        sleep(100);
+        outtake.outtake.setPower(volt.regulate(0.602)); // slightly stronger outtake
+        sleep(300);
 
         intake.activeintake.setPower(volt.regulate(1.0));
         midtake.newtake.setPower(volt.regulate(-1)); // ramp
-        sleep(1000);
-
-// Stop all
-        outtake.outtake.setPower(volt.regulate(0));
-        midtake.newtake.setPower(volt.regulate(0));
-        intake.activeintake.setPower(volt.regulate(0));
+        sleep(2000);
     }
 
     public void setPathState(int pState) {

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.oldteleop;
 
 import static java.lang.Math.clamp;
 
@@ -11,8 +11,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 @Disabled
-@TeleOp(name = "BlackTubeDuoFinal")
-public class BlackTubeDuoFinal extends LinearOpMode {
+@TeleOp(name = "BlackTubeSoloFinal")
+public class BlackTubeSoloFinal extends LinearOpMode {
 
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
@@ -95,12 +95,12 @@ public class BlackTubeDuoFinal extends LinearOpMode {
 
 
             // --- Mechanism Controls ---
-            if (gamepad2.a) {
+            if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
-                ramp.setPower(0.3);
+                ramp.setPower(0.5);
             }
 
-            if (gamepad2.dpad_left) {
+            if (gamepad1.dpad_left) {
                 out1.setPower(volt.regulate(-0.37));
                 out2.setPower(volt.regulate(0.37));
                 sleep(1000);
@@ -129,7 +129,7 @@ public class BlackTubeDuoFinal extends LinearOpMode {
                 sleep(100);
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(volt.regulate(-1));
-                sleep(1000);
+                sleep(1500);
 
                 // Stop all
                 out1.setPower(volt.regulate(0));
@@ -175,7 +175,7 @@ public class BlackTubeDuoFinal extends LinearOpMode {
                 ramp.setPower(volt.regulate(-1.0));
 
             }
-            if (gamepad2.x) {
+            if (gamepad1.x) {
                 activeintake.setPower(0);
                 out1.setPower(0);
                 out2.setPower(0);
@@ -188,7 +188,7 @@ public class BlackTubeDuoFinal extends LinearOpMode {
 
             //Niranjan auto align code is here! - Pranav 10/27
 
-            if (gamepad2.y) {
+            if (gamepad1.y) {
                 if (Math.abs(sdistanceError) == 0 && Math.abs(sangleError) <= SANGLE_TOLERANCE) {
                     frontLeftMotor.setPower(volt.regulate(0.0));
                     frontRightMotor.setPower(volt.regulate(0.0));

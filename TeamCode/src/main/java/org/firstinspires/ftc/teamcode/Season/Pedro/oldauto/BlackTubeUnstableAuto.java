@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.Pedro.auto;
+package org.firstinspires.ftc.teamcode.Season.Pedro.oldauto;
 
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake.outtake;
 
@@ -24,10 +24,10 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 
 //For now...
 @Disabled
-@Autonomous(name = "blacktubefront9", group = "Examples")
-public class blacktubefront9 extends NextFTCOpMode {
+@Autonomous(name = "BlackTubeUnstableAuto", group = "Examples")
+public class BlackTubeUnstableAuto extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
-    public blacktubefront9() {
+    public BlackTubeUnstableAuto() {
         addComponents(
                 new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE),
                 BulkReadComponent.INSTANCE,
@@ -85,10 +85,10 @@ public class blacktubefront9 extends NextFTCOpMode {
                 .addPath(new BezierLine(prePickup2, pickup2Pose))
                 .setLinearHeadingInterpolation(prePickup2.getHeading(), pickup2Pose.getHeading())
                 .build();
-dropofftwo = follower.pathBuilder()
-        .addPath(new BezierLine(pickup2Pose,dropoff2))
-        .setLinearHeadingInterpolation(pickup2Pose.getHeading(),dropoff2.getHeading())
-        .build();
+        dropofftwo = follower.pathBuilder()
+                .addPath(new BezierLine(pickup2Pose,dropoff2))
+                .setLinearHeadingInterpolation(pickup2Pose.getHeading(),dropoff2.getHeading())
+                .build();
         scorePickup2 = follower.pathBuilder()
                 .addPath(new BezierLine(dropoff2, scorePose))
                 .setLinearHeadingInterpolation(dropoff2.getHeading(), scorePose.getHeading())
@@ -238,8 +238,8 @@ dropofftwo = follower.pathBuilder()
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
 
-        Outtake.outtake.setPower(volt.regulate(0.28));
-        sleep(1500);
+        Outtake.outtake.setPower(volt.regulate(0.36));
+        sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1.0));
         sleep(100);
@@ -250,8 +250,8 @@ dropofftwo = follower.pathBuilder()
         sleep(300);
 
         intake.activeintake.setPower(volt.regulate(0));
-        Outtake.outtake.setPower(volt.regulate(0.32));
-        sleep(1500);
+        Outtake.outtake.setPower(volt.regulate(0.36));
+        sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1));
         sleep(50);
@@ -260,12 +260,12 @@ dropofftwo = follower.pathBuilder()
         midtake.newtake.setPower(volt.regulate(0));
         sleep(100);
 
-        Outtake.outtake.setPower(volt.regulate(0.34));
-        sleep(500);
+        Outtake.outtake.setPower(volt.regulate(0.36));
+        sleep(400);
 
         intake.activeintake.setPower(volt.regulate(1.0));
         midtake.newtake.setPower(volt.regulate(-1));
-        sleep(1000);
+        sleep(900);
 
         // Stop all
         Outtake.outtake.setPower(volt.regulate(0));
@@ -277,8 +277,8 @@ dropofftwo = follower.pathBuilder()
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
 
-        outtake.outtake.setPower(volt.regulate(0.32));
-        sleep(1500);
+        outtake.outtake.setPower(volt.regulate(0.36));
+        sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1.0));
         sleep(100);
@@ -289,8 +289,8 @@ dropofftwo = follower.pathBuilder()
         sleep(300);
 
         intake.activeintake.setPower(volt.regulate(0));
-        Outtake.outtake.setPower(volt.regulate(0.32));
-        sleep(1500);
+        Outtake.outtake.setPower(volt.regulate(0.36));
+        sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1));
         sleep(50);
@@ -299,12 +299,12 @@ dropofftwo = follower.pathBuilder()
         midtake.newtake.setPower(volt.regulate(0));
         sleep(100);
 
-        Outtake.outtake.setPower(volt.regulate(0.34));
-        sleep(500);
+        Outtake.outtake.setPower(volt.regulate(0.36));
+        sleep(400);
 
         intake.activeintake.setPower(volt.regulate(1.0));
         midtake.newtake.setPower(volt.regulate(-1));
-        sleep(1000);
+        sleep(900);
 
         // Stop all
         Outtake.outtake.setPower(volt.regulate(0));

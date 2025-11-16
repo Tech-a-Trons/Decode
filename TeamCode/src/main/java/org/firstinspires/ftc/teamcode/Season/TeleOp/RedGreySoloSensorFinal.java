@@ -20,7 +20,7 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
     DcMotor out1 = null;
     DcMotor out2 = null;
     DcMotor ramp = null;
-    ColorSensor sensor;
+    //ColorSensor sensor;
     DcMotor frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
     int artifactcounter = 0;
     private final double STARGET_DISTANCE = 40.1; // inches
@@ -38,7 +38,7 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
         ramp = hardwareMap.get(DcMotor.class, "ramp");
 
-        sensor = hardwareMap.get(ColorSensor.class, "ColorSensor");
+        //sensor = hardwareMap.get(ColorSensor.class, "ColorSensor");
 
         RedExperimentalDistanceLExtractor ll = new RedExperimentalDistanceLExtractor(hardwareMap);
         ll.startReading();
@@ -172,11 +172,7 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
                 out1.setPower(volt.regulate(0.3));
                 out2.setPower(volt.regulate(-0.3));
             }
-            if (gamepad1.left_bumper) {
-                artifactcounter -= 3;
-                if (artifactcounter < 0) {
-                    artifactcounter = 0;
-                }
+            if(gamepad1.left_bumper){
                 out1.setPower(volt.regulate(-0.6));
                 out2.setPower(volt.regulate(0.6));
                 sleep(1000);

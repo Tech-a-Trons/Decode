@@ -172,11 +172,7 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
                 out1.setPower(volt.regulate(0.3));
                 out2.setPower(volt.regulate(-0.3));
             }
-            if (gamepad1.left_bumper) {
-                artifactcounter -= 3;
-                if (artifactcounter < 0) {
-                    artifactcounter = 0;
-                }
+            if(gamepad1.left_bumper){
                 out1.setPower(volt.regulate(-0.6));
                 out2.setPower(volt.regulate(0.6));
                 sleep(1000);

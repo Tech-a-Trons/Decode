@@ -23,12 +23,12 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
     ColorSensor sensor;
     DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
     int artifactcounter = 0;
-    private final double STARGET_DISTANCE = 40.1; // inches
-    private final double SANGLE_TOLERANCE = 1.57;
-    private final double MTARGET_DISTANCE = 2838; // PLACEHOLDER
-    private final double MANGLE_TOLERANCE = 134; // PLACEHOLDER
-    private final double FTARGET_DISTANCE = 96.5; // PLACEHOLDER
-    private final double FANGLE_TOLERANCE = 27.0; // PLACEHOLDER
+    private final double STARGET_DISTANCE = 42.97; // inches
+    private final double SANGLE_TOLERANCE = -0.86;
+//    private final double MTARGET_DISTANCE = 2838; // PLACEHOLDER
+//    private final double MANGLE_TOLERANCE = 134; // PLACEHOLDER
+    private final double FTARGET_DISTANCE = 115.30; // PLACEHOLDER
+    private final double FANGLE_TOLERANCE = 3.06; // PLACEHOLDER
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -82,10 +82,10 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
             }
 
             double sdistanceError = distance - STARGET_DISTANCE;
-            double mdistanceError = distance - MTARGET_DISTANCE;
+            //double mdistanceError = distance - MTARGET_DISTANCE;
             double fdistanceError = distance - FTARGET_DISTANCE;
             double sangleError = tx;
-            double mangleError = tx;
+            //double mangleError = tx;
             double fangleError = tx;
 
             double sforwardPower = (-sdistanceError * 0.05) * 1;
@@ -96,9 +96,9 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
             double fstrafePower = (-fangleError * 0.03) * 1;
             double fturnPower = (fangleError * 0.02) * 1;
 
-            double mforwardPower = (-mdistanceError * 0.05) * 1;
-            double mstrafePower = (-mangleError * 0.03) * 1;
-            double mturnPower = (mangleError * 0.02) * 1;
+//            double mforwardPower = (-mdistanceError * 0.05) * 1;
+//            double mstrafePower = (-mangleError * 0.03) * 1;
+//            double mturnPower = (mangleError * 0.02) * 1;
 
             sforwardPower = clamp(sforwardPower, -0.4, 0.4);
             shstrafePower = clamp(shstrafePower, -0.4, 0.4);
@@ -108,9 +108,9 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
             fstrafePower = clamp(fstrafePower, -0.4, 0.4);
             fturnPower = clamp(fturnPower, -0.3, 0.3);
 
-            mforwardPower = clamp(mforwardPower, -0.4, 0.4);
-            mstrafePower = clamp(mstrafePower, -0.4, 0.4);
-            mturnPower = clamp(mturnPower, -0.3, 0.3);
+//            mforwardPower = clamp(mforwardPower, -0.4, 0.4);
+//            mstrafePower = clamp(mstrafePower, -0.4, 0.4);
+//            mturnPower = clamp(mturnPower, -0.3, 0.3);
 
             // --- Mechanism Controls ---
             if (gamepad1.a) {
@@ -172,10 +172,6 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
                 out2.setPower(volt.regulate(-0.3));
             }
             if(gamepad1.left_bumper){
-                artifactcounter -= 3;
-                if (artifactcounter < 0) {
-                    artifactcounter = 0;
-                }
                 out1.setPower(volt.regulate(-0.6));
                 out2.setPower(volt.regulate(0.6));
                 sleep(1000);
@@ -242,16 +238,16 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
                 }
             }
 
-            if (gamepad1.right_bumper) {
-                if (Math.abs(mdistanceError) == 0 && Math.abs(mangleError) <= MANGLE_TOLERANCE) {
-                    frontLeftMotor.setPower(volt.regulate(0.0));
-                    frontRightMotor.setPower(volt.regulate(0.0));
-                    backLeftMotor.setPower(volt.regulate(0.0));
-                    backRightMotor.setPower(volt.regulate(0.0));
-                } else {
-                    moveMecanum(mforwardPower, mstrafePower, mturnPower);
-                }
-            }
+//            if (gamepad1.right_bumper) {
+//                if (Math.abs(mdistanceError) == 0 && Math.abs(mangleError) <= MANGLE_TOLERANCE) {
+//                    frontLeftMotor.setPower(volt.regulate(0.0));
+//                    frontRightMotor.setPower(volt.regulate(0.0));
+//                    backLeftMotor.setPower(volt.regulate(0.0));
+//                    backRightMotor.setPower(volt.regulate(0.0));
+//                } else {
+//                    moveMecanum(mforwardPower, mstrafePower, mturnPower);
+//                }
+//            }
 
             // --- Drivetrain Controls ---
             double y = -gamepad1.left_stick_y; // forward/back

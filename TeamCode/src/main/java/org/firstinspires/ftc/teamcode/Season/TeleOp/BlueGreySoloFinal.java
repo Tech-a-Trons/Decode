@@ -114,7 +114,20 @@ public class BlueGreySoloFinal extends LinearOpMode {
 //            mforwardPower = clamp(mforwardPower, -0.4, 0.4);
 //            mstrafePower = clamp(mstrafePower, -0.4, 0.4);
 //            mturnPower = clamp(mturnPower, -0.3, 0.3);
-
+            // ---Kill Switches--
+            if (gamepad2.a){
+                activeintake.setPower(0);
+            }
+            if (gamepad2.b){
+                out1.setPower(0);
+                out2.setPower(0);
+            }
+            if (gamepad2.y){
+                frontLeftMotor.setPower(0);
+                backRightMotor.setPower(0);
+                frontRightMotor.setPower(0);
+                backLeftMotor.setPower(0);
+            }
             // --- Mechanism Controls ---
             if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));

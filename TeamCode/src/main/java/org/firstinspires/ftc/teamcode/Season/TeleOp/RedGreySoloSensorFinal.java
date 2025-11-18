@@ -44,7 +44,7 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
         ll.startReading();
         ll.setTelemetry(telemetry);
 
-        colorparser = new ExperimentalGreenAndPurple();
+        colorparser = new ExperimentalGreenAndPurple(hardwareMap);
 
         frontLeftMotor = hardwareMap.get(DcMotor.class, "fl");
         backLeftMotor = hardwareMap.get(DcMotor.class, "bl");

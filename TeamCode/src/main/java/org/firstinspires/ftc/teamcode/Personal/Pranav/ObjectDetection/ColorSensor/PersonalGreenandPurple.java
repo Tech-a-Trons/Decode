@@ -65,7 +65,7 @@ public class PersonalGreenandPurple {
         // If green is clearly highest → likely green
         if (green > red && green > blue && total > 100) return "green";
 
-        return null; // unknown color
+        return "VALUE";
     }
 
     public float gethue() {

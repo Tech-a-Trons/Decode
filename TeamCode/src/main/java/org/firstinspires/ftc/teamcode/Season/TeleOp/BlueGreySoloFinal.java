@@ -127,6 +127,7 @@ public class BlueGreySoloFinal extends LinearOpMode {
                 backRightMotor.setPower(0);
                 frontRightMotor.setPower(0);
                 backLeftMotor.setPower(0);
+                sleep(100);
             }
             // --- Mechanism Controls ---
             if (gamepad1.a) {

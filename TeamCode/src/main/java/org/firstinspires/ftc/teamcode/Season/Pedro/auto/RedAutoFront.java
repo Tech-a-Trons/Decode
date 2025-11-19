@@ -161,9 +161,9 @@ public class RedAutoFront extends NextFTCOpMode {
 
             case 5:
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(0.8);
+                    follower.setMaxPower(0.85);
                     follower.followPath(grabPickup2, true);
-                    follower.setMaxPower(1);
+
                     setPathState(6);
                 }
                 break;
@@ -174,6 +174,7 @@ public class RedAutoFront extends NextFTCOpMode {
                     Intake.INSTANCE.activeintake.setPower(0);
 //                    Outtake.INSTANCE.outtake.setPower(0.1);
                     follower.followPath(scorePickup2, true);
+                    follower.setMaxPower(1);
                     setPathState(7);
                 }
                 break;

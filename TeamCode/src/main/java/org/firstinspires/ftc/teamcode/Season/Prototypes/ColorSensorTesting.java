@@ -80,19 +80,21 @@ public class ColorSensorTesting extends LinearOpMode {
         }
     }
 
-    public void OutcountBalls() {
-        String color = colorparser.getColor();
-        current_alphavalue2 = colorparser.getalpha();
-        if (artifactcounter > 0) {
-            if (current_alphavalue2 > 40 && last_alphavalue2 < 40) {
-                artifactcounter -= 1;
-                rgbindicator.setPosition(0);
-            }
-            last_alphavalue = current_alphavalue;
-        } else if (artifactcounter == 0) {
-            telemetry.addLine("0 BALLS!");
-            last_alphavalue = current_alphavalue;
-            rgbindicator.setPosition(0.75);
-        }
-    }
+    //DO NOT USE
+
+//    public void OutcountBalls() {
+//        String color = colorparser.getColor();
+//        current_alphavalue2 = colorparser.getalpha();
+//        if (artifactcounter > 0) {
+//            if (current_alphavalue2 > 36 && last_alphavalue2 < 36) {
+//                artifactcounter -= 1;
+//                rgbindicator.setPosition(0);
+//            }
+//            last_alphavalue = current_alphavalue;
+//        } else if (artifactcounter == 0) {
+//            telemetry.addLine("0 BALLS!");
+//            last_alphavalue = current_alphavalue;
+//            rgbindicator.setPosition(0.75);
+//        }
+//    }
 }

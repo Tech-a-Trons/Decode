@@ -34,7 +34,7 @@ public class ExperimentalArtifacts {
 
     public ExperimentalArtifacts(HardwareMap hardwareMap) {
         colorsensor = hardwareMap.get(RevColorSensorV3.class, "ColorSensor");
-        colorsensor2 = hardwareMap.get(RevColorSensorV3.class, "ColorSensor2");
+        //colorsensor2 = hardwareMap.get(RevColorSensorV3.class, "ColorSensor2");
     }
 
     public String Getcolor() {
@@ -44,48 +44,48 @@ public class ExperimentalArtifacts {
         blue = colorsensor.blue();
         alpha = colorsensor.alpha();
 
-        red2 = colorsensor2.red();
-        green2 = colorsensor2.green();
-        blue2 = colorsensor2.blue();
-        alpha2 = colorsensor2.alpha();
+        //red2 = colorsensor2.red();
+        //green2 = colorsensor2.green();
+        //blue2 = colorsensor2.blue();
+        //alpha2 = colorsensor2.alpha();
 
         float total = red + green + blue;
         if (total == 0) return null; // avoid divide-by-zero
 
-        float total2 = red2 + green2 + blue2;
-        if (total2 == 0) return null; // avoid divide-by-zero
+        //float total2 = red2 + green2 + blue2;
+        //if (total2 == 0) return null; // avoid divide-by-zero
 
         // Normalize for brightness independence
         double rNorm = (double) red / total;
         double gNorm = (double) green / total;
         double bNorm = (double) blue / total;
 
-        double rNorm2 = (double) red2 / total2;
-        double gNorm2 = (double) green2 / total2;
-        double bNorm2 = (double) blue2 / total2;
+        //double rNorm2 = (double) red2 / total2;
+        //double gNorm2 = (double) green2 / total2;
+        //double bNorm2 = (double) blue2 / total2;
 
         // Scale for HSV conversion
         int scaledR = (int) (rNorm * 255);
         int scaledG = (int) (gNorm * 255);
         int scaledB = (int) (bNorm * 255);
 
-        int scaledR2 = (int) (rNorm2 * 255);
-        int scaledG2 = (int) (gNorm2 * 255);
-        int scaledB2 = (int) (bNorm2 * 255);
+        //int scaledR2 = (int) (rNorm2 * 255);
+        //int scaledG2 = (int) (gNorm2 * 255);
+        //int scaledB2 = (int) (bNorm2 * 255);
 
         float[] hsv = new float[3];
         Color.RGBToHSV(scaledR, scaledG, scaledB, hsv);
 
         float[] hsv2 = new float[3];
-        Color.RGBToHSV(scaledR2, scaledG2, scaledB2, hsv2);
+        //Color.RGBToHSV(scaledR2, scaledG2, scaledB2, hsv2);
 
         chue = hsv[0];   // 0–360
         csat = hsv[1];   // 0–1
         cval = hsv[2];   // 0–1
 
-        chue2 = hsv2[0];   // 0–360
-        csat2 = hsv2[1];   // 0–1
-        cval2 = hsv2[2];   // 0–1
+        //chue2 = hsv2[0];   // 0–360
+        //csat2 = hsv2[1];   // 0–1
+        //cval2 = hsv2[2];   // 0–1
 
         // ----------------------------
         // 1️⃣ Primary HSV detection
@@ -103,18 +103,18 @@ public class ExperimentalArtifacts {
             }
         }
 
-        if (csat2 > 0.15 && cval2 > 0.15) { // ignore dim/gray
+        //if (csat2 > 0.15 && cval2 > 0.15) { // ignore dim/gray
             // Green
-            if (chue2 >= 162 && chue2 <= 163) {
-                return "green";
-            } else if (chue2 >= 200 && chue2 <= 230) {
-                return "purple";
+        //    if (chue2 >= 162 && chue2 <= 163) {
+        //        return "green";
+        //    } else if (chue2 >= 200 && chue2 <= 230) {
+        //        return "purple";
 //            } else if (chue >= 142 && chue <= 155){
 //                return "red";
-            }else {
-                return "VALUE";
-            }
-        }
+        //    }else {
+        //        return "VALUE";
+        //    }
+        //}
 
         // ----------------------------
         // 2️⃣ Relative RGB fallback
@@ -170,6 +170,6 @@ public class ExperimentalArtifacts {
     public float getalpha() {
         return alpha;
     }
-    public float getAlpha2(){return alpha2; }
+    //public float getAlpha2(){return alpha2; }
     public String getColor() {return Getcolor();}
 }

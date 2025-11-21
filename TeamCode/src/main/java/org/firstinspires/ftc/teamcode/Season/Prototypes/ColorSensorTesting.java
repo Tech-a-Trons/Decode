@@ -33,7 +33,7 @@ public class ColorSensorTesting extends LinearOpMode {
         while (opModeIsActive()) {
             telemetry.addData("Ball count: ", artifactcounter);
             telemetry.addData("Alpha: ", colorparser.getalpha());
-            telemetry.addData("Alpha2: ", colorparser.getAlpha2());
+            //telemetry.addData("Alpha2: ", colorparser.getAlpha2());
             telemetry.addData("Current Alpha: ", current_alphavalue);
             telemetry.addData("Last Alpha: ", last_alphavalue);
             telemetry.update();
@@ -47,19 +47,19 @@ public class ColorSensorTesting extends LinearOpMode {
         String color = colorparser.getColor();
         current_alphavalue = colorparser.getalpha();
         if (artifactcounter < 3) {
-            if (current_alphavalue > 40 && last_alphavalue < 40) {
+            if (current_alphavalue > 42 && last_alphavalue < 42) {
                 artifactcounter += 1;
             }
             last_alphavalue = current_alphavalue;
         } else if (artifactcounter == 3) {
             telemetry.addLine("3 BALLS!");
-            if (current_alphavalue > 40 && last_alphavalue < 40) {
+            if (current_alphavalue > 42 && last_alphavalue < 42) {
                 artifactcounter += 1;
             }
             last_alphavalue = current_alphavalue;
             //rgbindicator.setPosition(0.5);
         } else if (artifactcounter > 3) {
-            if (current_alphavalue > 40 && last_alphavalue < 40) {
+            if (current_alphavalue > 42 && last_alphavalue < 42) {
                 artifactcounter += 1;
             }
             last_alphavalue = current_alphavalue;

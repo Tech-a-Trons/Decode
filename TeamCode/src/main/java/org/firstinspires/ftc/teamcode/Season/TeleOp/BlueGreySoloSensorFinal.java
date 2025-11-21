@@ -115,7 +115,7 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
             // --- Mechanism Controls ---
             if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
-                ramp.setPower(0.3);
+                ramp.setPower(0.4);
                 //countBalls();
             }
 

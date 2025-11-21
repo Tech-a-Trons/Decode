@@ -18,12 +18,15 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.ExperimentalGreenAndPurple;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
-@TeleOp(name = "PedroExperiment")
-public class PedroExperiment extends LinearOpMode {
+@TeleOp(name = "BlueTeleop")
+public class BlueTeleop extends LinearOpMode {
         private Follower follower;
+    ExperimentalGreenAndPurple colorparser;
+    int artifactcounter = 0;
     private final Pose startPose = new Pose(123.13, 122.08, Math.toRadians(220)); //See ExampleAuto to understand how to use this
     private boolean automatedDrive;
     private TelemetryManager telemetryM;
@@ -46,6 +49,7 @@ public class PedroExperiment extends LinearOpMode {
     int shootStep = 0;
     @Override
     public void runOpMode() throws InterruptedException {
+        colorparser = new ExperimentalGreenAndPurple(hardwareMap);
         // Initialize hardware
         out1 = hardwareMap.get(DcMotor.class, "outtake1");
         out2 = hardwareMap.get(DcMotor.class, "outtake2");
@@ -161,7 +165,7 @@ public class PedroExperiment extends LinearOpMode {
             // --- Mechanism Controls ---
             if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
-                ramp.setPower(0.3);
+                ramp.setPower(0.4);
             }
 
             // Start sequence
@@ -174,7 +178,6 @@ public class PedroExperiment extends LinearOpMode {
 // Shooting state machine
             if (shooting == true) {
                 switch (shootStep) {
-
                     case 0:
                         out1.setPower(volt.regulate(-0.41));
                         out2.setPower(volt.regulate(0.41));

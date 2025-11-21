@@ -21,10 +21,10 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "BlueAutoFront9", group = "Examples")
-public class BlueAutoFront extends NextFTCOpMode {
+@Autonomous(name = "RedAutoFront12", group = "Examples")
+public class RedAutoFront12 extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
-    public BlueAutoFront() {
+    public RedAutoFront12() {
         addComponents(
                 new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE),
                 BulkReadComponent.INSTANCE,
@@ -37,18 +37,18 @@ public class BlueAutoFront extends NextFTCOpMode {
     private Timer pathTimer, opmodeTimer;
     private int pathState;
 
-    private final Pose startPose = new Pose(123.13, 122.08, Math.toRadians(220)).mirror();
+    private final Pose startPose = new Pose(123.13, 122.08, Math.toRadians(220));
     //    private final Pose scorePose = new Pose(90, 90, Math.toRadians(215));
-    private final Pose scorePose = new Pose(93.13953488372094, 99.83720930232559, Math.toRadians(215)).mirror();
+    private final Pose scorePose = new Pose(88, 88, Math.toRadians(215));
 
 
-    private final Pose prePickup1 = new Pose(80, 76, Math.toRadians(0)).mirror();
-    private final Pose prePickup2 = new Pose(80.765, 54, Math.toRadians(0)).mirror(); //55
-    private final Pose prePickup3 = new Pose(85.565, 30, Math.toRadians(0)).mirror();
-    private final Pose dropoff2 = new Pose(100, 54, Math.toRadians(0)).mirror(); //55
-    private final Pose pickup1Pose = new Pose(123, 76, Math.toRadians(0)).mirror();
-    private final Pose pickup2Pose = new Pose(126, 54, Math.toRadians(0)).mirror();
-    private final Pose pickup3Pose = new Pose(123, 30, Math.toRadians(0)).mirror();
+    private final Pose prePickup1 = new Pose(80, 80, Math.toRadians(0));
+    private final Pose prePickup2 = new Pose(80.765, 54, Math.toRadians(0)); //55
+    private final Pose prePickup3 = new Pose(85.565, 33, Math.toRadians(0));
+    private final Pose dropoff2 = new Pose(100, 54, Math.toRadians(0)); //55
+    private final Pose pickup1Pose = new Pose(123, 80, Math.toRadians(0));
+    private final Pose pickup2Pose = new Pose(127.5, 54, Math.toRadians(0));
+    private final Pose pickup3Pose = new Pose(126, 32, Math.toRadians(0));
 
     private Path scorePreload;
 
@@ -64,7 +64,7 @@ public class BlueAutoFront extends NextFTCOpMode {
 
         grabPrePickup1 = follower.pathBuilder()
                 .addPath(new BezierLine(scorePose, prePickup1))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), 180)
+                .setLinearHeadingInterpolation(220, 0)
                 .build();
 
         grabPickup1 = follower.pathBuilder()
@@ -94,26 +94,25 @@ public class BlueAutoFront extends NextFTCOpMode {
                 .setLinearHeadingInterpolation(dropoff2.getHeading(), scorePose.getHeading())
                 .build();
 
-//        grabPrePickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(scorePose, prePickup3))
-//                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
-//                .build();
-//
-//        grabPickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(prePickup3, pickup3Pose))
-//                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
-//                .build();
-//
-//        scorePickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(pickup3Pose, scorePose))
-//                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
-//                .build();
+        grabPrePickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, prePickup3))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
+                .build();
+
+        grabPickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(prePickup3, pickup3Pose))
+                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
+                .build();
+
+        scorePickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(pickup3Pose, scorePose))
+                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
+                .build();
     }
 
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                Outtake.INSTANCE.outtake.setPower(volt.regulate(0.42));
                 follower.followPath(scorePreload, true);
                 setPathState(1);
 
@@ -134,7 +133,7 @@ public class BlueAutoFront extends NextFTCOpMode {
                 if (!follower.isBusy()) {
                     Intake.INSTANCE.activeintake.setPower(1);
                     Midtake.INSTANCE.newtake.setPower(0.3);
-//                    follower.setMaxPower(0.8);
+                    follower.setMaxPower(0.8);
                     follower.followPath(grabPickup1, true);
                     setPathState(3);
                 }
@@ -142,7 +141,7 @@ public class BlueAutoFront extends NextFTCOpMode {
 
             case 3:
                 if (!follower.isBusy()) {
-//                    follower.setMaxPower(1);
+                    follower.setMaxPower(1);
                     Intake.INSTANCE.activeintake.setPower(0);
 //                    Outtake.INSTANCE.outtake.setPower(0.1);
                     follower.followPath(scorePickup1, true);
@@ -162,9 +161,9 @@ public class BlueAutoFront extends NextFTCOpMode {
 
             case 5:
                 if (!follower.isBusy()) {
-//                    follower.setMaxPower(0.8);
+                    follower.setMaxPower(0.85);
                     follower.followPath(grabPickup2, true);
-                    follower.setMaxPower(1);
+
                     setPathState(6);
                 }
                 break;
@@ -174,7 +173,9 @@ public class BlueAutoFront extends NextFTCOpMode {
                     Midtake.INSTANCE.newtake.setPower(0);
                     Intake.INSTANCE.activeintake.setPower(0);
 //                    Outtake.INSTANCE.outtake.setPower(0.1);
+//                    follower.setMaxPower(0.7);
                     follower.followPath(scorePickup2, true);
+                    follower.setMaxPower(1);
                     setPathState(7);
                 }
                 break;
@@ -253,28 +254,28 @@ public class BlueAutoFront extends NextFTCOpMode {
         Intake intake = Intake.INSTANCE;
 
         outtake.outtake.setPower(volt.regulate(0.42)); // out1
-        sleep(650);
+        sleep(800);
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
-//        sleep(50);
+        sleep(50);
 
         intake.activeintake.setPower(volt.regulate(1.0)); // activeintake
-//        midtake.newtake.setPower(volt.regulate(0)); // ramp stop
-//        sleep(100);
+        midtake.newtake.setPower(volt.regulate(0)); // ramp stop
+        sleep(100);
 
-//        intake.activeintake.setPower(volt.regulate(0));
+        intake.activeintake.setPower(volt.regulate(0));
         outtake.outtake.setPower(volt.regulate(0.42)); // out1 again
-//        sleep(50);
+        sleep(50);
 
         midtake.newtake.setPower(volt.regulate(-1)); // ramp again
-//        sleep(50);
+        sleep(50);
 
         outtake.outtake.setPower(volt.regulate(0.44)); // slightly stronger outtake
-//        sleep(100);
+        sleep(100);
 
         intake.activeintake.setPower(volt.regulate(1.0));
         midtake.newtake.setPower(volt.regulate(-1)); // ramp
-        sleep(1200);
+        sleep(1100);
 
 // Stop all
         outtake.outtake.setPower(volt.regulate(0));
@@ -286,28 +287,28 @@ public class BlueAutoFront extends NextFTCOpMode {
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
         outtake.outtake.setPower(volt.regulate(0.42)); // out1
-        sleep(650); //800
+        sleep(800);
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
-//        sleep(50);
+        sleep(50);
 
         intake.activeintake.setPower(volt.regulate(1.0)); // activeintake
-//        midtake.newtake.setPower(volt.regulate(0)); // ramp stop
-//        sleep(50);
-//
-//        intake.activeintake.setPower(volt.regulate(0));
+        midtake.newtake.setPower(volt.regulate(0)); // ramp stop
+        sleep(50);
+
+        intake.activeintake.setPower(volt.regulate(0));
         outtake.outtake.setPower(volt.regulate(0.41)); // out1 again
-//        sleep(100);
+        sleep(100);
 
         midtake.newtake.setPower(volt.regulate(-1)); // ramp again
-//        sleep(50);
+        sleep(50);
 
         outtake.outtake.setPower(volt.regulate(0.43)); // slightly stronger outtake
-//        sleep(100);
+        sleep(100);
 
         intake.activeintake.setPower(volt.regulate(1.0));
         midtake.newtake.setPower(volt.regulate(-1)); // ramp
-        sleep(1200);
+        sleep(1100);
 
 // Stop all
         outtake.outtake.setPower(volt.regulate(0));

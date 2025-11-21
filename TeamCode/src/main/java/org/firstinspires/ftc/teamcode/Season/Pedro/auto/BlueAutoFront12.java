@@ -21,10 +21,10 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "BlueAutoFront9", group = "Examples")
-public class BlueAutoFront extends NextFTCOpMode {
+@Autonomous(name = "BlueAutoFront12", group = "Examples")
+public class BlueAutoFront12 extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
-    public BlueAutoFront() {
+    public BlueAutoFront12() {
         addComponents(
                 new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE),
                 BulkReadComponent.INSTANCE,
@@ -94,20 +94,20 @@ public class BlueAutoFront extends NextFTCOpMode {
                 .setLinearHeadingInterpolation(dropoff2.getHeading(), scorePose.getHeading())
                 .build();
 
-//        grabPrePickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(scorePose, prePickup3))
-//                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
-//                .build();
-//
-//        grabPickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(prePickup3, pickup3Pose))
-//                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
-//                .build();
-//
-//        scorePickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(pickup3Pose, scorePose))
-//                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
-//                .build();
+        grabPrePickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, prePickup3))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
+                .build();
+
+        grabPickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(prePickup3, pickup3Pose))
+                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
+                .build();
+
+        scorePickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(pickup3Pose, scorePose))
+                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
+                .build();
     }
 
     public void autonomousPathUpdate() {
@@ -215,38 +215,7 @@ public class BlueAutoFront extends NextFTCOpMode {
         }
     }
 
-    // 🔹 Clean shooting sequence (no volt.regulate)
-//    private void shootThreeBalls() {
-//        Outtake outtake = Outtake.INSTANCE;
-//        Midtake midtake = Midtake.INSTANCE;
-//        Intake intake = Intake.INSTANCE;
-//        Outtake.outtake.setPower(0.36);
-//sleep(800);
-//        midtake.newtake.setPower(-1.0);
-//        sleep(100);
-//        outtake.outtake.setPower(.3);
-//        intake.activeintake.setPower(1.0);
-//        midtake.newtake.setPower(0);
-//        sleep(300);
-//        intake.activeintake.setPower(0);
-//        outtake.outtake.setPower(0.33);
-//        sleep(800);
-//        midtake.newtake.setPower(-1);
-//        sleep(50);
-//        outtake.outtake.setPower(0.36);
-//        midtake.newtake.setPower(0);
-//        sleep(100);
-//        outtake.outtake.setPower(0.36);
-//        sleep(500);
-//        intake.activeintake.setPower(1.0);
-//        midtake.newtake.setPower(-1);
-//        sleep(600);
-//
-//        // Stop all
-//        outtake.outtake.setPower(0);
-//        midtake.newtake.setPower(0);
-//        intake.activeintake.setPower(0);
-//    }
+
     private void secondshootThreeBalls() {
         Outtake outtake = Outtake.INSTANCE;
         Midtake midtake = Midtake.INSTANCE;

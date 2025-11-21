@@ -21,7 +21,7 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "RedAutoFar", group = "Examples")
+@Autonomous(name = "RedAutoFar9", group = "Examples")
 public class RedAutoFar extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
     public RedAutoFar() {

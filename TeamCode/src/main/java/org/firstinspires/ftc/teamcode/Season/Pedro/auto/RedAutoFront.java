@@ -21,7 +21,7 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "RedAutoFront", group = "Examples")
+@Autonomous(name = "RedAutoFront9", group = "Examples")
 public class RedAutoFront extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
     public RedAutoFront() {
@@ -47,7 +47,7 @@ public class RedAutoFront extends NextFTCOpMode {
     private final Pose prePickup3 = new Pose(85.565, 33, Math.toRadians(0));
     private final Pose dropoff2 = new Pose(100, 54, Math.toRadians(0)); //55
     private final Pose pickup1Pose = new Pose(123, 80, Math.toRadians(0));
-    private final Pose pickup2Pose = new Pose(127.5, 52, Math.toRadians(0));
+    private final Pose pickup2Pose = new Pose(127.5, 54, Math.toRadians(0));
     private final Pose pickup3Pose = new Pose(126, 32, Math.toRadians(0));
 
     private Path scorePreload;
@@ -94,20 +94,20 @@ public class RedAutoFront extends NextFTCOpMode {
                 .setLinearHeadingInterpolation(dropoff2.getHeading(), scorePose.getHeading())
                 .build();
 
-        grabPrePickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, prePickup3))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
-                .build();
-
-        grabPickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(prePickup3, pickup3Pose))
-                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
-                .build();
-
-        scorePickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup3Pose, scorePose))
-                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
-                .build();
+//        grabPrePickup3 = follower.pathBuilder()
+//                .addPath(new BezierLine(scorePose, prePickup3))
+//                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
+//                .build();
+//
+//        grabPickup3 = follower.pathBuilder()
+//                .addPath(new BezierLine(prePickup3, pickup3Pose))
+//                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
+//                .build();
+//
+//        scorePickup3 = follower.pathBuilder()
+//                .addPath(new BezierLine(pickup3Pose, scorePose))
+//                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
+//                .build();
     }
 
     public void autonomousPathUpdate() {
@@ -173,6 +173,7 @@ public class RedAutoFront extends NextFTCOpMode {
                     Midtake.INSTANCE.newtake.setPower(0);
                     Intake.INSTANCE.activeintake.setPower(0);
 //                    Outtake.INSTANCE.outtake.setPower(0.1);
+                    follower.setMaxPower(0.7);
                     follower.followPath(scorePickup2, true);
                     follower.setMaxPower(1);
                     setPathState(7);

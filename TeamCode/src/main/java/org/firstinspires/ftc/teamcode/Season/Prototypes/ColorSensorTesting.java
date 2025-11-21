@@ -66,6 +66,8 @@ public class ColorSensorTesting extends LinearOpMode {
         }
     }
 
+    // For RGB indicator
+
     public void light() {
         if (artifactcounter == 0) {
             rgbindicator.setPosition(0);

@@ -158,7 +158,7 @@ public class BlueGreySoloFinal extends LinearOpMode {
             // --- Mechanism Controls ---
             if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
-                ramp.setPower(0.3);
+                ramp.setPower(0.8); //0.3
             }
 
             if (gamepad1.dpad_left) {
@@ -239,7 +239,11 @@ public class BlueGreySoloFinal extends LinearOpMode {
             }
 
             if (gamepad1.right_trigger > 0.0) {
-                ramp.setPower(volt.regulate(gamepad1.right_trigger));
+                ramp.setPower(0.3);
+                activeintake.setPower(-1);
+                sleep(100);
+                activeintake.setPower(0);
+                ramp.setPower(0);
             }
 
             //Niranjan auto align code is here! - Pranav 10/27

@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.Blue
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
 @TeleOp(name = "BlueTeleop")
-public class PedroExperiment extends LinearOpMode {
+public class BlueTeleop extends LinearOpMode {
         private Follower follower;
     ExperimentalGreenAndPurple colorparser;
     int artifactcounter = 0;

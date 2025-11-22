@@ -15,18 +15,27 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.ExperimentalArtifacts;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.ExperimentalGreenAndPurple;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
 @TeleOp(name = "BlueTeleop")
 public class BlueTeleop extends LinearOpMode {
+    ExperimentalArtifacts colorparser;
+    Servo rgbindicator;
+    public int artifactcounter = 0;
+    public float last_alphavalue = 32;
+    public float last_alphavalue2 = 32;
+
+    public float current_alphavalue = 0;
+    public float current_alphavalue2 = 0;
         private Follower follower;
-    ExperimentalGreenAndPurple colorparser;
-    int artifactcounter = 0;
     private final Pose startPose = new Pose(123.13, 122.08, Math.toRadians(220)); //See ExampleAuto to understand how to use this
     private boolean automatedDrive;
     private TelemetryManager telemetryM;
@@ -49,7 +58,11 @@ public class BlueTeleop extends LinearOpMode {
     int shootStep = 0;
     @Override
     public void runOpMode() throws InterruptedException {
-        colorparser = new ExperimentalGreenAndPurple(hardwareMap);
+        colorparser = new ExperimentalArtifacts(hardwareMap);
+        rgbindicator = hardwareMap.get(Servo.class, "rgbled");
+
+        telemetry.addLine("Ready!");
+        telemetry.update();
         // Initialize hardware
         out1 = hardwareMap.get(DcMotor.class, "outtake1");
         out2 = hardwareMap.get(DcMotor.class, "outtake2");
@@ -87,6 +100,9 @@ public class BlueTeleop extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
+            IncountBalls();
+            light();
+
 //            follower.update();
 //            telemetryM.update();
             ll.update();
@@ -118,13 +134,13 @@ public class BlueTeleop extends LinearOpMode {
             //double mangleError = tx;
             double fangleError = tx;
 
-            double sforwardPower = (-sdistanceError * 0.05) * 1;
-            double shstrafePower = (-sangleError * 0.03) * 1;
-            double sturnPower = (sangleError * 0.02) * 1;
+            double sforwardPower = (-sdistanceError * 0.05) * 100; //1
+            double shstrafePower = (-sangleError * 0.03) * 5;//1
+            double sturnPower = (sangleError * 0.02) * 1;//1
 
-            double farforwardPower = (-fdistanceError * 0.05) * 1;
-            double fstrafePower = (-fangleError * 0.03) * 1;
-            double fturnPower = (fangleError * 0.02) * 1;
+            double farforwardPower = (-fdistanceError * 0.05) * 10;//1
+            double fstrafePower = (-fangleError * 0.03) * 10;//1
+            double fturnPower = (fangleError * 0.02) * 10;//1
 
 //            double mforwardPower = (-mdistanceError * 0.05) * 1;
 //            double mstrafePower = (-mangleError * 0.03) * 1;
@@ -166,10 +182,11 @@ public class BlueTeleop extends LinearOpMode {
             if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(0.4);
+
             }
 
             // Start sequence
-            if (gamepad1.dpad_left) {
+            if (gamepad1.dpad_left || gamepad1.b ) {
                 shooting = true;
                 shootStep = 0;
                 shootTimer.reset();
@@ -240,17 +257,18 @@ public class BlueTeleop extends LinearOpMode {
                     case 6:
                         activeintake.setPower(volt.regulate(1.0));
                         ramp.setPower(volt.regulate(-1));
-
+                        shootStep=0;
                         // Done
+                        ResetBalls();
                         shooting = false;
                         break;
                 }
             }
 
-            if (gamepad1.b) {
-                out1.setPower(volt.regulate(-0.36));
-                out2.setPower(volt.regulate(0.36));
-            }
+//            if (gamepad1.b) {
+//                out1.setPower(volt.regulate(-0.36));
+//                out2.setPower(volt.regulate(0.36));
+//            }
 
             if (gamepad1.dpad_down) {
                 out1.setPower(volt.regulate(0.3));
@@ -346,10 +364,10 @@ public class BlueTeleop extends LinearOpMode {
             double backRightPower = (y + x - rx) / denominator;
 
             // Apply voltage regulation to all drive motors
-            frontLeftMotor.setPower(volt.regulate(frontLeftPower));
-            backLeftMotor.setPower(volt.regulate(backLeftPower));
-            frontRightMotor.setPower(volt.regulate(frontRightPower));
-            backRightMotor.setPower(volt.regulate(backRightPower));
+            frontLeftMotor.setPower(frontLeftPower);
+            backLeftMotor.setPower(backLeftPower);
+            frontRightMotor.setPower(frontRightPower);
+            backRightMotor.setPower(backRightPower);
 
 //             --- Telemetry ---
             telemetry.addData("Voltage", volt.getVoltage());
@@ -363,6 +381,52 @@ public class BlueTeleop extends LinearOpMode {
     }
 
     //I added these bc they worked rly well for rotations - Pranav 10/27
+    public void IncountBalls() {
+        String color = colorparser.getColor();
+        current_alphavalue = colorparser.getalpha();
+        if (artifactcounter < 3) {
+            if (current_alphavalue > 42 && last_alphavalue < 42) {
+                artifactcounter += 1;
+            }
+            last_alphavalue = current_alphavalue;
+        } else if (artifactcounter == 3) {
+            telemetry.addLine("3 BALLS!");
+            if (current_alphavalue > 42 && last_alphavalue < 42) {
+                artifactcounter += 1;
+            }
+            last_alphavalue = current_alphavalue;
+            //rgbindicator.setPosition(0.5);
+        } else if (artifactcounter > 3) {
+            if (current_alphavalue > 42 && last_alphavalue < 42) {
+                artifactcounter += 1;
+            }
+            last_alphavalue = current_alphavalue;
+        }
+    }
+
+
+
+    public void ResetBalls() {
+        artifactcounter=0;
+        }
+
+
+//     For RGB indicator
+
+    public void light() {
+        if (artifactcounter == 0) {
+            rgbindicator.setPosition(0);
+        } else if (artifactcounter == 1) {
+            rgbindicator.setPosition(0.3);
+        } else if (artifactcounter == 2) {
+            rgbindicator.setPosition(0.375);
+        } else if (artifactcounter == 3) {
+            rgbindicator.setPosition(0.5);
+        } else if (artifactcounter > 3) {
+            rgbindicator.setPosition(0.6);
+        }
+    }
+
 
     private double clamp(double val, double min, double max) {
         return Math.max(min, Math.min(max, val));

@@ -100,8 +100,11 @@ public class BlueTeleop extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            IncountBalls();
-            light();
+            if (gamepad1.b){
+                IncountBalls();
+                light();
+            }
+
 
 //            follower.update();
 //            telemetryM.update();
@@ -134,25 +137,25 @@ public class BlueTeleop extends LinearOpMode {
             //double mangleError = tx;
             double fangleError = tx;
 
-            double sforwardPower = (-sdistanceError * 0.05) * 100; //1
-            double shstrafePower = (-sangleError * 0.03) * 5;//1
+            double sforwardPower = (-sdistanceError * 0.05) * 1; //1
+            double shstrafePower = (-sangleError * 0.03) * 1;//1
             double sturnPower = (sangleError * 0.02) * 1;//1
 
-            double farforwardPower = (-fdistanceError * 0.05) * 10;//1
-            double fstrafePower = (-fangleError * 0.03) * 10;//1
-            double fturnPower = (fangleError * 0.02) * 10;//1
+            double farforwardPower = (-fdistanceError * 0.05) * 1;//1
+            double fstrafePower = (-fangleError * 0.03) * 1;//1
+            double fturnPower = (fangleError * 0.02) * 1;//1
 
 //            double mforwardPower = (-mdistanceError * 0.05) * 1;
 //            double mstrafePower = (-mangleError * 0.03) * 1;
 //            double mturnPower = (mangleError * 0.02) * 1;
 
-            sforwardPower = clamp(sforwardPower, -0.4, 0.4);
-            shstrafePower = clamp(shstrafePower, -0.4, 0.4);
-            sturnPower = clamp(sturnPower, -0.3, 0.3);
+            sforwardPower = clamp(sforwardPower, -1, 1);
+            shstrafePower = clamp(shstrafePower, -1, 1);
+            sturnPower = clamp(sturnPower, -1, 1);
 
-            farforwardPower = clamp(farforwardPower, -0.4, 0.4);
-            fstrafePower = clamp(fstrafePower, -0.4, 0.4);
-            fturnPower = clamp(fturnPower, -0.3, 0.3);
+            farforwardPower = clamp(farforwardPower, -1, 1);
+            fstrafePower = clamp(fstrafePower, -1, 1);
+            fturnPower = clamp(fturnPower, -1, 1);
 
 //            mforwardPower = clamp(mforwardPower, -0.4, 0.4);
 //            mstrafePower = clamp(mstrafePower, -0.4, 0.4);
@@ -403,8 +406,6 @@ public class BlueTeleop extends LinearOpMode {
             last_alphavalue = current_alphavalue;
         }
     }
-
-
 
     public void ResetBalls() {
         artifactcounter=0;

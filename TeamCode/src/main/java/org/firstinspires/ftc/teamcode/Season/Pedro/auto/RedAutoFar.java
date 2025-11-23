@@ -39,15 +39,15 @@ public class RedAutoFar extends NextFTCOpMode {
 
     private final Pose startPose = new Pose(57.000, 8.000, Math.toRadians(270)).mirror();
     //    private final Pose scorePose = new Pose(90, 90, Math.toRadians(215));
-    private final Pose scorePose = new Pose(76, 19, Math.toRadians(304)).mirror();
+    private final Pose scorePose = new Pose(76, 19, Math.toRadians(300)).mirror();
 
 
-    private final Pose prePickup1 = new Pose(48.500, 31, Math.toRadians(180)).mirror();
-    private final Pose prePickup2 = new Pose(48, 52, Math.toRadians(180)).mirror(); //55
+    private final Pose prePickup1 = new Pose(48.500, 34, Math.toRadians(180)).mirror();
+    private final Pose prePickup2 = new Pose(48, 58, Math.toRadians(180)).mirror(); //55
     private final Pose prePickup3 = new Pose(46.5, 84, Math.toRadians(180)).mirror();
     //    private final Pose dropoff2 = new Pose(100, 54, Math.toRadians(180)); //55
-    private final Pose pickup1Pose = new Pose(9.000, 31, Math.toRadians(180)).mirror();
-    private final Pose pickup2Pose = new Pose(9, 52, Math.toRadians(180)).mirror();
+    private final Pose pickup1Pose = new Pose(9.000, 34, Math.toRadians(180)).mirror();
+    private final Pose pickup2Pose = new Pose(9, 58, Math.toRadians(180)).mirror();
     private final Pose pickup3Pose = new Pose(12, 84, Math.toRadians(180)).mirror();
 
     private Path scorePreload;

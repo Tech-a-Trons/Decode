@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
@@ -90,7 +91,9 @@ public class RedAutoFront12 extends NextFTCOpMode {
                 .setLinearHeadingInterpolation(pickup2Pose.getHeading(),dropoff2.getHeading())
                 .build();
         scorePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(dropoff2, scorePose))
+                .addPath(new BezierCurve(pickup2Pose,
+                        dropoff2
+                        ,scorePose))
                 .setLinearHeadingInterpolation(dropoff2.getHeading(), scorePose.getHeading())
                 .build();
 
@@ -163,7 +166,7 @@ public class RedAutoFront12 extends NextFTCOpMode {
                 if (!follower.isBusy()) {
                     follower.setMaxPower(0.85);
                     follower.followPath(grabPickup2, true);
-
+                    follower.setMaxPower(0.6);
                     setPathState(6);
                 }
                 break;

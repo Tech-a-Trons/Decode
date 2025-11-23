@@ -25,7 +25,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.ExperimentalGreenAndPurp
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
 
-@TeleOp(name = "BlueTeleop")
+@TeleOp(name = "Teleop")
 public class BlueTeleop extends LinearOpMode {
     ExperimentalArtifacts colorparser;
     Servo rgbindicator;
@@ -384,43 +384,31 @@ public class BlueTeleop extends LinearOpMode {
     public void IncountBalls() {
         String color = colorparser.getColor();
         current_alphavalue = colorparser.getalpha();
-        if (artifactcounter < 3) {
-            if (current_alphavalue > 42 && last_alphavalue < 42) {
-                artifactcounter += 1;
-            }
-            last_alphavalue = current_alphavalue;
-        } else if (artifactcounter == 3) {
-            telemetry.addLine("3 BALLS!");
-            if (current_alphavalue > 42 && last_alphavalue < 42) {
-                artifactcounter += 1;
-            }
-            last_alphavalue = current_alphavalue;
-            //rgbindicator.setPosition(0.5);
-        } else if (artifactcounter > 3) {
-            if (current_alphavalue > 42 && last_alphavalue < 42) {
-                artifactcounter += 1;
-            }
-            last_alphavalue = current_alphavalue;
+        if (current_alphavalue > 41 && last_alphavalue < 41){
+            artifactcounter += 1;
         }
+        last_alphavalue = current_alphavalue;
     }
 
 
 
     public void ResetBalls() {
         artifactcounter=0;
+        rgbindicator.setPosition(0);
         }
 
 
 //     For RGB indicator
 
     public void light() {
-        if (artifactcounter == 0) {
-            rgbindicator.setPosition(0);
-        } else if (artifactcounter == 1) {
-            rgbindicator.setPosition(0.3);
-        } else if (artifactcounter == 2) {
-            rgbindicator.setPosition(0.375);
-        } else if (artifactcounter == 3) {
+        //if (artifactcounter == 0) {
+        //    rgbindicator.setPosition(0);
+        //} else if (artifactcounter == 1) {
+        //    rgbindicator.setPosition(0.3);
+        //} else if (artifactcounter == 2) {
+        //    rgbindicator.setPosition(0.375);
+        //}
+        if (artifactcounter == 3) {
             rgbindicator.setPosition(0.5);
         } else if (artifactcounter > 3) {
             rgbindicator.setPosition(0.6);

@@ -43,11 +43,11 @@ public class BlueAutoFront12 extends NextFTCOpMode {
 
 
     private final Pose prePickup1 = new Pose(80, 76, Math.toRadians(0)).mirror();
-    private final Pose prePickup2 = new Pose(80.765, 54, Math.toRadians(0)).mirror(); //55
+    private final Pose prePickup2 = new Pose(80.765, 52, Math.toRadians(0)).mirror(); //55
     private final Pose prePickup3 = new Pose(85.565, 30, Math.toRadians(0)).mirror();
     private final Pose dropoff2 = new Pose(100, 54, Math.toRadians(0)).mirror(); //55
     private final Pose pickup1Pose = new Pose(123, 76, Math.toRadians(0)).mirror();
-    private final Pose pickup2Pose = new Pose(126, 54, Math.toRadians(0)).mirror();
+    private final Pose pickup2Pose = new Pose(126, 52, Math.toRadians(0)).mirror();
     private final Pose pickup3Pose = new Pose(123, 30, Math.toRadians(0)).mirror();
 
     private Path scorePreload;

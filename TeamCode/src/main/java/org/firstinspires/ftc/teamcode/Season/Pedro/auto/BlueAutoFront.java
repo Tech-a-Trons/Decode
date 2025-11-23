@@ -43,9 +43,9 @@ public class BlueAutoFront extends NextFTCOpMode {
 
 
     private final Pose prePickup1 = new Pose(80, 76, Math.toRadians(0)).mirror();
-    private final Pose prePickup2 = new Pose(80.765, 54, Math.toRadians(0)).mirror(); //55
+    private final Pose prePickup2 = new Pose(80.765, 52, Math.toRadians(0)).mirror(); //55
     private final Pose prePickup3 = new Pose(85.565, 30, Math.toRadians(0)).mirror();
-    private final Pose dropoff2 = new Pose(100, 54, Math.toRadians(0)).mirror(); //55
+    private final Pose dropoff2 = new Pose(100, 52, Math.toRadians(0)).mirror(); //55
     private final Pose pickup1Pose = new Pose(123, 76, Math.toRadians(0)).mirror();
     private final Pose pickup2Pose = new Pose(126, 54, Math.toRadians(0)).mirror();
     private final Pose pickup3Pose = new Pose(123, 30, Math.toRadians(0)).mirror();
@@ -285,7 +285,7 @@ public class BlueAutoFront extends NextFTCOpMode {
         Outtake outtake = Outtake.INSTANCE;
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
-        outtake.outtake.setPower(volt.regulate(0.42)); // out1
+        outtake.outtake.setPower(volt.regulate(0.44)); // out1 //42
         sleep(650); //800
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
@@ -296,13 +296,13 @@ public class BlueAutoFront extends NextFTCOpMode {
 //        sleep(50);
 //
 //        intake.activeintake.setPower(volt.regulate(0));
-        outtake.outtake.setPower(volt.regulate(0.41)); // out1 again
+        outtake.outtake.setPower(volt.regulate(0.43)); // out1 again //41
 //        sleep(100);
 
         midtake.newtake.setPower(volt.regulate(-1)); // ramp again
 //        sleep(50);
 
-        outtake.outtake.setPower(volt.regulate(0.43)); // slightly stronger outtake
+        outtake.outtake.setPower(volt.regulate(0.44)); // slightly stronger outtake //43
 //        sleep(100);
 
         intake.activeintake.setPower(volt.regulate(1.0));

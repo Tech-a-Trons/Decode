@@ -47,15 +47,18 @@ public class BlueTeleop extends LinearOpMode {
     DcMotor out2 = null;
     DcMotor ramp = null;
     DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
-    private final double STARGET_DISTANCE = 42.97; // inches
+    private final double STARGET_DISTANCE = 58; // inches 42.97
     private final double SANGLE_TOLERANCE = -1.8;
     //    private final double MTARGET_DISTANCE = 2838; // PLACEHOLDER
 //    private final double MANGLE_TOLERANCE = 134; // PLACEHOLDER
-    private final double FTARGET_DISTANCE = 112.21;
-    private final double FANGLE_TOLERANCE = 3.47;
+    private final double FTARGET_DISTANCE = 124; //115
+    private final double FANGLE_TOLERANCE = 1; //3.47
     ElapsedTime shootTimer = new ElapsedTime();
     boolean shooting = false;
     int shootStep = 0;
+    ElapsedTime shootSlowTimer = new ElapsedTime();
+    boolean slowshooting = false;
+
     @Override
     public void runOpMode() throws InterruptedException {
         colorparser = new ExperimentalArtifacts(hardwareMap);
@@ -267,16 +270,16 @@ public class BlueTeleop extends LinearOpMode {
                         break;
                 }
             }
-
+//            if (gamepad1.dpad_down ) {
+//                slowshooting = true;
+//                shootStep = 0;
+//                shootSlowTimer.reset();
+//            }
 //            if (gamepad1.b) {
 //                out1.setPower(volt.regulate(-0.36));
 //                out2.setPower(volt.regulate(0.36));
 //            }
 
-            if (gamepad1.dpad_down) {
-                out1.setPower(volt.regulate(0.3));
-                out2.setPower(volt.regulate(-0.3));
-            }
             if (gamepad1.left_bumper) {
                 out1.setPower(volt.regulate(-0.6));
                 out2.setPower(volt.regulate(0.6));

@@ -39,7 +39,7 @@ public class BlueAutoFar extends NextFTCOpMode {
 
     private final Pose startPose = new Pose(57.000, 8.000, Math.toRadians(270));
     //    private final Pose scorePose = new Pose(90, 90, Math.toRadians(215));
-    private final Pose scorePose = new Pose(76, 19, Math.toRadians(304));
+    private final Pose scorePose = new Pose(76, 19, Math.toRadians(307));
 
 
     private final Pose prePickup1 = new Pose(48.500, 30, Math.toRadians(180));
@@ -76,38 +76,38 @@ public class BlueAutoFar extends NextFTCOpMode {
                 .addPath(new BezierLine(pickup1Pose, scorePose))
                 .setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
                 .build();
-        grabPrePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, prePickup2))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup2.getHeading())
-                .build();
-
-        grabPickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(prePickup2, pickup2Pose))
-                .setLinearHeadingInterpolation(prePickup2.getHeading(), pickup2Pose.getHeading())
-                .build();
-//        dropofftwo = follower.pathBuilder()
-//                .addPath(new BezierLine(pickup2Pose,dropoff2))
-//                .setLinearHeadingInterpolation(pickup2Pose.getHeading(),dropoff2.getHeading())
+//        grabPrePickup2 = follower.pathBuilder()
+//                .addPath(new BezierLine(scorePose, prePickup2))
+//                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup2.getHeading())
 //                .build();
-        scorePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup2Pose, scorePose))
-                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
-                .build();
-
-        grabPrePickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, prePickup3))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
-                .build();
-
-        grabPickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(prePickup3, pickup3Pose))
-                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
-                .build();
-
-        scorePickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup3Pose, scorePose))
-                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
-                .build();
+//
+//        grabPickup2 = follower.pathBuilder()
+//                .addPath(new BezierLine(prePickup2, pickup2Pose))
+//                .setLinearHeadingInterpolation(prePickup2.getHeading(), pickup2Pose.getHeading())
+//                .build();
+////        dropofftwo = follower.pathBuilder()
+////                .addPath(new BezierLine(pickup2Pose,dropoff2))
+////                .setLinearHeadingInterpolation(pickup2Pose.getHeading(),dropoff2.getHeading())
+////                .build();
+//        scorePickup2 = follower.pathBuilder()
+//                .addPath(new BezierLine(pickup2Pose, scorePose))
+//                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
+//                .build();
+//
+//        grabPrePickup3 = follower.pathBuilder()
+//                .addPath(new BezierLine(scorePose, prePickup3))
+//                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
+//                .build();
+//
+//        grabPickup3 = follower.pathBuilder()
+//                .addPath(new BezierLine(prePickup3, pickup3Pose))
+//                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
+//                .build();
+//
+//        scorePickup3 = follower.pathBuilder()
+//                .addPath(new BezierLine(pickup3Pose, scorePose))
+//                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
+//                .build();
     }
 
     public void autonomousPathUpdate() {
@@ -122,6 +122,7 @@ public class BlueAutoFar extends NextFTCOpMode {
                 if (!follower.isBusy()) {
 
                     // SHOOT after preload
+                    follower.setMaxPower(1);
                     shootThreeBalls();
                     follower.followPath(grabPrePickup1);
 
@@ -133,7 +134,7 @@ public class BlueAutoFar extends NextFTCOpMode {
                 if (!follower.isBusy()) {
                     Intake.INSTANCE.activeintake.setPower(1);
                     Midtake.INSTANCE.newtake.setPower(0.3);
-                    follower.setMaxPower(0.8);
+                    follower.setMaxPower(1);
                     follower.followPath(grabPickup1, true);
                     setPathState(3);
                 }
@@ -141,7 +142,7 @@ public class BlueAutoFar extends NextFTCOpMode {
 
             case 3:
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(1);
+                    follower.setMaxPower(0.7);
                     Intake.INSTANCE.activeintake.setPower(0);
 //                    Outtake.INSTANCE.outtake.setPower(0.1);
                     follower.followPath(scorePickup1, true);
@@ -152,65 +153,65 @@ public class BlueAutoFar extends NextFTCOpMode {
             case 4:
                 if (!follower.isBusy()) {
                     shootThreeBalls();
-                    follower.followPath(grabPrePickup2, true);
-                    Intake.INSTANCE.activeintake.setPower(1);
-                    Midtake.INSTANCE.newtake.setPower(0.3);
+//                    follower.followPath(grabPrePickup2, true);
+//                    Intake.INSTANCE.activeintake.setPower(1);
+//                    Midtake.INSTANCE.newtake.setPower(0.3);
                     setPathState(5);
                 }
                 break;
-
-            case 5:
-                if (!follower.isBusy()) {
-                    follower.setMaxPower(0.8);
-                    follower.followPath(grabPickup2, true);
-                    follower.setMaxPower(1);
-                    setPathState(6);
-                }
-                break;
-
-            case 6:
-                if (!follower.isBusy()) {
-                    Midtake.INSTANCE.newtake.setPower(0);
-                    Intake.INSTANCE.activeintake.setPower(0);
-//                    Outtake.INSTANCE.outtake.setPower(0.1);
-                    follower.followPath(scorePickup2, true);
-                    setPathState(7);
-                }
-                break;
-
-            case 7:
-                if (!follower.isBusy()) {
-                    thirdshootThreeBalls();
-                    follower.followPath(grabPrePickup3, true);
-                    Intake.INSTANCE.activeintake.setPower(1);
-                    Midtake.INSTANCE.newtake.setPower(0.3);
-                    setPathState(8);
-                }
-                break;
-
-            case 8:
-                if (!follower.isBusy()) {
-                    follower.followPath(grabPickup3, true);
-                    setPathState(9);
-                }
-                break;
-
-            case 9:
-                if (!follower.isBusy()) {
-                    Midtake.INSTANCE.newtake.setPower(0);
-                    Intake.INSTANCE.activeintake.setPower(0);
-                    follower.followPath(scorePickup3, true);
-//                    shootThreeBalls();
-                    setPathState(10);
-                }
-                break;
-
-            case 10:
-                if (!follower.isBusy()) {
-                    secondshootThreeBalls();
-                    setPathState(-1);
-                }
-                break;
+//
+//            case 5:
+//                if (!follower.isBusy()) {
+//                    follower.setMaxPower(0.8);
+//                    follower.followPath(grabPickup2, true);
+//                    follower.setMaxPower(1);
+//                    setPathState(6);
+//                }
+//                break;
+//
+//            case 6:
+//                if (!follower.isBusy()) {
+//                    Midtake.INSTANCE.newtake.setPower(0);
+//                    Intake.INSTANCE.activeintake.setPower(0);
+////                    Outtake.INSTANCE.outtake.setPower(0.1);
+//                    follower.followPath(scorePickup2, true);
+//                    setPathState(7);
+//                }
+//                break;
+//
+//            case 7:
+//                if (!follower.isBusy()) {
+//                    thirdshootThreeBalls();
+//                    follower.followPath(grabPrePickup3, true);
+//                    Intake.INSTANCE.activeintake.setPower(1);
+//                    Midtake.INSTANCE.newtake.setPower(0.3);
+//                    setPathState(8);
+//                }
+//                break;
+//
+//            case 8:
+//                if (!follower.isBusy()) {
+//                    follower.followPath(grabPickup3, true);
+//                    setPathState(9);
+//                }
+//                break;
+//
+//            case 9:
+//                if (!follower.isBusy()) {
+//                    Midtake.INSTANCE.newtake.setPower(0);
+//                    Intake.INSTANCE.activeintake.setPower(0);
+//                    follower.followPath(scorePickup3, true);
+////                    shootThreeBalls();
+//                    setPathState(10);
+////                }
+//                break;
+//
+//            case 10:
+//                if (!follower.isBusy()) {
+//                    secondshootThreeBalls();
+//                    setPathState(-1);
+//                }
+//                break;
         }
     }
 
@@ -250,7 +251,7 @@ public class BlueAutoFar extends NextFTCOpMode {
         Outtake outtake = Outtake.INSTANCE;
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
-        outtake.outtake.setPower(volt.regulate(0.58)); // out1
+        outtake.outtake.setPower(volt.regulate(0.54)); // out1
         sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
@@ -261,13 +262,13 @@ public class BlueAutoFar extends NextFTCOpMode {
         sleep(300);
 
         intake.activeintake.setPower(volt.regulate(0));
-        outtake.outtake.setPower(volt.regulate(0.58)); // out1 again
+        outtake.outtake.setPower(volt.regulate(0.54)); // out1 again
         sleep(300);
 
         midtake.newtake.setPower(volt.regulate(-1)); // ramp again
         sleep(300);
 
-        outtake.outtake.setPower(volt.regulate(0.58)); // slightly stronger outtake
+        outtake.outtake.setPower(volt.regulate(0.54)); // slightly stronger outtake
         sleep(300);
 
         intake.activeintake.setPower(volt.regulate(1.0));
@@ -317,7 +318,7 @@ public class BlueAutoFar extends NextFTCOpMode {
         Outtake outtake = Outtake.INSTANCE;
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
-        outtake.outtake.setPower(volt.regulate(0.58)); // out1
+        outtake.outtake.setPower(volt.regulate(0.56)); // out1
         sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
@@ -328,13 +329,13 @@ public class BlueAutoFar extends NextFTCOpMode {
         sleep(300);
 
         intake.activeintake.setPower(volt.regulate(0));
-        outtake.outtake.setPower(volt.regulate(0.58)); // out1 again
+        outtake.outtake.setPower(volt.regulate(0.545)); // out1 again
         sleep(300);
 
         midtake.newtake.setPower(volt.regulate(-1)); // ramp again
         sleep(300);
 
-        outtake.outtake.setPower(volt.regulate(0.58)); // slightly stronger outtake
+        outtake.outtake.setPower(volt.regulate(0.545)); // slightly stronger outtake
         sleep(300);
 
         intake.activeintake.setPower(volt.regulate(1.0));

@@ -1,9 +1,9 @@
 package org.firstinspires.ftc.teamcode.Season.Pedro.oldauto;
 
 import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.Intake;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.Midtake;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.Outtake;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Intake;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Midtake;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Outtake;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;

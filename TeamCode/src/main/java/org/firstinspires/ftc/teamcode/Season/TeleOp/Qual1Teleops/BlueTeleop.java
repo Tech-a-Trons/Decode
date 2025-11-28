@@ -1,16 +1,11 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.Qual1Teleops;
 
-import static org.firstinspires.ftc.teamcode.Season.Pedro.Tuning.follower;
 import static java.lang.Math.clamp;
-import com.bylazar.configurables.annotations.Configurable;
+
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.HeadingInterpolator;
-import com.pedropathing.paths.Path;
-import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -18,12 +13,10 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.ExperimentalArtifacts;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.ExperimentalGreenAndPurple;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.ExperimentalArtifacts;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
 
 @TeleOp(name = "Teleop")
 public class BlueTeleop extends LinearOpMode {
@@ -202,10 +195,12 @@ public class BlueTeleop extends LinearOpMode {
             if (shooting == true) {
                 switch (shootStep) {
                     case 0:
+
                         out1.setPower(volt.regulate(-0.41));
                         out2.setPower(volt.regulate(0.41));
 
                         if (shootTimer.milliseconds() > 1000) {
+
                             shootStep++;
                             shootTimer.reset();
                         }
@@ -215,16 +210,19 @@ public class BlueTeleop extends LinearOpMode {
                         ramp.setPower(volt.regulate(-1.0));
 
                         if (shootTimer.milliseconds() > 100) {
+
                             shootStep++;
                             shootTimer.reset();
                         }
                         break;
 
                     case 2:
+
                         activeintake.setPower(volt.regulate(1.0));
                         ramp.setPower(0);
 
                         if (shootTimer.milliseconds() > 100) {
+
                             shootStep++;
                             shootTimer.reset();
                         }
@@ -236,6 +234,7 @@ public class BlueTeleop extends LinearOpMode {
                         out2.setPower(volt.regulate(0.41));
 
                         if (shootTimer.milliseconds() > 100) {
+
                             shootStep++;
                             shootTimer.reset();
                         }
@@ -245,6 +244,7 @@ public class BlueTeleop extends LinearOpMode {
                         ramp.setPower(volt.regulate(-1));
 
                         if (shootTimer.milliseconds() > 100) {
+                            follower.update();
                             shootStep++;
                             shootTimer.reset();
                         }
@@ -255,6 +255,7 @@ public class BlueTeleop extends LinearOpMode {
                         out2.setPower(volt.regulate(0.43));
 
                         if (shootTimer.milliseconds() > 100) {
+                            follower.update();
                             shootStep++;
                             shootTimer.reset();
                         }

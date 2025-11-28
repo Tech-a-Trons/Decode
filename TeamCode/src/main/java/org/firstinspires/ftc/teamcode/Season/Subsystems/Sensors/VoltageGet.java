@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.Subsystems;
+package org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;

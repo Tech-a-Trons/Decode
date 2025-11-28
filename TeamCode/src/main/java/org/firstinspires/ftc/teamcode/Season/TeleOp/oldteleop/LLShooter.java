@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
 @Disabled
 public class LLShooter extends LinearOpMode {
     VoltageGet volt = new VoltageGet();

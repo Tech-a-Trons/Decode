@@ -1,31 +1,32 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.Qual1Teleops;
+
+import static java.lang.Math.clamp;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.ExperimentalGreenAndPurple;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
 
-@TeleOp(name = "BlueGreySoloSensorFinal")
-public class BlueGreySoloSensorFinal extends LinearOpMode {
-
-    ExperimentalGreenAndPurple colorparser;
+@TeleOp(name = "BlueGreySoloFinal")
+public class BlueGreySoloFinal extends LinearOpMode {
+//    private Follower follower;
+//    private final Pose startPose = new Pose(123.13, 122.08, Math.toRadians(220)); //See ExampleAuto to understand how to use this
+//    private boolean automatedDrive;
+//    private TelemetryManager telemetryM;
+//    private boolean slowMode = false;
+//    private double slowModeMultiplier = 0.5;
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
     DcMotor out1 = null;
     DcMotor out2 = null;
     DcMotor ramp = null;
-    //ColorSensor sensor;
     DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
-    int artifactcounter = 0;
     private final double STARGET_DISTANCE = 42.97; // inches
     private final double SANGLE_TOLERANCE = -1.8;
-//    private final double MTARGET_DISTANCE = 2838; // PLACEHOLDER
+    //    private final double MTARGET_DISTANCE = 2838; // PLACEHOLDER
 //    private final double MANGLE_TOLERANCE = 134; // PLACEHOLDER
     private final double FTARGET_DISTANCE = 112.21;
     private final double FANGLE_TOLERANCE = 3.47;
@@ -37,14 +38,13 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
         out2 = hardwareMap.get(DcMotor.class, "outtake2");
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
         ramp = hardwareMap.get(DcMotor.class, "ramp");
-
-        //sensor = hardwareMap.get(ColorSensor.class, "ColorSensor");
-
+//        follower = Constants.createFollower(hardwareMap);
+//        follower.setStartingPose(startPose);
+//        follower.update();
+//        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         BlueExperimentalDistanceLExtractor ll = new BlueExperimentalDistanceLExtractor(hardwareMap);
         ll.startReading();
         ll.setTelemetry(telemetry);
-
-        colorparser = new ExperimentalGreenAndPurple(hardwareMap);
 
         frontLeftMotor = hardwareMap.get(DcMotor.class, "fl");
         backLeftMotor = hardwareMap.get(DcMotor.class, "bl");
@@ -70,6 +70,19 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
+//            follower.update();
+//            telemetryM.update();
+            ll.update();
+
+            distance = ll.getEuclideanDistance();
+            tx = ll.getTx();
+            if (tx == null) {
+                tx = 0.0;
+            }
+            if (distance == null) {
+                distance = 0.0;
+            }
+
             ll.update();
 
             distance = ll.getEuclideanDistance();
@@ -111,19 +124,34 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
 //            mforwardPower = clamp(mforwardPower, -0.4, 0.4);
 //            mstrafePower = clamp(mstrafePower, -0.4, 0.4);
 //            mturnPower = clamp(mturnPower, -0.3, 0.3);
+            // ---Kill Switches--
+            if (gamepad2.a){
+                activeintake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                activeintake.setPower(0);
+            }
+//            if (gamepad2.b){
+//                ramp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//                ramp.setPower(0);
+//            }
 
+            if (gamepad2.y) {
+                frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                frontLeftMotor.setPower(0);
+                backRightMotor.setPower(0);
+                frontRightMotor.setPower(0);
+                backLeftMotor.setPower(0);
+                sleep(100);
+            }
             // --- Mechanism Controls ---
             if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
-                ramp.setPower(0.4);
-                //countBalls();
+                ramp.setPower(0.8); //0.3
             }
 
             if (gamepad1.dpad_left) {
-                artifactcounter -= 3;
-                if (artifactcounter < 0) {
-                    artifactcounter = 0;
-                }
                 out1.setPower(volt.regulate(-0.41));
                 out2.setPower(volt.regulate(0.41));
                 sleep(1000);
@@ -140,7 +168,6 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
                 out1.setPower(volt.regulate(-0.41));
                 out2.setPower(volt.regulate(0.41));
                 sleep(100);
-
                 ramp.setPower(volt.regulate(-1));
 //        sleep(50);
 
@@ -155,23 +182,15 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
             }
 
             if (gamepad1.b) {
-                artifactcounter -= 1;
-                if (artifactcounter < 0) {
-                    artifactcounter = 0;
-                }
                 out1.setPower(volt.regulate(-0.36));
                 out2.setPower(volt.regulate(0.36));
             }
 
             if (gamepad1.dpad_down) {
-                artifactcounter -= 1;
-                if (artifactcounter < 0) {
-                    artifactcounter = 0;
-                }
                 out1.setPower(volt.regulate(0.3));
                 out2.setPower(volt.regulate(-0.3));
             }
-            if(gamepad1.left_bumper){
+            if (gamepad1.left_bumper) {
                 out1.setPower(volt.regulate(-0.6));
                 out2.setPower(volt.regulate(0.6));
                 sleep(1000);
@@ -210,7 +229,11 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
             }
 
             if (gamepad1.right_trigger > 0.0) {
-                ramp.setPower(volt.regulate(gamepad1.right_trigger));
+                ramp.setPower(0.3);
+                activeintake.setPower(-1);
+                sleep(100);
+                activeintake.setPower(0);
+                ramp.setPower(0);
             }
 
             //Niranjan auto align code is here! - Pranav 10/27
@@ -238,22 +261,18 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
                 }
             }
 
-//            if (gamepad1.right_bumper) {
-//                if (Math.abs(mdistanceError) == 0 && Math.abs(mangleError) <= MANGLE_TOLERANCE) {
-//                    frontLeftMotor.setPower(volt.regulate(0.0));
-//                    frontRightMotor.setPower(volt.regulate(0.0));
-//                    backLeftMotor.setPower(volt.regulate(0.0));
-//                    backRightMotor.setPower(volt.regulate(0.0));
-//                } else {
-//                    moveMecanum(mforwardPower, mstrafePower, mturnPower);
-//                }
-//            }
-
-            // --- Drivetrain Controls ---
-            double y = -gamepad1.left_stick_y; // forward/back
-            double x = gamepad1.left_stick_x * 1.1; // strafe
-            double rx = gamepad1.right_stick_x; // rotation
-
+//             --- Drivetrain Controls ---
+//            double y = -gamepad1.left_stick_y; // forward/back
+//            double x = gamepad1.left_stick_x * 1.1; // strafe
+//            double rx = gamepad1.right_stick_x; // rotation
+            double y = 0;
+            double x = 0;
+            double rx = 0;
+            if (!gamepad2.y) {
+                y = -gamepad1.left_stick_y;
+                x = gamepad1.left_stick_x * 1.1;
+                rx = gamepad1.right_stick_x;
+            }
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
             double frontLeftPower = (y + x + rx) / denominator;
             double backLeftPower = (y - x + rx) / denominator;
@@ -266,7 +285,7 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
             frontRightMotor.setPower(volt.regulate(frontRightPower));
             backRightMotor.setPower(volt.regulate(backRightPower));
 
-            // --- Telemetry ---
+//             --- Telemetry ---
             telemetry.addData("Voltage", volt.getVoltage());
             telemetry.update();
         }
@@ -293,26 +312,4 @@ public class BlueGreySoloSensorFinal extends LinearOpMode {
         backLeftMotor.setPower(blPower);
         backRightMotor.setPower(brPower);
     }
-
-//    public int countBalls() {
-//        String colorGet = colorparser.getColor();
-//        if (colorGet == null) {
-//            colorGet = "VALUE";
-//        }
-//        while (artifactcounter < 3) {
-//            if (colorGet == "purple" || colorGet == "green") {
-//                artifactcounter +=1;
-//            } else if (colorGet == "VALUE") {
-//
-//            } else {
-//
-//            }
-//        }
-//
-//        if (artifactcounter == 3) {
-//            activeintake.setPower(0);
-//            //ramp.setPower(0);
-//        }
-//        return artifactcounter;
-//    }
 }

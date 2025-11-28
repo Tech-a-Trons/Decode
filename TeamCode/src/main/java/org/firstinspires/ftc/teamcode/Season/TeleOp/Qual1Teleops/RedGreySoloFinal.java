@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.Qual1Teleops;
 
 import static java.lang.Math.clamp;
 
@@ -7,11 +7,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
 
-@TeleOp(name = "BlueGreyDuoFinal")
-public class BlueGreyDuoFinal extends LinearOpMode {
+@TeleOp(name = "RedGreySoloFinal")
+public class RedGreySoloFinal extends LinearOpMode {
 
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
@@ -19,12 +19,10 @@ public class BlueGreyDuoFinal extends LinearOpMode {
     DcMotor out2 = null;
     DcMotor ramp = null;
     DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
-    private final double STARGET_DISTANCE = 42.97; // inches
-    private final double SANGLE_TOLERANCE = -1.8;
-    //    private final double MTARGET_DISTANCE = 2838; // PLACEHOLDER
-//    private final double MANGLE_TOLERANCE = 134; // PLACEHOLDER
-    private final double FTARGET_DISTANCE = 112.21;
-    private final double FANGLE_TOLERANCE = 3.47;
+    private final double STARGET_DISTANCE = 40.1; // inches
+    private final double SANGLE_TOLERANCE = 1.57;
+//    private final double FTARGET_DISTANCE = 96.5;
+//    private final double FANGLE_TOLERANCE = 27.0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -34,7 +32,7 @@ public class BlueGreyDuoFinal extends LinearOpMode {
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
         ramp = hardwareMap.get(DcMotor.class, "ramp");
 
-        BlueExperimentalDistanceLExtractor ll = new BlueExperimentalDistanceLExtractor(hardwareMap);
+        RedExperimentalDistanceLExtractor ll = new RedExperimentalDistanceLExtractor(hardwareMap);
         ll.startReading();
         ll.setTelemetry(telemetry);
 
@@ -73,68 +71,35 @@ public class BlueGreyDuoFinal extends LinearOpMode {
                 distance = 0.0;
             }
 
-            ll.update();
-
-            distance = ll.getEuclideanDistance();
-            tx = ll.getTx();
-            if (tx == null) {
-                tx = 0.0;
-            }
-            if (distance == null) {
-                distance = 0.0;
-            }
-
             double sdistanceError = distance - STARGET_DISTANCE;
-            //double mdistanceError = distance - MTARGET_DISTANCE;
-            double fdistanceError = distance - FTARGET_DISTANCE;
+            //double fdistanceError = distance - FTARGET_DISTANCE;
             double sangleError = tx;
-            //double mangleError = tx;
-            double fangleError = tx;
+            //double fangleError = tx;
 
             double sforwardPower = (-sdistanceError * 0.05) * 1;
             double shstrafePower = (-sangleError * 0.03) * 1;
             double sturnPower = (sangleError * 0.02) * 1;
 
-            double farforwardPower = (-fdistanceError * 0.05) * 1;
-            double fstrafePower = (-fangleError * 0.03) * 1;
-            double fturnPower = (fangleError * 0.02) * 1;
-
-//            double mforwardPower = (-mdistanceError * 0.05) * 1;
-//            double mstrafePower = (-mangleError * 0.03) * 1;
-//            double mturnPower = (mangleError * 0.02) * 1;
+//            double farforwardPower = (-fdistanceError * 0.05) * 1;
+//            double fstrafePower = (-fangleError * 0.03) * 1;
+//            double fturnPower = (fangleError * 0.02) * 1;
 
             sforwardPower = clamp(sforwardPower, -0.4, 0.4);
             shstrafePower = clamp(shstrafePower, -0.4, 0.4);
             sturnPower = clamp(sturnPower, -0.3, 0.3);
 
-            farforwardPower = clamp(farforwardPower, -0.4, 0.4);
-            fstrafePower = clamp(fstrafePower, -0.4, 0.4);
-            fturnPower = clamp(fturnPower, -0.3, 0.3);
+//            farforwardPower = clamp(farforwardPower, -0.4, 0.4);
+//            fstrafePower = clamp(fstrafePower, -0.4, 0.4);
+//            fturnPower = clamp(fturnPower, -0.3, 0.3);
 
-//            mforwardPower = clamp(mforwardPower, -0.4, 0.4);
-//            mstrafePower = clamp(mstrafePower, -0.4, 0.4);
-//            mturnPower = clamp(mturnPower, -0.3, 0.3);
-            // ---Kill Switches--
-//            if (gamepad2.a){
-//                activeintake.setPower(0);
-//            }
-//            if (gamepad2.b){
-//                out1.setPower(0);
-//                out2.setPower(0);
-//            }
-//            if (gamepad2.y){
-//                frontLeftMotor.setPower(0);
-//                backRightMotor.setPower(0);
-//                frontRightMotor.setPower(0);
-//                backLeftMotor.setPower(0);
-//            }
+
             // --- Mechanism Controls ---
-            if (gamepad2.a) {
+            if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(0.3);
             }
 
-            if (gamepad2.dpad_left) {
+            if (gamepad1.dpad_left) {
                 out1.setPower(volt.regulate(-0.41));
                 out2.setPower(volt.regulate(0.41));
                 sleep(1000);
@@ -165,16 +130,16 @@ public class BlueGreyDuoFinal extends LinearOpMode {
                 ramp.setPower(volt.regulate(-1));
             }
 
-            if (gamepad2.b) {
+            if (gamepad1.b) {
                 out1.setPower(volt.regulate(-0.36));
                 out2.setPower(volt.regulate(0.36));
             }
 
-            if (gamepad2.dpad_down) {
+            if (gamepad1.dpad_down) {
                 out1.setPower(volt.regulate(0.3));
                 out2.setPower(volt.regulate(-0.3));
             }
-            if(gamepad2.left_bumper){
+            if(gamepad1.left_bumper){
                 out1.setPower(volt.regulate(-0.6));
                 out2.setPower(volt.regulate(0.6));
                 sleep(1000);
@@ -205,20 +170,20 @@ public class BlueGreyDuoFinal extends LinearOpMode {
                 ramp.setPower(volt.regulate(-1));
 
             }
-            if (gamepad2.x) {
+            if (gamepad1.x) {
                 activeintake.setPower(0);
                 out1.setPower(0);
                 out2.setPower(0);
                 ramp.setPower(0);
             }
 
-            if (gamepad2.right_trigger > 0.0) {
+            if (gamepad1.right_trigger > 0.0) {
                 ramp.setPower(volt.regulate(gamepad1.right_trigger));
             }
 
             //Niranjan auto align code is here! - Pranav 10/27
 
-            if (gamepad2.y) {
+            if (gamepad1.y) {
                 if (Math.abs(sdistanceError) == 0 && Math.abs(sangleError) <= SANGLE_TOLERANCE) {
                     frontLeftMotor.setPower(volt.regulate(0.0));
                     frontRightMotor.setPower(volt.regulate(0.0));
@@ -230,16 +195,16 @@ public class BlueGreyDuoFinal extends LinearOpMode {
                 }
             }
 
-            if (gamepad2.dpad_right) {
-                if (Math.abs(fdistanceError) == 0 && Math.abs(fangleError) <= FANGLE_TOLERANCE) {
-                    frontLeftMotor.setPower(volt.regulate(0.0));
-                    frontRightMotor.setPower(volt.regulate(0.0));
-                    backLeftMotor.setPower(volt.regulate(0.0));
-                    backRightMotor.setPower(volt.regulate(0.0));
-                } else {
-                    moveMecanum(farforwardPower, fstrafePower, fturnPower);
-                }
-            }
+//            if (gamepad1.dpad_right) {
+//                if (Math.abs(fdistanceError) == 0 && Math.abs(fangleError) <= FANGLE_TOLERANCE) {
+//                    frontLeftMotor.setPower(volt.regulate(0.0));
+//                    frontRightMotor.setPower(volt.regulate(0.0));
+//                    backLeftMotor.setPower(volt.regulate(0.0));
+//                    backRightMotor.setPower(volt.regulate(0.0));
+//                } else {
+//                    moveMecanum(farforwardPower, fstrafePower, fturnPower);
+//                }
+//            }
 
             // --- Drivetrain Controls ---
             double y = -gamepad1.left_stick_y; // forward/back

@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.ExperimentalArtifacts;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.ExperimentalArtifacts;
 
 @TeleOp
 public class ColorSensorTesting extends LinearOpMode {

@@ -1,11 +1,6 @@
-package org.firstinspires.ftc.teamcode.Season.Subsystems;
-
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
-import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
+package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC;
 
 import dev.nextftc.control.ControlSystem;
-import dev.nextftc.control.KineticState;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.controllable.MotorGroup;
@@ -15,6 +10,7 @@ import dev.nextftc.hardware.impl.MotorEx;
 public class Outtake implements Subsystem {
     public static final Outtake INSTANCE = new Outtake();
     private Outtake() { }
+
     public static MotorGroup outtake = new MotorGroup(
             new MotorEx("outtake1").reversed(),
             new MotorEx("outtake2")
@@ -31,17 +27,25 @@ public class Outtake implements Subsystem {
 
         return new RunToVelocity(
                 controller,
-                400,
+                250,
                 5
         ).requires(this);
     }
-@Override
+    public Command resetShooter(){
+
+        return new RunToVelocity(
+                controller,
+                0,
+                0
+        ).requires(this);
+    }
+
+    @Override
     public void periodic(){
         outtake.setPower(
                 controller.calculate(
                         outtake.getState()
                 )
         );
+    }
 }
-}
-

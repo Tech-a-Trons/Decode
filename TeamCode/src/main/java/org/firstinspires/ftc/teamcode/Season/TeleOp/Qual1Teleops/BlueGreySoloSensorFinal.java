@@ -1,18 +1,16 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.Qual1Teleops;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.ExperimentalGreenAndPurple;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.ExperimentalGreenAndPurple;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
 
-@TeleOp(name = "RedGreySoloSensorFinal")
-public class RedGreySoloSensorFinal extends LinearOpMode {
+@TeleOp(name = "BlueGreySoloSensorFinal")
+public class BlueGreySoloSensorFinal extends LinearOpMode {
 
     ExperimentalGreenAndPurple colorparser;
     VoltageGet volt = new VoltageGet();
@@ -21,14 +19,14 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
     DcMotor out2 = null;
     DcMotor ramp = null;
     //ColorSensor sensor;
-    DcMotor frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
+    DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
     int artifactcounter = 0;
-    private final double STARGET_DISTANCE = 40.1; // inches
-    private final double SANGLE_TOLERANCE = 1.57;
-    private final double MTARGET_DISTANCE = 2838; // PLACEHOLDER
-    private final double MANGLE_TOLERANCE = 134; // PLACEHOLDER
-    private final double FTARGET_DISTANCE = 96.5; // PLACEHOLDER
-    private final double FANGLE_TOLERANCE = 27.0; // PLACEHOLDER
+    private final double STARGET_DISTANCE = 42.97; // inches
+    private final double SANGLE_TOLERANCE = -1.8;
+//    private final double MTARGET_DISTANCE = 2838; // PLACEHOLDER
+//    private final double MANGLE_TOLERANCE = 134; // PLACEHOLDER
+    private final double FTARGET_DISTANCE = 112.21;
+    private final double FANGLE_TOLERANCE = 3.47;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -40,7 +38,7 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
 
         //sensor = hardwareMap.get(ColorSensor.class, "ColorSensor");
 
-        RedExperimentalDistanceLExtractor ll = new RedExperimentalDistanceLExtractor(hardwareMap);
+        BlueExperimentalDistanceLExtractor ll = new BlueExperimentalDistanceLExtractor(hardwareMap);
         ll.startReading();
         ll.setTelemetry(telemetry);
 
@@ -82,10 +80,10 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
             }
 
             double sdistanceError = distance - STARGET_DISTANCE;
-            double mdistanceError = distance - MTARGET_DISTANCE;
+            //double mdistanceError = distance - MTARGET_DISTANCE;
             double fdistanceError = distance - FTARGET_DISTANCE;
             double sangleError = tx;
-            double mangleError = tx;
+            //double mangleError = tx;
             double fangleError = tx;
 
             double sforwardPower = (-sdistanceError * 0.05) * 1;
@@ -96,9 +94,9 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
             double fstrafePower = (-fangleError * 0.03) * 1;
             double fturnPower = (fangleError * 0.02) * 1;
 
-            double mforwardPower = (-mdistanceError * 0.05) * 1;
-            double mstrafePower = (-mangleError * 0.03) * 1;
-            double mturnPower = (mangleError * 0.02) * 1;
+//            double mforwardPower = (-mdistanceError * 0.05) * 1;
+//            double mstrafePower = (-mangleError * 0.03) * 1;
+//            double mturnPower = (mangleError * 0.02) * 1;
 
             sforwardPower = clamp(sforwardPower, -0.4, 0.4);
             shstrafePower = clamp(shstrafePower, -0.4, 0.4);
@@ -108,16 +106,15 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
             fstrafePower = clamp(fstrafePower, -0.4, 0.4);
             fturnPower = clamp(fturnPower, -0.3, 0.3);
 
-            mforwardPower = clamp(mforwardPower, -0.4, 0.4);
-            mstrafePower = clamp(mstrafePower, -0.4, 0.4);
-            mturnPower = clamp(mturnPower, -0.3, 0.3);
+//            mforwardPower = clamp(mforwardPower, -0.4, 0.4);
+//            mstrafePower = clamp(mstrafePower, -0.4, 0.4);
+//            mturnPower = clamp(mturnPower, -0.3, 0.3);
 
             // --- Mechanism Controls ---
             if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
-                ramp.setPower(0.3);
+                ramp.setPower(0.4);
                 //countBalls();
-
             }
 
             if (gamepad1.dpad_left) {
@@ -239,16 +236,16 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
                 }
             }
 
-            if (gamepad1.right_bumper) {
-                if (Math.abs(mdistanceError) == 0 && Math.abs(mangleError) <= MANGLE_TOLERANCE) {
-                    frontLeftMotor.setPower(volt.regulate(0.0));
-                    frontRightMotor.setPower(volt.regulate(0.0));
-                    backLeftMotor.setPower(volt.regulate(0.0));
-                    backRightMotor.setPower(volt.regulate(0.0));
-                } else {
-                    moveMecanum(mforwardPower, mstrafePower, mturnPower);
-                }
-            }
+//            if (gamepad1.right_bumper) {
+//                if (Math.abs(mdistanceError) == 0 && Math.abs(mangleError) <= MANGLE_TOLERANCE) {
+//                    frontLeftMotor.setPower(volt.regulate(0.0));
+//                    frontRightMotor.setPower(volt.regulate(0.0));
+//                    backLeftMotor.setPower(volt.regulate(0.0));
+//                    backRightMotor.setPower(volt.regulate(0.0));
+//                } else {
+//                    moveMecanum(mforwardPower, mstrafePower, mturnPower);
+//                }
+//            }
 
             // --- Drivetrain Controls ---
             double y = -gamepad1.left_stick_y; // forward/back
@@ -283,7 +280,6 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
     private double clamp(double val, double min, double max) {
         return Math.max(min, Math.min(max, val));
     }
-
     private void moveMecanum(double forward, double strafe, double turn) {
         double flPower = forward + strafe + turn;
         double frPower = forward - strafe - turn;
@@ -303,7 +299,7 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
 //        }
 //        while (artifactcounter < 3) {
 //            if (colorGet == "purple" || colorGet == "green") {
-//                artifactcounter += 1;
+//                artifactcounter +=1;
 //            } else if (colorGet == "VALUE") {
 //
 //            } else {
@@ -313,7 +309,7 @@ public class RedGreySoloSensorFinal extends LinearOpMode {
 //
 //        if (artifactcounter == 3) {
 //            activeintake.setPower(0);
-////            ramp.setPower(0);
+//            //ramp.setPower(0);
 //        }
 //        return artifactcounter;
 //    }

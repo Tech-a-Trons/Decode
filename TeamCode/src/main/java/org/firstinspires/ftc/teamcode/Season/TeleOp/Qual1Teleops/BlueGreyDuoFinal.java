@@ -1,33 +1,18 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.Qual1Teleops;
 
-import static org.firstinspires.ftc.teamcode.Season.Pedro.Tuning.follower;
 import static java.lang.Math.clamp;
-import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
-import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.HeadingInterpolator;
-import com.pedropathing.paths.Path;
-import com.pedropathing.paths.PathChain;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.VoltageGet;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
 
-@TeleOp(name = "BlueGreySoloFinal")
-public class BlueGreySoloFinal extends LinearOpMode {
-//    private Follower follower;
-//    private final Pose startPose = new Pose(123.13, 122.08, Math.toRadians(220)); //See ExampleAuto to understand how to use this
-//    private boolean automatedDrive;
-//    private TelemetryManager telemetryM;
-//    private boolean slowMode = false;
-//    private double slowModeMultiplier = 0.5;
+@TeleOp(name = "BlueGreyDuoFinal")
+public class BlueGreyDuoFinal extends LinearOpMode {
+
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
     DcMotor out1 = null;
@@ -48,10 +33,7 @@ public class BlueGreySoloFinal extends LinearOpMode {
         out2 = hardwareMap.get(DcMotor.class, "outtake2");
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
         ramp = hardwareMap.get(DcMotor.class, "ramp");
-//        follower = Constants.createFollower(hardwareMap);
-//        follower.setStartingPose(startPose);
-//        follower.update();
-//        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
+
         BlueExperimentalDistanceLExtractor ll = new BlueExperimentalDistanceLExtractor(hardwareMap);
         ll.startReading();
         ll.setTelemetry(telemetry);
@@ -80,8 +62,6 @@ public class BlueGreySoloFinal extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-//            follower.update();
-//            telemetryM.update();
             ll.update();
 
             distance = ll.getEuclideanDistance();
@@ -135,33 +115,26 @@ public class BlueGreySoloFinal extends LinearOpMode {
 //            mstrafePower = clamp(mstrafePower, -0.4, 0.4);
 //            mturnPower = clamp(mturnPower, -0.3, 0.3);
             // ---Kill Switches--
-            if (gamepad2.a){
-                activeintake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                activeintake.setPower(0);
-            }
-//            if (gamepad2.b){
-//                ramp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//                ramp.setPower(0);
+//            if (gamepad2.a){
+//                activeintake.setPower(0);
 //            }
-
-            if (gamepad2.y) {
-                frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                frontLeftMotor.setPower(0);
-                backRightMotor.setPower(0);
-                frontRightMotor.setPower(0);
-                backLeftMotor.setPower(0);
-                sleep(100);
-            }
+//            if (gamepad2.b){
+//                out1.setPower(0);
+//                out2.setPower(0);
+//            }
+//            if (gamepad2.y){
+//                frontLeftMotor.setPower(0);
+//                backRightMotor.setPower(0);
+//                frontRightMotor.setPower(0);
+//                backLeftMotor.setPower(0);
+//            }
             // --- Mechanism Controls ---
-            if (gamepad1.a) {
+            if (gamepad2.a) {
                 activeintake.setPower(volt.regulate(1.0));
-                ramp.setPower(0.8); //0.3
+                ramp.setPower(0.3);
             }
 
-            if (gamepad1.dpad_left) {
+            if (gamepad2.dpad_left) {
                 out1.setPower(volt.regulate(-0.41));
                 out2.setPower(volt.regulate(0.41));
                 sleep(1000);
@@ -178,6 +151,7 @@ public class BlueGreySoloFinal extends LinearOpMode {
                 out1.setPower(volt.regulate(-0.41));
                 out2.setPower(volt.regulate(0.41));
                 sleep(100);
+
                 ramp.setPower(volt.regulate(-1));
 //        sleep(50);
 
@@ -191,16 +165,16 @@ public class BlueGreySoloFinal extends LinearOpMode {
                 ramp.setPower(volt.regulate(-1));
             }
 
-            if (gamepad1.b) {
+            if (gamepad2.b) {
                 out1.setPower(volt.regulate(-0.36));
                 out2.setPower(volt.regulate(0.36));
             }
 
-            if (gamepad1.dpad_down) {
+            if (gamepad2.dpad_down) {
                 out1.setPower(volt.regulate(0.3));
                 out2.setPower(volt.regulate(-0.3));
             }
-            if (gamepad1.left_bumper) {
+            if(gamepad2.left_bumper){
                 out1.setPower(volt.regulate(-0.6));
                 out2.setPower(volt.regulate(0.6));
                 sleep(1000);
@@ -231,24 +205,20 @@ public class BlueGreySoloFinal extends LinearOpMode {
                 ramp.setPower(volt.regulate(-1));
 
             }
-            if (gamepad1.x) {
+            if (gamepad2.x) {
                 activeintake.setPower(0);
                 out1.setPower(0);
                 out2.setPower(0);
                 ramp.setPower(0);
             }
 
-            if (gamepad1.right_trigger > 0.0) {
-                ramp.setPower(0.3);
-                activeintake.setPower(-1);
-                sleep(100);
-                activeintake.setPower(0);
-                ramp.setPower(0);
+            if (gamepad2.right_trigger > 0.0) {
+                ramp.setPower(volt.regulate(gamepad1.right_trigger));
             }
 
             //Niranjan auto align code is here! - Pranav 10/27
 
-            if (gamepad1.y) {
+            if (gamepad2.y) {
                 if (Math.abs(sdistanceError) == 0 && Math.abs(sangleError) <= SANGLE_TOLERANCE) {
                     frontLeftMotor.setPower(volt.regulate(0.0));
                     frontRightMotor.setPower(volt.regulate(0.0));
@@ -260,7 +230,7 @@ public class BlueGreySoloFinal extends LinearOpMode {
                 }
             }
 
-            if (gamepad1.dpad_right) {
+            if (gamepad2.dpad_right) {
                 if (Math.abs(fdistanceError) == 0 && Math.abs(fangleError) <= FANGLE_TOLERANCE) {
                     frontLeftMotor.setPower(volt.regulate(0.0));
                     frontRightMotor.setPower(volt.regulate(0.0));
@@ -271,18 +241,11 @@ public class BlueGreySoloFinal extends LinearOpMode {
                 }
             }
 
-//             --- Drivetrain Controls ---
-//            double y = -gamepad1.left_stick_y; // forward/back
-//            double x = gamepad1.left_stick_x * 1.1; // strafe
-//            double rx = gamepad1.right_stick_x; // rotation
-            double y = 0;
-            double x = 0;
-            double rx = 0;
-            if (!gamepad2.y) {
-                y = -gamepad1.left_stick_y;
-                x = gamepad1.left_stick_x * 1.1;
-                rx = gamepad1.right_stick_x;
-            }
+            // --- Drivetrain Controls ---
+            double y = -gamepad1.left_stick_y; // forward/back
+            double x = gamepad1.left_stick_x * 1.1; // strafe
+            double rx = gamepad1.right_stick_x; // rotation
+
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
             double frontLeftPower = (y + x + rx) / denominator;
             double backLeftPower = (y - x + rx) / denominator;
@@ -295,7 +258,7 @@ public class BlueGreySoloFinal extends LinearOpMode {
             frontRightMotor.setPower(volt.regulate(frontRightPower));
             backRightMotor.setPower(volt.regulate(backRightPower));
 
-//             --- Telemetry ---
+            // --- Telemetry ---
             telemetry.addData("Voltage", volt.getVoltage());
             telemetry.update();
         }

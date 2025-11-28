@@ -1,15 +1,9 @@
-package org.firstinspires.ftc.teamcode.Season.Subsystems;
-
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+package org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors;
 
 import android.graphics.Color;
 
 import com.qualcomm.hardware.rev.RevColorSensorV3;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.I2cAddr;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 
 //Make changes here
 //For color sensor

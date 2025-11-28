@@ -1,6 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.Subsystems;
-
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+package org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors;
 
 import android.graphics.Color;
 

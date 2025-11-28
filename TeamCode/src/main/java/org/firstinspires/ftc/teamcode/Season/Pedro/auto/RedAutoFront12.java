@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Season.Pedro.auto;
 
+import static com.qualcomm.ftccommon.CommandList.CmdVisuallyIdentify.Command;
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Outtake.outtake;
 
 import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
@@ -116,6 +117,8 @@ public class RedAutoFront12 extends NextFTCOpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
+
+                prestartouttake();
                 follower.followPath(scorePreload, true);
                 setPathState(1);
 
@@ -146,6 +149,7 @@ public class RedAutoFront12 extends NextFTCOpMode {
                 if (!follower.isBusy()) {
                     follower.setMaxPower(1);
                     Intake.INSTANCE.activeintake.setPower(0);
+                    prestartouttake();
 //                    Outtake.INSTANCE.outtake.setPower(0.1);
                     follower.followPath(scorePickup1, true);
                     setPathState(4);
@@ -175,6 +179,7 @@ public class RedAutoFront12 extends NextFTCOpMode {
                 if (!follower.isBusy()) {
                     Midtake.INSTANCE.newtake.setPower(0);
                     Intake.INSTANCE.activeintake.setPower(0);
+                    prestartouttake();
 //                    Outtake.INSTANCE.outtake.setPower(0.1);
 //                    follower.setMaxPower(0.7);
                     follower.followPath(scorePickup2, true);
@@ -204,6 +209,7 @@ public class RedAutoFront12 extends NextFTCOpMode {
                 if (!follower.isBusy()) {
                     Midtake.INSTANCE.newtake.setPower(0);
                     Intake.INSTANCE.activeintake.setPower(0);
+                    prestartouttake();
                     follower.followPath(scorePickup3, true);
 //                    shootThreeBalls();
                     setPathState(10);
@@ -257,7 +263,7 @@ public class RedAutoFront12 extends NextFTCOpMode {
         Intake intake = Intake.INSTANCE;
 
         outtake.outtake.setPower(volt.regulate(0.42)); // out1
-        sleep(800);
+//        sleep(800);
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
         sleep(50);
@@ -285,12 +291,18 @@ public class RedAutoFront12 extends NextFTCOpMode {
         midtake.newtake.setPower(volt.regulate(0));
         intake.activeintake.setPower(volt.regulate(0));
     }
+    private void prestartouttake() {
+        Outtake outtake = Outtake.INSTANCE;
+
+        outtake.outtake.setPower(volt.regulate(0.42)); // out1
+
+    }
     private void shootThreeBalls() {
         Outtake outtake = Outtake.INSTANCE;
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
         outtake.outtake.setPower(volt.regulate(0.42)); // out1
-        sleep(800);
+//        sleep(800);
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
         sleep(50);

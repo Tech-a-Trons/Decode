@@ -1,11 +1,10 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.Qual1Teleops;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Intake;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Midtake;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Outtake;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.Intake;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.Midtake;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.Outtake;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.components.BindingsComponent;

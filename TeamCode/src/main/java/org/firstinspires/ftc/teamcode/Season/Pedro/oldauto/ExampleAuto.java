@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.Season.Pedro.oldauto; // make sure this aligns with class location
 
 import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Intake;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Outtake;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.Intake;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.Outtake;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;

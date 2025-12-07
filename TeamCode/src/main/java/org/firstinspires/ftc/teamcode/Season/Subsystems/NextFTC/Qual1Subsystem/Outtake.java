@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC;
+package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem;
 
 
 import dev.nextftc.control.ControlSystem;
@@ -26,8 +26,8 @@ public class Outtake implements Subsystem {
     private Outtake() { }
 
     public static MotorGroup outtake = new MotorGroup(
-            new MotorEx("outtakeleft").reversed(),
-            new MotorEx("outtakeright")
+            new MotorEx("out1").reversed(),
+            new MotorEx("out2")
     );
 
     ControlSystem controller = ControlSystem.builder()

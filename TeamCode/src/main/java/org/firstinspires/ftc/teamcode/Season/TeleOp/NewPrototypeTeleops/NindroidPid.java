@@ -1,28 +1,21 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp;
-
-import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.TurretPID.turret;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Intake;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Midtake;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Outtake;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.TurretPID;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.Outtake;
 
-import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
-import dev.nextftc.hardware.driving.MecanumDriverControlled;
-import dev.nextftc.hardware.impl.MotorEx;
 
-@TeleOp
-public class PIDTest extends NextFTCOpMode {
-    public PIDTest() {
+@TeleOp(name = "NindroidPid")
+
+public class NindroidPid extends NextFTCOpMode {
+    public NindroidPid() {
         addComponents(
-                new SubsystemComponent(TurretPID.INSTANCE),
+                new SubsystemComponent(Outtake.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE
         );
@@ -33,15 +26,10 @@ public class PIDTest extends NextFTCOpMode {
 //    private final MotorEx frontRightMotor = new MotorEx("fr");
 //    private final MotorEx backLeftMotor = new MotorEx("bl").reversed();
 //    private final MotorEx backRightMotor = new MotorEx("br");
-//    private boolean intakeOn = false;
-//
-   private final MotorEx outl = new MotorEx("outtakeleft").reversed();
-   private final MotorEx outr = new MotorEx("outtakeright");
+    private boolean intakeOn = false;
 
     @Override
     public void onStartButtonPressed() {
-        telemetry.addData("Velo: ", turret.getVelocity());
-        telemetry.update();
 //        Command driverControlled = new MecanumDriverControlled(
 //                frontLeftMotor,
 //                frontRightMotor,
@@ -51,33 +39,18 @@ public class PIDTest extends NextFTCOpMode {
 //                Gamepads.gamepad1().leftStickX(),
 //                Gamepads.gamepad1().rightStickX()
 //        );
-        Gamepads.gamepad1().b()
-                .whenBecomesTrue(() -> {
-                    TurretPID.INSTANCE.setCloseShooterSpeed().schedule();
-                });
-        Gamepads.gamepad1().a()
-                .whenBecomesTrue(() -> {
-                    TurretPID.INSTANCE.setFarShooterSpeed().schedule();
-                });
-        Gamepads.gamepad1().x()
-                .whenBecomesTrue(() -> {
-                    TurretPID.INSTANCE.resetShooter().schedule();
-                });
-        Gamepads.gamepad1().y()
-                .whenBecomesTrue(() -> {
-                   TurretPID.INSTANCE.turret.setPower(0.01);
-                });
+
 // Toggle all off when left bumper is pressed
-//        Gamepads.gamepad1().leftBumper()
-//                .whenBecomesTrue(() -> {
-//                    Outtake.INSTANCE.resetShooter().schedule();
-//                    ;// stop outtake
+        Gamepads.gamepad1().leftBumper()
+                .whenBecomesTrue(() -> {
+                    Outtake.INSTANCE.resetShooter().schedule();
+                    ;// stop outtake
 //                    Midtake.INSTANCE.newtake.setPower(0);    // stop ramp/midtake
 //                    Intake.INSTANCE.activeintake.setPower(0);     // stop intake
-//                });
-//        Gamepads.gamepad1().b().whenBecomesTrue(
-//                () -> Outtake.INSTANCE.setShooterSpeed().schedule()
-//        );
+                });
+        Gamepads.gamepad1().b().whenBecomesTrue(
+                () -> Outtake.INSTANCE.setShooterSpeed().schedule()
+        );
 //        Gamepads.gamepad1().rightBumper()
 //                .whenBecomesTrue(() -> {
 //                    // Start shooter immediately
@@ -97,8 +70,8 @@ public class PIDTest extends NextFTCOpMode {
 
         // Inside your periodic loop or command scheduler
 
-
-
-        //driverControlled.schedule();
+//
+//
+//        driverControlled.schedule();
     }
 }

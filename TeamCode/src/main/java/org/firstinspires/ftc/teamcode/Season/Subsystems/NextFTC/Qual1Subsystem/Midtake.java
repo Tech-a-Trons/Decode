@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC;
+package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem;
 
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.impl.MotorEx;

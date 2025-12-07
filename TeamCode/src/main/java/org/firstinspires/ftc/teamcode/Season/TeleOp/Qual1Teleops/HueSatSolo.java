@@ -347,7 +347,7 @@ public class HueSatSolo extends LinearOpMode {
     private void moveMecanum(double forward, double strafe, double turn) {
         double flPower = forward + strafe + turn;
         double frPower = forward - strafe - turn;
-        double blPower = forward - strafe + turn;
+        double blPower  = forward - strafe + turn;
         double brPower = forward + strafe - turn;
 
         frontLeftMotor.setPower(flPower);

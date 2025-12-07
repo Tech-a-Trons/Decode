@@ -26,8 +26,8 @@ public class Outtake implements Subsystem {
     private Outtake() { }
 
     public static MotorGroup outtake = new MotorGroup(
-            new MotorEx("outtake1").reversed(),
-            new MotorEx("outtake2")
+            new MotorEx("outtakeleft").reversed(),
+            new MotorEx("outtakeright")
     );
 
     ControlSystem controller = ControlSystem.builder()

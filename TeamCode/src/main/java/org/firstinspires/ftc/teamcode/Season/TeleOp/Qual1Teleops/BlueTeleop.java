@@ -161,10 +161,15 @@ public class BlueTeleop extends LinearOpMode {
                 activeintake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 activeintake.setPower(0);
             }
-//            if (gamepad2.b){
-//                ramp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//                ramp.setPower(0);
+//            if (gamepad1.b){
+//                out1.setPower(volt.regulate(-0.38));
+//                out2.setPower(volt.regulate(0.38));
 //            }
+            if(gamepad2.x){
+                ramp.setPower(0);
+//                out1.setPower(volt.regulate(-0.38));
+//                out2.setPower(volt.regulate(0.38));
+            }
 
             if (gamepad2.y) {
                 frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -185,7 +190,7 @@ public class BlueTeleop extends LinearOpMode {
             }
 
             // Start sequence
-            if (gamepad1.dpad_left || gamepad1.b ) {
+            if (gamepad1.dpad_left ) {
                 shooting = true;
                 shootStep = 0;
                 shootTimer.reset();
@@ -196,10 +201,10 @@ public class BlueTeleop extends LinearOpMode {
                 switch (shootStep) {
                     case 0:
 
-                        out1.setPower(volt.regulate(-0.41));
-                        out2.setPower(volt.regulate(0.41));
+                        out1.setPower(volt.regulate(-0.38));
+                        out2.setPower(volt.regulate(0.38));
 
-                        if (shootTimer.milliseconds() > 1000) {
+                        if (shootTimer.milliseconds() > 750) {
 
                             shootStep++;
                             shootTimer.reset();
@@ -230,8 +235,8 @@ public class BlueTeleop extends LinearOpMode {
 
                     case 3:
                         activeintake.setPower(0);
-                        out1.setPower(volt.regulate(-0.41));
-                        out2.setPower(volt.regulate(0.41));
+                        out1.setPower(volt.regulate(-0.39));
+                        out2.setPower(volt.regulate(0.39));
 
                         if (shootTimer.milliseconds() > 100) {
 
@@ -251,8 +256,8 @@ public class BlueTeleop extends LinearOpMode {
                         break;
 
                     case 5:
-                        out1.setPower(volt.regulate(-0.43));
-                        out2.setPower(volt.regulate(0.43));
+                        out1.setPower(volt.regulate(-0.42));
+                        out2.setPower(volt.regulate(0.42));
 
                         if (shootTimer.milliseconds() > 100) {
                             follower.update();
@@ -340,6 +345,10 @@ public class BlueTeleop extends LinearOpMode {
                     moveMecanum(sforwardPower, shstrafePower, sturnPower);
                 }
             }
+            if (gamepad2.left_bumper){
+                out1.setPower(volt.regulate(0));
+                out2.setPower(volt.regulate(0));
+            }
 
             if (gamepad1.dpad_right) {
                 if (Math.abs(fdistanceError) == 0 && Math.abs(fangleError) <= FANGLE_TOLERANCE) {
@@ -351,6 +360,14 @@ public class BlueTeleop extends LinearOpMode {
                     moveMecanum(farforwardPower, fstrafePower, fturnPower);
                 }
             }
+            if ((gamepad2.right_bumper)){
+                IncountBalls();
+                light();
+            }
+            if (gamepad2.left_bumper){
+                ResetBalls();
+                light();
+            }
 
 //             --- Drivetrain Controls ---
 //            double y = -gamepad1.left_stick_y; // forward/back
@@ -360,9 +377,9 @@ public class BlueTeleop extends LinearOpMode {
             double x = 0;
             double rx = 0;
             if (!gamepad2.y) {
-                y = -gamepad1.left_stick_y;
-                x = gamepad1.left_stick_x * 1.1;
-                rx = gamepad1.right_stick_x;
+                y = -gamepad1.left_stick_y*0.75;
+                x = gamepad1.left_stick_x * 0.75;
+                rx = gamepad1.right_stick_x*0.75;
             }
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
             double frontLeftPower = (y + x + rx) / denominator;
@@ -396,7 +413,14 @@ public class BlueTeleop extends LinearOpMode {
         }
         last_alphavalue = current_alphavalue;
     }
-
+    public void DecountBalls() {
+        String color = colorparser.getColor();
+        current_alphavalue = colorparser.getalpha();
+        if (current_alphavalue > 41 && last_alphavalue < 41){
+            artifactcounter -= 1;
+        }
+        last_alphavalue = current_alphavalue;
+    }
     public void ResetBalls() {
         artifactcounter=0;
         rgbindicator.setPosition(0);

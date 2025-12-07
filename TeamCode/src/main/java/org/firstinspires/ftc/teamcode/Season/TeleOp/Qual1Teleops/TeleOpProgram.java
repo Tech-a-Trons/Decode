@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp.oldteleop;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.Qual1Teleops;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -15,8 +15,8 @@ import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 import dev.nextftc.hardware.driving.MecanumDriverControlled;
 import dev.nextftc.hardware.impl.MotorEx;
-@Disabled
-@TeleOp(name = "VelocityPid(NoGood)")
+
+@TeleOp(name = "VelocityPid")
 
 public class TeleOpProgram extends NextFTCOpMode {
     public TeleOpProgram() {

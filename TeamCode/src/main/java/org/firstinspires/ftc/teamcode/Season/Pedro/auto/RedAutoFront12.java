@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Intake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Midtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Outtake;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.OuttakeSetPower;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
 
 import com.pedropathing.follower.Follower;
@@ -28,7 +29,7 @@ public class RedAutoFront12 extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
     public RedAutoFront12() {
         addComponents(
-                new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE),
+                new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE,OuttakeSetPower.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE
         );
@@ -48,14 +49,16 @@ public class RedAutoFront12 extends NextFTCOpMode {
     private final Pose prePickup2 = new Pose(80.765, 54, Math.toRadians(0)); //55
     private final Pose prePickup3 = new Pose(85.565, 33, Math.toRadians(0));
     private final Pose dropoff2 = new Pose(100, 54, Math.toRadians(0)); //55
-    private final Pose pickup1Pose = new Pose(123, 80, Math.toRadians(0));
-    private final Pose pickup2Pose = new Pose(127.5, 54, Math.toRadians(0));
-    private final Pose pickup3Pose = new Pose(126, 32, Math.toRadians(0));
+    private final Pose pickup1Pose = new Pose(125.5, 80, Math.toRadians(0));
+    private final Pose pickup2Pose = new Pose(131, 54, Math.toRadians(0));
+    private final Pose pickup3Pose = new Pose(130, 32, Math.toRadians(0));
+    private final Pose preGate = new Pose(110,65, Math.toRadians(0));
+    private final Pose OpenGate = new Pose(125.5, 65,Math.toRadians(0));
 
     private Path scorePreload;
 
 
-    private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
+    private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3, openGate,PreGate;
     private PathChain grabPrePickup1, grabPrePickup2, grabPrePickup3;
 
     private PathChain dropofftwo;
@@ -73,10 +76,18 @@ public class RedAutoFront12 extends NextFTCOpMode {
                 .addPath(new BezierLine(prePickup1, pickup1Pose))
                 .setLinearHeadingInterpolation(prePickup1.getHeading(), pickup1Pose.getHeading())
                 .build();
+        PreGate = follower.pathBuilder()
+                .addPath(new BezierLine(pickup1Pose,preGate))
+                .setLinearHeadingInterpolation(pickup1Pose.getHeading(),preGate.getHeading())
+                .build();
+        openGate = follower.pathBuilder()
+                .addPath(new BezierLine(preGate,OpenGate))
+                .setLinearHeadingInterpolation(preGate.getHeading(),OpenGate.getHeading())
+                .build();
 
         scorePickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup1Pose, scorePose))
-                .setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
+                .addPath(new BezierLine(OpenGate, scorePose))
+                .setLinearHeadingInterpolation(OpenGate.getHeading(), scorePose.getHeading())
                 .build();
         grabPrePickup2 = follower.pathBuilder()
                 .addPath(new BezierLine(scorePose, prePickup2))
@@ -117,9 +128,9 @@ public class RedAutoFront12 extends NextFTCOpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-
                 prestartouttake();
                 follower.followPath(scorePreload, true);
+
                 setPathState(1);
 
                 break;
@@ -141,82 +152,90 @@ public class RedAutoFront12 extends NextFTCOpMode {
                     Midtake.INSTANCE.newtake.setPower(0.3);
                     follower.setMaxPower(0.8);
                     follower.followPath(grabPickup1, true);
-                    setPathState(3);
+                    setPathState(4);
                 }
                 break;
+//            case 3:
+//                if (!follower.isBusy()) {
+//                   follower.setMaxPower(1);
+//                    follower.followPath(PreGate);
+//                    follower.followPath(openGate);
+//                    setPathState(4);
+//                }
+//                break;
 
-            case 3:
+            case 4:
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(1);
+//                    follower.setMaxPower(1);
                     Intake.INSTANCE.activeintake.setPower(0);
                     prestartouttake();
 //                    Outtake.INSTANCE.outtake.setPower(0.1);
                     follower.followPath(scorePickup1, true);
-                    setPathState(4);
-                }
-                break;
-
-            case 4:
-                if (!follower.isBusy()) {
-                    secondshootThreeBalls();
-                    follower.followPath(grabPrePickup2, true);
-                    Intake.INSTANCE.activeintake.setPower(1);
-                    Midtake.INSTANCE.newtake.setPower(0.3);
                     setPathState(5);
                 }
                 break;
 
             case 5:
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(0.85);
-                    follower.followPath(grabPickup2, true);
-                    follower.setMaxPower(0.6);
+                    secondshootThreeBalls();
+                    follower.followPath(grabPrePickup2, true);
+                    Intake.INSTANCE.activeintake.setPower(1);
+                    Midtake.INSTANCE.newtake.setPower(0.3);
                     setPathState(6);
                 }
                 break;
 
             case 6:
                 if (!follower.isBusy()) {
-                    Midtake.INSTANCE.newtake.setPower(0);
-                    Intake.INSTANCE.activeintake.setPower(0);
-                    prestartouttake();
-//                    Outtake.INSTANCE.outtake.setPower(0.1);
-//                    follower.setMaxPower(0.7);
-                    follower.followPath(scorePickup2, true);
-                    follower.setMaxPower(1);
+                    follower.setMaxPower(0.85);
+                    follower.followPath(grabPickup2, true);
+                    follower.setMaxPower(0.6);
                     setPathState(7);
                 }
                 break;
 
             case 7:
                 if (!follower.isBusy()) {
-                    secondshootThreeBalls();
-                    follower.followPath(grabPrePickup3, true);
-                    Intake.INSTANCE.activeintake.setPower(1);
-                    Midtake.INSTANCE.newtake.setPower(0.3);
+                    Midtake.INSTANCE.newtake.setPower(0);
+                    Intake.INSTANCE.activeintake.setPower(0);
+//                    Outtake.INSTANCE.outtake.setPower(0.1);
+//                    follower.setMaxPower(0.7);
+                    prestartouttake();
+                    follower.followPath(scorePickup2, true);
+                    follower.setMaxPower(1);
                     setPathState(8);
                 }
                 break;
 
             case 8:
                 if (!follower.isBusy()) {
-                    follower.followPath(grabPickup3, true);
+                    secondshootThreeBalls();
+                    follower.followPath(grabPrePickup3, true);
+                    Intake.INSTANCE.activeintake.setPower(1);
+                    Midtake.INSTANCE.newtake.setPower(0.3);
                     setPathState(9);
                 }
                 break;
 
             case 9:
                 if (!follower.isBusy()) {
-                    Midtake.INSTANCE.newtake.setPower(0);
-                    Intake.INSTANCE.activeintake.setPower(0);
-                    prestartouttake();
-                    follower.followPath(scorePickup3, true);
-//                    shootThreeBalls();
+                    follower.followPath(grabPickup3, true);
                     setPathState(10);
                 }
                 break;
 
             case 10:
+                if (!follower.isBusy()) {
+                    Midtake.INSTANCE.newtake.setPower(0);
+                    Intake.INSTANCE.activeintake.setPower(0);
+                    prestartouttake();
+                    follower.followPath(scorePickup3, true);
+//                    shootThreeBalls();
+                    setPathState(11);
+                }
+                break;
+
+            case 11:
                 if (!follower.isBusy()) {
                     secondshootThreeBalls();
                     setPathState(-1);
@@ -262,8 +281,8 @@ public class RedAutoFront12 extends NextFTCOpMode {
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
 
-        outtake.outtake.setPower(volt.regulate(0.42)); // out1
-//        sleep(800);
+//        outtake.outtake.setPower(volt.regulate(0.43)); // out1
+//        sleep(550);
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
         sleep(50);
@@ -273,13 +292,13 @@ public class RedAutoFront12 extends NextFTCOpMode {
         sleep(100);
 
         intake.activeintake.setPower(volt.regulate(0));
-        outtake.outtake.setPower(volt.regulate(0.42)); // out1 again
+        outtake.outtake.setPower(volt.regulate(0.38)); // out1 again
         sleep(50);
 
         midtake.newtake.setPower(volt.regulate(-1)); // ramp again
         sleep(50);
 
-        outtake.outtake.setPower(volt.regulate(0.44)); // slightly stronger outtake
+        outtake.outtake.setPower(volt.regulate(0.42)); // slightly stronger outtake
         sleep(100);
 
         intake.activeintake.setPower(volt.regulate(1.0));
@@ -290,19 +309,20 @@ public class RedAutoFront12 extends NextFTCOpMode {
         outtake.outtake.setPower(volt.regulate(0));
         midtake.newtake.setPower(volt.regulate(0));
         intake.activeintake.setPower(volt.regulate(0));
+        OuttakeSetPower.outtake.setPower(0);
     }
     private void prestartouttake() {
-        Outtake outtake = Outtake.INSTANCE;
+        OuttakeSetPower.outtake.setPower(0.37);
 
-        outtake.outtake.setPower(volt.regulate(0.42)); // out1
-
+        // out1
+sleep(20);
     }
     private void shootThreeBalls() {
         Outtake outtake = Outtake.INSTANCE;
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
-        outtake.outtake.setPower(volt.regulate(0.42)); // out1
-//        sleep(800);
+//        outtake.outtake.setPower(volt.regulate(0.42)); // out1
+//        sleep(550);
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
         sleep(50);
@@ -312,13 +332,13 @@ public class RedAutoFront12 extends NextFTCOpMode {
         sleep(50);
 
         intake.activeintake.setPower(volt.regulate(0));
-        outtake.outtake.setPower(volt.regulate(0.41)); // out1 again
+        outtake.outtake.setPower(volt.regulate(0.38)); // out1 again
         sleep(100);
 
         midtake.newtake.setPower(volt.regulate(-1)); // ramp again
         sleep(50);
 
-        outtake.outtake.setPower(volt.regulate(0.43)); // slightly stronger outtake
+        outtake.outtake.setPower(volt.regulate(0.41)); // slightly stronger outtake
         sleep(100);
 
         intake.activeintake.setPower(volt.regulate(1.0));
@@ -329,6 +349,7 @@ public class RedAutoFront12 extends NextFTCOpMode {
         outtake.outtake.setPower(volt.regulate(0));
         midtake.newtake.setPower(volt.regulate(0));
         intake.activeintake.setPower(volt.regulate(0));
+        OuttakeSetPower.outtake.setPower(0);
     }
 
     public void setPathState(int pState) {

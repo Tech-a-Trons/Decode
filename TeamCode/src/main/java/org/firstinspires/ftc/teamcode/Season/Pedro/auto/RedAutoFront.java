@@ -253,7 +253,7 @@ public class RedAutoFront extends NextFTCOpMode {
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
 
-        outtake.outtake.setPower(volt.regulate(0.42)); // out1
+        outtake.outtake.setPower(volt.regulate(0.38)); // out1
         sleep(800);
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
@@ -264,13 +264,13 @@ public class RedAutoFront extends NextFTCOpMode {
         sleep(100);
 
         intake.activeintake.setPower(volt.regulate(0));
-        outtake.outtake.setPower(volt.regulate(0.42)); // out1 again
+        outtake.outtake.setPower(volt.regulate(0.37)); // out1 again
         sleep(50);
 
         midtake.newtake.setPower(volt.regulate(-1)); // ramp again
         sleep(50);
 
-        outtake.outtake.setPower(volt.regulate(0.44)); // slightly stronger outtake
+        outtake.outtake.setPower(volt.regulate(0.4)); // slightly stronger outtake
         sleep(100);
 
         intake.activeintake.setPower(volt.regulate(1.0));
@@ -286,7 +286,7 @@ public class RedAutoFront extends NextFTCOpMode {
         Outtake outtake = Outtake.INSTANCE;
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
-        outtake.outtake.setPower(volt.regulate(0.42)); // out1
+        outtake.outtake.setPower(volt.regulate(0.38)); // out1
         sleep(800);
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
@@ -297,13 +297,13 @@ public class RedAutoFront extends NextFTCOpMode {
         sleep(50);
 
         intake.activeintake.setPower(volt.regulate(0));
-        outtake.outtake.setPower(volt.regulate(0.41)); // out1 again
+        outtake.outtake.setPower(volt.regulate(0.37)); // out1 again
         sleep(100);
 
         midtake.newtake.setPower(volt.regulate(-1)); // ramp again
         sleep(50);
 
-        outtake.outtake.setPower(volt.regulate(0.43)); // slightly stronger outtake
+        outtake.outtake.setPower(volt.regulate(0.4)); // slightly stronger outtake
         sleep(100);
 
         intake.activeintake.setPower(volt.regulate(1.0));

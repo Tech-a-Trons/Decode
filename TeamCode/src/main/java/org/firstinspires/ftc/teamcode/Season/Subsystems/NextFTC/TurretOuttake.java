@@ -9,8 +9,8 @@ import dev.nextftc.hardware.controllable.RunToVelocity;
 import dev.nextftc.hardware.impl.MotorEx;
 import com.acmerobotics.dashboard.config.Config;
 @Config
-public class Outtake implements Subsystem {
-    public static final Outtake INSTANCE = new Outtake();
+public class TurretOuttake implements Subsystem {
+    public static final TurretOuttake INSTANCE = new TurretOuttake();
     public static double kP = 0.00005;
     public static double kI = 0.01;
     public static double kD = 0.05;
@@ -20,7 +20,7 @@ public class Outtake implements Subsystem {
     public static double kS = 0.01;
 
     public static double goal = 700;
-    private Outtake() { }
+    private TurretOuttake() { }
 
     public static MotorGroup outtake = new MotorGroup(
             new MotorEx("outtake1").reversed(),

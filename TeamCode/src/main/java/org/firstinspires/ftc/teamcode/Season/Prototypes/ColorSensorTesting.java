@@ -31,51 +31,65 @@ public class ColorSensorTesting extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
+            IncountBalls();
+            light();
             telemetry.addData("Ball count: ", artifactcounter);
             telemetry.addData("Alpha: ", colorparser.getalpha());
             //telemetry.addData("Alpha2: ", colorparser.getAlpha2());
             telemetry.addData("Current Alpha: ", current_alphavalue);
             telemetry.addData("Last Alpha: ", last_alphavalue);
             telemetry.update();
-            IncountBalls();
-            light();
+            //IncountBalls();
+            //light();
 
         }
         stop();
     }
+
+
     public void IncountBalls() {
         String color = colorparser.getColor();
         current_alphavalue = colorparser.getalpha();
-        if (artifactcounter < 3) {
-            if (current_alphavalue > 42 && last_alphavalue < 42) {
-                artifactcounter += 1;
-            }
-            last_alphavalue = current_alphavalue;
-        } else if (artifactcounter == 3) {
-            telemetry.addLine("3 BALLS!");
-            if (current_alphavalue > 42 && last_alphavalue < 42) {
-                artifactcounter += 1;
-            }
-            last_alphavalue = current_alphavalue;
-            //rgbindicator.setPosition(0.5);
-        } else if (artifactcounter > 3) {
-            if (current_alphavalue > 42 && last_alphavalue < 42) {
-                artifactcounter += 1;
-            }
-            last_alphavalue = current_alphavalue;
+        if (current_alphavalue > 41 && last_alphavalue < 41){
+            artifactcounter += 1;
         }
+        last_alphavalue = current_alphavalue;
     }
+
+//    public void IncountBalls() {
+//        String color = colorparser.getColor();
+//        current_alphavalue = colorparser.getalpha();
+//        if (artifactcounter < 3) {
+//            if (current_alphavalue > 54 && last_alphavalue < 54) {
+//                artifactcounter += 1;
+//            }
+//            last_alphavalue = current_alphavalue;
+//        } else if (artifactcounter == 3) {
+//            //telemetry.addLine("3 BALLS!");
+//            if (current_alphavalue > 54 && last_alphavalue < 54) {
+//                artifactcounter += 1;
+//            }
+//            last_alphavalue = current_alphavalue;
+//            //rgbindicator.setPosition(0.5);
+//        } else if (artifactcounter > 3) {
+//            if (current_alphavalue > 54 && last_alphavalue < 54) {
+//                artifactcounter += 1;
+//            }
+//            last_alphavalue = current_alphavalue;
+//        }
+//    }
 
     // For RGB indicator
 
     public void light() {
-        if (artifactcounter == 0) {
-            rgbindicator.setPosition(0);
-        } else if (artifactcounter == 1) {
-            rgbindicator.setPosition(0.3);
-        } else if (artifactcounter == 2) {
-            rgbindicator.setPosition(0.375);
-        } else if (artifactcounter == 3) {
+        //if (artifactcounter == 0) {
+        //    rgbindicator.setPosition(0);
+        //} else if (artifactcounter == 1) {
+        //    rgbindicator.setPosition(0.3);
+        //} else if (artifactcounter == 2) {
+        //    rgbindicator.setPosition(0.375);
+        //}
+        if (artifactcounter == 3) {
             rgbindicator.setPosition(0.5);
         } else if (artifactcounter > 3) {
             rgbindicator.setPosition(0.6);

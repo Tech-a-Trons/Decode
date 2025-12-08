@@ -22,17 +22,21 @@ public class HueSatSolo extends LinearOpMode {
     double y;
     double x;
     double rx;
+
+    int green = 0;
+
+    int purple = 0;
     DcMotor out2 = null;
     DcMotor ramp = null;
 
     ColorHueFix colorparser;
     Servo rgbindicator;
     public int artifactcounter = 0;
-    public float last_alphavalue = 32;
-    public float last_alphavalue2 = 32;
-
-    public float current_alphavalue = 0;
-    public float current_alphavalue2 = 0;
+//    public float last_alphavalue = 32;
+//    public float last_alphavalue2 = 32;
+//
+//    public float current_alphavalue = 0;
+//    public float current_alphavalue2 = 0;
     public float current_sat = 0;
 
     public float current_hue = 0;
@@ -42,7 +46,7 @@ public class HueSatSolo extends LinearOpMode {
     public int activeslot = 0;
     public int asc = 0;
     // asc = active slot color
-    int[] slots = new int[3];
+    int[] slots = new int[10];
 
     int[] motif = new int[3];
 
@@ -103,12 +107,17 @@ public class HueSatSolo extends LinearOpMode {
                 telemetry.addData("Ball count: ", artifactcounter);
                 telemetry.addData("Alpha: ", colorparser.getalpha());
                 //telemetry.addData("Alpha2: ", colorparser.getAlpha2());
-                telemetry.addData("Current Alpha: ", current_alphavalue);
-                telemetry.addData("Last Alpha: ", last_alphavalue);
+//                telemetry.addData("Current Alpha: ", current_alphavalue);
+//                telemetry.addData("Last Alpha: ", last_alphavalue);
                 telemetry.addData("Hue: ", colorparser.gethue());
                 telemetry.addData("Sat: ", colorparser.getsat());
                 telemetry.addData("Val: ", colorparser.getval());
-                telemetry.addData("Color: ", colorparser.getColor());
+//                telemetry.addData("Color: ", colorparser.getColor());
+                telemetry.addData("green", green);
+                telemetry.addData("purple", purple);
+                telemetry.addData("slot 0", slots[0]);
+                telemetry.addData("slot 1", slots[1]);
+                telemetry.addData("slot 2", slots[2]);
                 telemetry.update();
 
                 current_sat = colorparser.getsat();
@@ -195,9 +204,9 @@ public class HueSatSolo extends LinearOpMode {
             if (gamepad1.a) {
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(0.3);
-                IncountBalls();
             }
             IncountBalls();
+
 
             if (gamepad1.dpad_left && !gamepad2.b) {
                 out1.setPower(volt.regulate(-0.41));
@@ -251,6 +260,9 @@ public class HueSatSolo extends LinearOpMode {
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(volt.regulate(0));
                 sleep(100);
+                artifactcounter -= 1;
+                slots[1] = 0;
+
 
                 activeintake.setPower(volt.regulate(0));
                 out1.setPower(volt.regulate(-0.6));
@@ -263,12 +275,15 @@ public class HueSatSolo extends LinearOpMode {
 //        Outtake.outtake.setPower(volt.regulate(0.1));
 //        midtake.newtake.setPower(volt.regulate(0));
                 sleep(100);
+                artifactcounter -= 1;
+                slots[2] = 0;
                 out1.setPower(volt.regulate(-0.6));
                 out2.setPower(volt.regulate(0.6));
                 sleep(100);
                 activeintake.setPower(volt.regulate(1.0));
                 ramp.setPower(volt.regulate(-1));
-
+                artifactcounter -= 1;
+                slots[3] = 0;
             }
             if (gamepad1.x) {
                 activeintake.setPower(0);
@@ -362,19 +377,27 @@ public class HueSatSolo extends LinearOpMode {
         current_hue = colorparser.gethue();
 
 
-            if (current_sat > 0.5) {
-                artifactcounter += 1;
-                asc += 5;
-                light();
-                sleep(800);
-            } else if (current_hue > 167) {
-                artifactcounter += 1;
-                asc += 1;
-                light();
-                sleep(800);
-            }
+        if (current_sat > 0.5) {
+            artifactcounter += 1;
+            asc += 5;
+            light();
+            AssignColors();
+            spindexe();
+            activeslot += 1;
+            sleep(800);
+        } else if (current_hue > 167) {
+            artifactcounter += 1;
+            asc += 1;
+            light();
+            AssignColors();
+            spindexe();
+            activeslot += 1;
+            sleep(800);
+        }
+        // remove activeslot = artifactcounter when new robot is made
 
-//         last_alphavalue = current_alphavalue;
+      green = (slots[0] + slots[1] + slots[2]) / 5;
+      purple = (slots[0] + slots[1] + slots[2]) % 5;
     }
     public void light() {
         if (artifactcounter == 0) {
@@ -393,21 +416,22 @@ public class HueSatSolo extends LinearOpMode {
     public void AssignColors() {
         slots[activeslot] = asc;
         asc = 0;
+
     }
 
     public void spindexe() {
         //motor spin to next slot
-        activeslot += 1;
-        if (activeslot > 2) {
-            activeslot = 0;
-        }
-        if (activeslot < 0) {
-                activeslot = 2;
-        }
+//        activeslot = 1;
+//        if (activeslot > 2) {
+//            activeslot = 0;
+//        }
+//        if (activeslot < 0) {
+//                activeslot = 2;
+        // put commented code after new robot is made
+
     }
 
-        int green = (slots[0] + slots[1] + slots[2])/5;
-        int purple = (slots[0] + slots[1] + slots[2])%5;
+
 
         public void Outake_Transfer() {
             double RightNumber = 0;
@@ -418,9 +442,9 @@ public class HueSatSolo extends LinearOpMode {
             int LeftPlacement = 0;
 
 
-            motif[1] = 5;
+            motif[0] = 5;
+            motif[1] = 1;
             motif[2] = 1;
-            motif[3] = 1;
             outakeslot = activeslot += 1.5;
             if (outakeslot > 2.5){
                 outakeslot = 0.5;

@@ -1,10 +1,10 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
 
-import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.TurretPID.turret;
+import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.TurretPID.turret;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.TurretPID;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.TurretPID;
 
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;

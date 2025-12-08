@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC;
+package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 

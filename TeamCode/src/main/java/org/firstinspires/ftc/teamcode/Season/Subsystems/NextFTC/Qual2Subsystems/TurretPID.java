@@ -28,8 +28,8 @@ public class TurretPID implements Subsystem {
     private TurretPID() { }
 
     public static MotorGroup turret = new MotorGroup(
-            new MotorEx("outtakeleft").reversed(),
-            new MotorEx("outtakeright")
+            new MotorEx("outtakeright"),
+            new MotorEx("outtakeleft").reversed()
     );
 
     ControlSystem controller = ControlSystem.builder()

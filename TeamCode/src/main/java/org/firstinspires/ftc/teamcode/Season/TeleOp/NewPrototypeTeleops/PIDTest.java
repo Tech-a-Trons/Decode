@@ -60,6 +60,8 @@ public class PIDTest extends NextFTCOpMode {
         Gamepads.gamepad1().y()
                 .whenBecomesTrue(() -> {
                    TurretPID.INSTANCE.turret.setPower(0.01);
+                    telemetry.addData("Velo: ", turret.getVelocity());
+                    telemetry.update();
                 });
 // Toggle all off when left bumper is pressed
 //        Gamepads.gamepad1().leftBumper()

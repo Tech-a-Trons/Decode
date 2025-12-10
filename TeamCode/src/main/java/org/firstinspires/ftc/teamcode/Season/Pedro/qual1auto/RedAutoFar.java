@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.Pedro.auto;
+package org.firstinspires.ftc.teamcode.Season.Pedro.qual1auto;
 
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.Outtake.outtake;
 
@@ -21,10 +21,10 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "RedAutoFront9", group = "Examples")
-public class RedAutoFront extends NextFTCOpMode {
+@Autonomous(name = "RedAutoFar9", group = "Examples")
+public class RedAutoFar extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
-    public RedAutoFront() {
+    public RedAutoFar() {
         addComponents(
                 new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE),
                 BulkReadComponent.INSTANCE,
@@ -37,18 +37,18 @@ public class RedAutoFront extends NextFTCOpMode {
     private Timer pathTimer, opmodeTimer;
     private int pathState;
 
-    private final Pose startPose = new Pose(123.13, 122.08, Math.toRadians(220));
+    private final Pose startPose = new Pose(57.000, 8.000, Math.toRadians(270)).mirror();
     //    private final Pose scorePose = new Pose(90, 90, Math.toRadians(215));
-    private final Pose scorePose = new Pose(88, 88, Math.toRadians(215));
+    private final Pose scorePose = new Pose(76, 19, Math.toRadians(300)).mirror();
 
 
-    private final Pose prePickup1 = new Pose(80, 80, Math.toRadians(0));
-    private final Pose prePickup2 = new Pose(80.765, 54, Math.toRadians(0)); //55
-    private final Pose prePickup3 = new Pose(85.565, 33, Math.toRadians(0));
-    private final Pose dropoff2 = new Pose(100, 54, Math.toRadians(0)); //55
-    private final Pose pickup1Pose = new Pose(123, 80, Math.toRadians(0));
-    private final Pose pickup2Pose = new Pose(127.5, 54, Math.toRadians(0));
-    private final Pose pickup3Pose = new Pose(126, 32, Math.toRadians(0));
+    private final Pose prePickup1 = new Pose(48.500, 34, Math.toRadians(180)).mirror();
+    private final Pose prePickup2 = new Pose(48, 58, Math.toRadians(180)).mirror(); //55
+    private final Pose prePickup3 = new Pose(46.5, 84, Math.toRadians(180)).mirror();
+    //    private final Pose dropoff2 = new Pose(100, 54, Math.toRadians(180)); //55
+    private final Pose pickup1Pose = new Pose(9.000, 34, Math.toRadians(180)).mirror();
+    private final Pose pickup2Pose = new Pose(9, 58, Math.toRadians(180)).mirror();
+    private final Pose pickup3Pose = new Pose(12, 84, Math.toRadians(180)).mirror();
 
     private Path scorePreload;
 
@@ -64,7 +64,7 @@ public class RedAutoFront extends NextFTCOpMode {
 
         grabPrePickup1 = follower.pathBuilder()
                 .addPath(new BezierLine(scorePose, prePickup1))
-                .setLinearHeadingInterpolation(220, 0)
+                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup1.getHeading())
                 .build();
 
         grabPickup1 = follower.pathBuilder()
@@ -85,29 +85,29 @@ public class RedAutoFront extends NextFTCOpMode {
                 .addPath(new BezierLine(prePickup2, pickup2Pose))
                 .setLinearHeadingInterpolation(prePickup2.getHeading(), pickup2Pose.getHeading())
                 .build();
-        dropofftwo = follower.pathBuilder()
-                .addPath(new BezierLine(pickup2Pose,dropoff2))
-                .setLinearHeadingInterpolation(pickup2Pose.getHeading(),dropoff2.getHeading())
-                .build();
+//        dropofftwo = follower.pathBuilder()
+//                .addPath(new BezierLine(pickup2Pose,dropoff2))
+//                .setLinearHeadingInterpolation(pickup2Pose.getHeading(),dropoff2.getHeading())
+//                .build();
         scorePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(dropoff2, scorePose))
-                .setLinearHeadingInterpolation(dropoff2.getHeading(), scorePose.getHeading())
+                .addPath(new BezierLine(pickup2Pose, scorePose))
+                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
                 .build();
 
-//        grabPrePickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(scorePose, prePickup3))
-//                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
-//                .build();
-//
-//        grabPickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(prePickup3, pickup3Pose))
-//                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
-//                .build();
-//
-//        scorePickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(pickup3Pose, scorePose))
-//                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
-//                .build();
+        grabPrePickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, prePickup3))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
+                .build();
+
+        grabPickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(prePickup3, pickup3Pose))
+                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
+                .build();
+
+        scorePickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(pickup3Pose, scorePose))
+                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
+                .build();
     }
 
     public void autonomousPathUpdate() {
@@ -161,9 +161,9 @@ public class RedAutoFront extends NextFTCOpMode {
 
             case 5:
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(0.85);
+                    follower.setMaxPower(0.8);
                     follower.followPath(grabPickup2, true);
-                    follower.setMaxPower(0.6);
+                    follower.setMaxPower(1);
                     setPathState(6);
                 }
                 break;
@@ -173,9 +173,7 @@ public class RedAutoFront extends NextFTCOpMode {
                     Midtake.INSTANCE.newtake.setPower(0);
                     Intake.INSTANCE.activeintake.setPower(0);
 //                    Outtake.INSTANCE.outtake.setPower(0.1);
-
                     follower.followPath(scorePickup2, true);
-                    follower.setMaxPower(1);
                     setPathState(7);
                 }
                 break;
@@ -252,30 +250,29 @@ public class RedAutoFront extends NextFTCOpMode {
         Outtake outtake = Outtake.INSTANCE;
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
-
-        outtake.outtake.setPower(volt.regulate(0.38)); // out1
-        sleep(800);
+        outtake.outtake.setPower(volt.regulate(0.6)); // out1
+        sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
         sleep(50);
 
         intake.activeintake.setPower(volt.regulate(1.0)); // activeintake
         midtake.newtake.setPower(volt.regulate(0)); // ramp stop
-        sleep(100);
+        sleep(300);
 
         intake.activeintake.setPower(volt.regulate(0));
-        outtake.outtake.setPower(volt.regulate(0.37)); // out1 again
-        sleep(50);
+        outtake.outtake.setPower(volt.regulate(0.601)); // out1 again
+        sleep(300);
 
         midtake.newtake.setPower(volt.regulate(-1)); // ramp again
-        sleep(50);
+        sleep(300);
 
-        outtake.outtake.setPower(volt.regulate(0.4)); // slightly stronger outtake
-        sleep(100);
+        outtake.outtake.setPower(volt.regulate(0.602)); // slightly stronger outtake
+        sleep(300);
 
         intake.activeintake.setPower(volt.regulate(1.0));
         midtake.newtake.setPower(volt.regulate(-1)); // ramp
-        sleep(1100);
+        sleep(2000);
 
 // Stop all
         outtake.outtake.setPower(volt.regulate(0));
@@ -283,37 +280,33 @@ public class RedAutoFront extends NextFTCOpMode {
         intake.activeintake.setPower(volt.regulate(0));
     }
     private void shootThreeBalls() {
+
         Outtake outtake = Outtake.INSTANCE;
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
-        outtake.outtake.setPower(volt.regulate(0.38)); // out1
-        sleep(800);
+        outtake.outtake.setPower(volt.regulate(0.63)); // out1
+        sleep(1400);
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
         sleep(50);
 
         intake.activeintake.setPower(volt.regulate(1.0)); // activeintake
         midtake.newtake.setPower(volt.regulate(0)); // ramp stop
-        sleep(50);
+        sleep(300);
 
         intake.activeintake.setPower(volt.regulate(0));
-        outtake.outtake.setPower(volt.regulate(0.37)); // out1 again
-        sleep(100);
+        outtake.outtake.setPower(volt.regulate(0.601)); // out1 again
+        sleep(300);
 
         midtake.newtake.setPower(volt.regulate(-1)); // ramp again
-        sleep(50);
+        sleep(300);
 
-        outtake.outtake.setPower(volt.regulate(0.4)); // slightly stronger outtake
-        sleep(100);
+        outtake.outtake.setPower(volt.regulate(0.602)); // slightly stronger outtake
+        sleep(300);
 
         intake.activeintake.setPower(volt.regulate(1.0));
         midtake.newtake.setPower(volt.regulate(-1)); // ramp
-        sleep(1100);
-
-// Stop all
-        outtake.outtake.setPower(volt.regulate(0));
-        midtake.newtake.setPower(volt.regulate(0));
-        intake.activeintake.setPower(volt.regulate(0));
+        sleep(2000);
     }
 
     public void setPathState(int pState) {

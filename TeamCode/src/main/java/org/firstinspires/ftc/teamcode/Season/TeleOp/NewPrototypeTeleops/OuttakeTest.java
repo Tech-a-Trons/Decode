@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -10,13 +11,14 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class OuttakeTest extends LinearOpMode {
     DcMotor outleft = null;
     DcMotor outright = null;
-    Servo hood = null;
+    CRServo hood = null;
     @Override
     public void runOpMode() throws InterruptedException {
         outright=hardwareMap.get(DcMotor.class,"outtakeright");
         outleft=hardwareMap.get(DcMotor.class,"outtakeleft");
-        hood = hardwareMap.get(Servo.class,"hood");
+        hood = hardwareMap.get(CRServo.class,"hood");
         outleft.setDirection(DcMotorSimple.Direction.REVERSE);
+        hood.setDirection(CRServo.Direction.REVERSE);
         waitForStart();
         while (opModeIsActive()){
 //            if (gamepad1.a){
@@ -36,23 +38,29 @@ public class OuttakeTest extends LinearOpMode {
                 //0.6 power for close
             }
             if (gamepad1.a){
-                outright.setPower(0.8);
-                outleft.setPower(0.8);
+                outright.setPower(0.72);
+                outleft.setPower(0.72);
                 //0.8 power for far
             }
 //            if (gamepad1.a){
 //                hood.setPosition(0.3);
 //            }
             if (gamepad1.y){
-                hood.setPosition(-0.5);
+                hood.setPower(0.3);
+//                sleep(100);
+//                hood.setPower(-0);
             }
             if (gamepad1.dpad_left){
-                hood.setPosition(1);
+                hood.setPower(-0.5);
+//                sleep(100);
+//                hood.setPower(-0);
             }
             if (gamepad1.x){
                 outleft.setPower(0);
                 outright.setPower(0);
-                hood.setPosition(0);
+                hood.setPower(-1);
+//                sleep(100);
+//                hood.setPower(-0);
             }
 
         }

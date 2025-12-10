@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.Pedro.auto;
+package org.firstinspires.ftc.teamcode.Season.Pedro.qual1auto;
 
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.Outtake.outtake;
 
@@ -6,7 +6,6 @@ import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.Intake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.Midtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.Outtake;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.OuttakeSetPower;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
 
 import com.pedropathing.follower.Follower;
@@ -22,10 +21,10 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "BlueAutoFront12", group = "Examples")
-public class BlueAutoFront12 extends NextFTCOpMode {
+@Autonomous(name = "BlueAutoFront9", group = "Examples")
+public class BlueAutoFront extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
-    public BlueAutoFront12() {
+    public BlueAutoFront() {
         addComponents(
                 new SubsystemComponent(Outtake.INSTANCE, Intake.INSTANCE, Midtake.INSTANCE),
                 BulkReadComponent.INSTANCE,
@@ -46,9 +45,9 @@ public class BlueAutoFront12 extends NextFTCOpMode {
     private final Pose prePickup1 = new Pose(80, 76, Math.toRadians(0)).mirror();
     private final Pose prePickup2 = new Pose(80.765, 52, Math.toRadians(0)).mirror(); //55
     private final Pose prePickup3 = new Pose(85.565, 30, Math.toRadians(0)).mirror();
-    private final Pose dropoff2 = new Pose(100, 54, Math.toRadians(0)).mirror(); //55
+    private final Pose dropoff2 = new Pose(100, 52, Math.toRadians(0)).mirror(); //55
     private final Pose pickup1Pose = new Pose(123, 76, Math.toRadians(0)).mirror();
-    private final Pose pickup2Pose = new Pose(128, 52, Math.toRadians(0)).mirror(); //126
+    private final Pose pickup2Pose = new Pose(128, 54, Math.toRadians(0)).mirror();
     private final Pose pickup3Pose = new Pose(128, 30, Math.toRadians(0)).mirror();
 
     private Path scorePreload;
@@ -95,26 +94,26 @@ public class BlueAutoFront12 extends NextFTCOpMode {
                 .setLinearHeadingInterpolation(dropoff2.getHeading(), scorePose.getHeading())
                 .build();
 
-        grabPrePickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, prePickup3))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
-                .build();
-
-        grabPickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(prePickup3, pickup3Pose))
-                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
-                .build();
-
-        scorePickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup3Pose, scorePose))
-                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
-                .build();
+//        grabPrePickup3 = follower.pathBuilder()
+//                .addPath(new BezierLine(scorePose, prePickup3))
+//                .setLinearHeadingInterpolation(scorePose.getHeading(), prePickup3.getHeading())
+//                .build();
+//
+//        grabPickup3 = follower.pathBuilder()
+//                .addPath(new BezierLine(prePickup3, pickup3Pose))
+//                .setLinearHeadingInterpolation(prePickup3.getHeading(), pickup3Pose.getHeading())
+//                .build();
+//
+//        scorePickup3 = follower.pathBuilder()
+//                .addPath(new BezierLine(pickup3Pose, scorePose))
+//                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
+//                .build();
     }
 
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                prestartouttake();
+                Outtake.INSTANCE.outtake.setPower(volt.regulate(0.42));
                 follower.followPath(scorePreload, true);
                 setPathState(1);
 
@@ -146,7 +145,6 @@ public class BlueAutoFront12 extends NextFTCOpMode {
 //                    follower.setMaxPower(1);
                     Intake.INSTANCE.activeintake.setPower(0);
 //                    Outtake.INSTANCE.outtake.setPower(0.1);
-                    prestartouttake();
                     follower.followPath(scorePickup1, true);
                     setPathState(4);
                 }
@@ -175,7 +173,6 @@ public class BlueAutoFront12 extends NextFTCOpMode {
                 if (!follower.isBusy()) {
                     Midtake.INSTANCE.newtake.setPower(0);
                     Intake.INSTANCE.activeintake.setPower(0);
-                    prestartouttake();
 //                    Outtake.INSTANCE.outtake.setPower(0.1);
                     follower.followPath(scorePickup2, true);
                     setPathState(7);
@@ -203,7 +200,6 @@ public class BlueAutoFront12 extends NextFTCOpMode {
                 if (!follower.isBusy()) {
                     Midtake.INSTANCE.newtake.setPower(0);
                     Intake.INSTANCE.activeintake.setPower(0);
-                    prestartouttake();
                     follower.followPath(scorePickup3, true);
 //                    shootThreeBalls();
                     setPathState(10);
@@ -219,81 +215,104 @@ public class BlueAutoFront12 extends NextFTCOpMode {
         }
     }
 
-
+    // 🔹 Clean shooting sequence (no volt.regulate)
+//    private void shootThreeBalls() {
+//        Outtake outtake = Outtake.INSTANCE;
+//        Midtake midtake = Midtake.INSTANCE;
+//        Intake intake = Intake.INSTANCE;
+//        Outtake.outtake.setPower(0.36);
+//sleep(800);
+//        midtake.newtake.setPower(-1.0);
+//        sleep(100);
+//        outtake.outtake.setPower(.3);
+//        intake.activeintake.setPower(1.0);
+//        midtake.newtake.setPower(0);
+//        sleep(300);
+//        intake.activeintake.setPower(0);
+//        outtake.outtake.setPower(0.33);
+//        sleep(800);
+//        midtake.newtake.setPower(-1);
+//        sleep(50);
+//        outtake.outtake.setPower(0.36);
+//        midtake.newtake.setPower(0);
+//        sleep(100);
+//        outtake.outtake.setPower(0.36);
+//        sleep(500);
+//        intake.activeintake.setPower(1.0);
+//        midtake.newtake.setPower(-1);
+//        sleep(600);
+//
+//        // Stop all
+//        outtake.outtake.setPower(0);
+//        midtake.newtake.setPower(0);
+//        intake.activeintake.setPower(0);
+//    }
     private void secondshootThreeBalls() {
         Outtake outtake = Outtake.INSTANCE;
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
 
-//        outtake.outtake.setPower(volt.regulate(0.43)); // out1
-//        sleep(550);
+        outtake.outtake.setPower(volt.regulate(0.42)); // out1
+        sleep(650);
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
-        sleep(50);
+//        sleep(50);
 
         intake.activeintake.setPower(volt.regulate(1.0)); // activeintake
-        midtake.newtake.setPower(volt.regulate(0)); // ramp stop
-        sleep(100);
+//        midtake.newtake.setPower(volt.regulate(0)); // ramp stop
+//        sleep(100);
 
-        intake.activeintake.setPower(volt.regulate(0));
-        outtake.outtake.setPower(volt.regulate(0.4)); // out1 again
-        sleep(50);
+//        intake.activeintake.setPower(volt.regulate(0));
+        outtake.outtake.setPower(volt.regulate(0.42)); // out1 again
+//        sleep(50);
 
         midtake.newtake.setPower(volt.regulate(-1)); // ramp again
-        sleep(50);
+//        sleep(50);
 
-        outtake.outtake.setPower(volt.regulate(0.41)); // slightly stronger outtake
-        sleep(100);
+        outtake.outtake.setPower(volt.regulate(0.44)); // slightly stronger outtake
+//        sleep(100);
 
         intake.activeintake.setPower(volt.regulate(1.0));
         midtake.newtake.setPower(volt.regulate(-1)); // ramp
-        sleep(1100);
+        sleep(1200);
 
 // Stop all
         outtake.outtake.setPower(volt.regulate(0));
         midtake.newtake.setPower(volt.regulate(0));
         intake.activeintake.setPower(volt.regulate(0));
-        OuttakeSetPower.outtake.setPower(0);
-    }
-    private void prestartouttake() {
-        OuttakeSetPower.outtake.setPower(0.37);
-
-        // out1
-        sleep(20);
     }
     private void shootThreeBalls() {
         Outtake outtake = Outtake.INSTANCE;
         Midtake midtake = Midtake.INSTANCE;
         Intake intake = Intake.INSTANCE;
-//        outtake.outtake.setPower(volt.regulate(0.42)); // out1
-//        sleep(550);
+        outtake.outtake.setPower(volt.regulate(0.44)); // out1 //42
+        sleep(650); //800
 
         midtake.newtake.setPower(volt.regulate(-1.0)); // ramp
-        sleep(50);
+//        sleep(50);
 
         intake.activeintake.setPower(volt.regulate(1.0)); // activeintake
-        midtake.newtake.setPower(volt.regulate(0)); // ramp stop
-        sleep(50);
-
-        intake.activeintake.setPower(volt.regulate(0));
-        outtake.outtake.setPower(volt.regulate(0.39)); // out1 again
-        sleep(100);
+//        midtake.newtake.setPower(volt.regulate(0)); // ramp stop
+//        sleep(50);
+//
+//        intake.activeintake.setPower(volt.regulate(0));
+        outtake.outtake.setPower(volt.regulate(0.43)); // out1 again //41
+//        sleep(100);
 
         midtake.newtake.setPower(volt.regulate(-1)); // ramp again
-        sleep(50);
+//        sleep(50);
 
-        outtake.outtake.setPower(volt.regulate(0.43)); // slightly stronger outtake
-        sleep(100);
+        outtake.outtake.setPower(volt.regulate(0.44)); // slightly stronger outtake //43
+//        sleep(100);
 
         intake.activeintake.setPower(volt.regulate(1.0));
         midtake.newtake.setPower(volt.regulate(-1)); // ramp
-        sleep(1100);
+        sleep(1200);
 
 // Stop all
         outtake.outtake.setPower(volt.regulate(0));
         midtake.newtake.setPower(volt.regulate(0));
         intake.activeintake.setPower(volt.regulate(0));
-        OuttakeSetPower.outtake.setPower(0);
     }
 
     public void setPathState(int pState) {

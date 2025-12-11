@@ -50,12 +50,12 @@ public class PIDTest extends NextFTCOpMode {
         Gamepads.gamepad1().b()
                 .whenBecomesTrue(() -> {
                     TurretPID.INSTANCE.setCloseShooterSpeed().schedule();
-                    TurretPID.INSTANCE.turret.setPower(0);
+//                    TurretPID.INSTANCE.periodic();
                 });
         Gamepads.gamepad1().a()
                 .whenBecomesTrue(() -> {
                     TurretPID.INSTANCE.setFarShooterSpeed().schedule();
-                    TurretPID.INSTANCE.turret.setPower(0);
+//                    TurretPID.INSTANCE.periodic();
                 });
 
         //Ehh might remove this
@@ -65,10 +65,11 @@ public class PIDTest extends NextFTCOpMode {
                 });
 
         //Then set periodic
-//        Gamepads.gamepad1().y()
-//                .whenBecomesTrue(() -> {
-//                   TurretPID.INSTANCE.periodic();
-//                });
+        Gamepads.gamepad1().y()
+                .whenBecomesTrue(() -> {
+                   TurretPID.INSTANCE.periodic();
+                   TurretPID.INSTANCE.turret.setPower(0.6);
+                });
 
         //If anything goes wrong, use this
         Gamepads.gamepad1().leftBumper()

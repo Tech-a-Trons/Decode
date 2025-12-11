@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subs
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Hood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.TurretPID;
 
 import dev.nextftc.core.components.BindingsComponent;
@@ -16,7 +17,7 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 public class PIDTest extends NextFTCOpMode {
     public PIDTest() {
         addComponents(
-                new SubsystemComponent(TurretPID.INSTANCE),
+                new SubsystemComponent(TurretPID.INSTANCE, Hood.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE
         );
@@ -50,11 +51,14 @@ public class PIDTest extends NextFTCOpMode {
         Gamepads.gamepad1().b()
                 .whenBecomesTrue(() -> {
                     TurretPID.INSTANCE.setCloseShooterSpeed().schedule();
+                    Hood.INSTANCE.open();
+
 //                    TurretPID.INSTANCE.periodic();
                 });
         Gamepads.gamepad1().a()
                 .whenBecomesTrue(() -> {
                     TurretPID.INSTANCE.setFarShooterSpeed().schedule();
+                    Hood.INSTANCE.open();
 //                    TurretPID.INSTANCE.periodic();
                 });
 
@@ -62,6 +66,7 @@ public class PIDTest extends NextFTCOpMode {
         Gamepads.gamepad1().x()
                 .whenBecomesTrue(() -> {
                     TurretPID.INSTANCE.resetShooter().schedule();
+                    Hood.INSTANCE.close();
                 });
 
         //Then set periodic

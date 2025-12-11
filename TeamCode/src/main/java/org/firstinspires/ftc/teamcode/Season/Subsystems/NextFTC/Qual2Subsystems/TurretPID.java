@@ -16,7 +16,7 @@ import dev.nextftc.hardware.impl.MotorEx;
 public class TurretPID implements Subsystem {
 
     public static final TurretPID INSTANCE = new TurretPID();
-    public static double kP = 0.0005;
+    public static double kP = 0.05; //before 0.0005
     public static double kI = 0.0;
     public static double kD = 0.0;
 

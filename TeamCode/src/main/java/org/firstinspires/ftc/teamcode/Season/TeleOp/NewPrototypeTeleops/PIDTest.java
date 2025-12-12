@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subs
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Hood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.TurretPID;
 
@@ -35,6 +36,23 @@ public class PIDTest extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
+        final double STARGET_DISTANCE = 58; // inches 42.97
+         final double SANGLE_TOLERANCE = -1.8;
+        //    private final double MTARGET_DISTANCE = 2838; // PLACEHOLDER
+//    private final double MANGLE_TOLERANCE = 134; // PLACEHOLDER
+         final double FTARGET_DISTANCE = 124; //115
+         final double FANGLE_TOLERANCE = 1; //3.47
+        BlueExperimentalDistanceLExtractor ll = new BlueExperimentalDistanceLExtractor(hardwareMap);
+        ll.startReading();
+        ll.setTelemetry(telemetry);
+        Double tx = ll.getTx();
+        if (tx == null) {
+            tx = 0.0;
+        }
+        Double distance = ll.getEuclideanDistance();
+        if (distance == null) {
+            distance = 0.0;
+        }
         telemetry.addData("Velo: ", turret.getVelocity());
         telemetry.update();
 //        Command driverControlled = new MecanumDriverControlled(

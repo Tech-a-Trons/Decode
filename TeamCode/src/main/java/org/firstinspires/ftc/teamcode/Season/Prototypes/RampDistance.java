@@ -1,11 +1,11 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp.Qual1Teleops;
+package org.firstinspires.ftc.teamcode.Season.Prototypes;
 
 import static java.lang.Math.clamp;
 
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
-import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.Pose;
+//import com.pedropathing.follower.Follower;
+//import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -15,16 +15,17 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
 import org.firstinspires.ftc.teamcode.Season.SensorStuff.LimelightTester;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.ColorHueFix;
+//import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.ColorHueFix;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.ExperimentalArtifacts;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
 
 import dev.nextftc.core.units.Distance;
+import dev.nextftc.hardware.positionable.SetPosition;
 
-@TeleOp(name = "ColorSensingTele")
-public class ColorSensingTele extends LinearOpMode {
-    ColorHueFix colorparser;
+@TeleOp(name = "HoodDistance")
+public class RampDistance extends LinearOpMode {
+//    ColorHueFix colorparser;
     Servo rgbindicator;
     public int artifactcounter = 0;
     public float last_alphavalue = 32;
@@ -32,8 +33,8 @@ public class ColorSensingTele extends LinearOpMode {
 
     public float current_alphavalue = 0;
     public float current_alphavalue2 = 0;
-    private Follower follower;
-    private final Pose startPose = new Pose(123.13, 122.08, Math.toRadians(220)); //See ExampleAuto to understand how to use this
+//    private Follower follower;
+//    private final Pose startPose = new Pose(123.13, 122.08, Math.toRadians(220)); //See ExampleAuto to understand how to use this
     private boolean automatedDrive;
     private TelemetryManager telemetryM;
     private boolean slowMode = false;
@@ -41,8 +42,11 @@ public class ColorSensingTele extends LinearOpMode {
     VoltageGet volt = new VoltageGet();
     DcMotor activeintake = null;
     DcMotor out1 = null;
+
+    Servo Hood = null;
     DcMotor out2 = null;
     DcMotor ramp = null;
+
     DcMotor frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
 
     int green = 0;
@@ -81,19 +85,20 @@ public class ColorSensingTele extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        colorparser = new ColorHueFix(hardwareMap);
-        rgbindicator = hardwareMap.get(Servo.class, "rgbled");
+//        colorparser = new ColorHueFix(hardwareMap);
+//        rgbindicator = hardwareMap.get(Servo.class, "rgbled");
 
         telemetry.addLine("Ready!");
         telemetry.update();
         // Initialize hardware
-        out1 = hardwareMap.get(DcMotor.class, "outtake1");
-        out2 = hardwareMap.get(DcMotor.class, "outtake2");
+//        out1 = hardwareMap.get(DcMotor.class, "outtake1");
+//        out2 = hardwareMap.get(DcMotor.class, "outtake2");
         activeintake = hardwareMap.get(DcMotor.class, "activeintake");
-        ramp = hardwareMap.get(DcMotor.class, "ramp");
-        follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startPose);
-        follower.update();
+//        ramp = hardwareMap.get(DcMotor.class, "ramp");
+        Hood = hardwareMap.get(Servo.class, "hood");
+//        follower = Constants.createFollower(hardwareMap);
+//        follower.setStartingPose(startPose);
+//        follower.update();
 
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         BlueExperimentalDistanceLExtractor ll = new BlueExperimentalDistanceLExtractor(hardwareMap);
@@ -124,26 +129,29 @@ public class ColorSensingTele extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            IncountBalls();
+            Hood.setPosition(distance/100);
+
+
+//            IncountBalls();
             telemetry.addData("Ball count: ", artifactcounter);
-            telemetry.addData("Alpha: ", colorparser.getalpha());
+//            telemetry.addData("Alpha: ", colorparser.getalpha());
             //telemetry.addData("Alpha2: ", colorparser.getAlpha2());
 //                telemetry.addData("Current Alpha: ", current_alphavalue);
 //                telemetry.addData("Last Alpha: ", last_alphavalue);
-            telemetry.addData("Hue: ", colorparser.gethue());
-            telemetry.addData("Sat: ", colorparser.getsat());
-            telemetry.addData("Val: ", colorparser.getval());
-//                telemetry.addData("Color: ", colorparser.getColor());
-            telemetry.addData("green", green);
-            telemetry.addData("purple", purple);
-            telemetry.addData("slot 0", slots[0]);
-            telemetry.addData("slot 1", slots[1]);
-            telemetry.addData("slot 2", slots[2]);
+//            telemetry.addData("Hue: ", colorparser.gethue());
+//            telemetry.addData("Sat: ", colorparser.getsat());
+//            telemetry.addData("Val: ", colorparser.getval());
+////                telemetry.addData("Color: ", colorparser.getColor());
+//            telemetry.addData("green", green);
+//            telemetry.addData("purple", purple);
+//            telemetry.addData("slot 0", slots[0]);
+//            telemetry.addData("slot 1", slots[1]);
+//            telemetry.addData("slot 2", slots[2]);
             telemetry.addData("distance", distance);
             telemetry.update();
-
-            current_sat = colorparser.getsat();
-            current_hue = colorparser.gethue();
+//
+//            current_sat = colorparser.getsat();
+//            current_hue = colorparser.gethue();
 
 
 //            follower.update();
@@ -214,7 +222,6 @@ public class ColorSensingTele extends LinearOpMode {
 //                out1.setPower(volt.regulate(-0.38));
 //                out2.setPower(volt.regulate(0.38));
             }
-
             if (gamepad2.y) {
                 frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -260,7 +267,7 @@ public class ColorSensingTele extends LinearOpMode {
                         slots[0] = 0;
                         slots[1] = 1;
                         slots[2] = 2;
-                        light();
+//                        light();
 
                         if (shootTimer.milliseconds() > 100) {
 
@@ -299,7 +306,7 @@ public class ColorSensingTele extends LinearOpMode {
 
 
                         if (shootTimer.milliseconds() > 100) {
-                            follower.update();
+//                            follower.update();
                             shootStep++;
                             shootTimer.reset();
                         }
@@ -310,7 +317,7 @@ public class ColorSensingTele extends LinearOpMode {
                         out2.setPower(volt.regulate(0.42));
 
                         if (shootTimer.milliseconds() > 100) {
-                            follower.update();
+//                            follower.update();
                             shootStep++;
                             shootTimer.reset();
                         }
@@ -373,6 +380,10 @@ public class ColorSensingTele extends LinearOpMode {
                 ramp.setPower(0);
             }
 
+            if (gamepad1.left_trigger > 0.0) {
+
+                Hood.setPosition(0.5);
+            }
             if (gamepad1.right_trigger > 0.0) {
                 ramp.setPower(0.3);
                 activeintake.setPower(-1);
@@ -462,68 +473,68 @@ public class ColorSensingTele extends LinearOpMode {
         backLeftMotor.setPower(blPower);
         backRightMotor.setPower(brPower);
     }
-    public void IncountBalls() {
-        String color = colorparser.getColor();
-        current_sat = colorparser.getsat();
-        current_hue = colorparser.gethue();
-        int ColorSensing = 0;
-        if (IncountTimer.milliseconds() > 800) {
-            if (current_sat > 0.5) {
-                artifactcounter += 1;
-                asc += 5;
-                light();
-                AssignColors();
-                activeslot += 1;
-                IncountTimer.reset();
-
-            } else if (current_hue > 167) {
-                artifactcounter += 1;
-                asc += 1;
-
-                light();
-                AssignColors();
-
-                activeslot += 1;
-                IncountTimer.reset();
-            }
-        }
-        // remove activeslot = artifactcounter when new robot is made
-
-        green = (slots[0] + slots[1] + slots[2]) / 5;
-        purple = (slots[0] + slots[1] + slots[2]) % 5;
-    }
-    public void light() {
-        if (artifactcounter == 0) {
-            rgbindicator.setPosition(0);
-        } else if (artifactcounter == 1) {
-            rgbindicator.setPosition(0.3);
-        } else if (artifactcounter == 2) {
-            rgbindicator.setPosition(0.375);
-        } else if (artifactcounter == 3) {
-            rgbindicator.setPosition(0.5);
-        } else if (artifactcounter > 3) {
-            rgbindicator.setPosition(0.6);
-        }
-    }
-
-    public void AssignColors() {
-        slots[activeslot] = asc;
-        asc = 0;
-
-    }
-
-
-//    public void spindexe() {
-        //motor spin to next slot
+//    public void IncountBalls() {
+//        String color = colorparser.getColor();
+//        current_sat = colorparser.getsat();
+//        current_hue = colorparser.gethue();
+//        int ColorSensing = 0;
+//        if (IncountTimer.milliseconds() > 800) {
+//            if (current_sat > 0.5) {
+//                artifactcounter += 1;
+//                asc += 5;
+//                light();
+//                AssignColors();
+//                activeslot += 1;
+//                IncountTimer.reset();
+//
+//            } else if (current_hue > 167) {
+//                artifactcounter += 1;
+//                asc += 1;
+//
+//                light();
+//                AssignColors();
+//
+//                activeslot += 1;
+//                IncountTimer.reset();
+//            }
+//        }
+//        // remove activeslot = artifactcounter when new robot is made
+//
+//        green = (slots[0] + slots[1] + slots[2]) / 5;
+//        purple = (slots[0] + slots[1] + slots[2]) % 5;
+//    }
+//    public void light() {
+//        if (artifactcounter == 0) {
+//            rgbindicator.setPosition(0);
+//        } else if (artifactcounter == 1) {
+//            rgbindicator.setPosition(0.3);
+//        } else if (artifactcounter == 2) {
+//            rgbindicator.setPosition(0.375);
+//        } else if (artifactcounter == 3) {
+//            rgbindicator.setPosition(0.5);
+//        } else if (artifactcounter > 3) {
+//            rgbindicator.setPosition(0.6);
+//        }
+//    }
+//
+//    public void AssignColors() {
+//        slots[activeslot] = asc;
+//        asc = 0;
+//
+//    }
+//
+//
+////    public void spindexe() {
+    //motor spin to next slot
 //        activeslot = 1;
 //        if (activeslot > 2) {
 //            activeslot = 0;
 //        }
 //        if (activeslot < 0) {
 //                activeslot = 2;
-        // put commented code after new robot is made
+    // put commented code after new robot is made
 
-    }
+}
 
 
 

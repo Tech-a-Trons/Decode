@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
@@ -13,9 +16,9 @@ import dev.nextftc.hardware.impl.MotorEx;
 //For new intake
 
 @Config
-public class TurretPID implements Subsystem {
+public class RedTurretPID implements Subsystem {
 
-    public static final TurretPID INSTANCE = new TurretPID();
+    public static final RedTurretPID INSTANCE = new RedTurretPID();
     public static double kP = 0.05; //before 0.0005
     public static double kI = 0.0;
     public static double kD = 0.0;
@@ -25,8 +28,14 @@ public class TurretPID implements Subsystem {
     public static double kS = 0.01;
     public static double closegoal = 500;
     public static double fargoal = 700;
+    Hood hood = new Hood();
+    HardwareMap hardwareMap = new HardwareMap(null,null);
+    RedExperimentalDistanceLExtractor ll = new RedExperimentalDistanceLExtractor(hardwareMap);
+    double distance = ll.getEuclideanDistance();
 
-    private TurretPID() { }
+    private RedTurretPID() {
+        ll.startReading();
+    }
 
     public static MotorGroup turret = new MotorGroup(
             new MotorEx("outtakeright"),
@@ -41,23 +50,47 @@ public class TurretPID implements Subsystem {
     // Set the goal velocity to 500 units per second
 
     public Command setCloseShooterSpeed(){
+        ll.update();
+        hood.INSTANCE.close();
         return new RunToVelocity(
                 controller,
-                900, // 500
+                distance*3.03, // 500
                 5
         ).requires(this);
     }
 
     public Command setFarShooterSpeed(){
+        ll.update();
+        hood.INSTANCE.open();
         return new RunToVelocity(
                 controller,
-                1100, // 700
+                distance*3.03, // 700
+                5
+        ).requires(this);
+    }
+
+    public Command setMidCloseShooterSpeed(){
+        ll.update();
+        hood.INSTANCE.midclose();
+        return new RunToVelocity(
+                controller,
+                distance*3.03, // 500
+                5
+        ).requires(this);
+    }
+
+    public Command setMidFarShooterSpeed(){
+        ll.update();
+        hood.INSTANCE.midopen();
+        return new RunToVelocity(
+                controller,
+                distance*3.03, // 700
                 5
         ).requires(this);
     }
 
     public Command resetShooter(){
-
+        ll.update();
         return new RunToVelocity(
                 controller,
                 0,
@@ -67,6 +100,7 @@ public class TurretPID implements Subsystem {
 
     @Override
     public void periodic() {
+        ll.update();
         // Shooter velocity in ticks per second
         double vel = turret.getVelocity();
 
@@ -76,7 +110,7 @@ public class TurretPID implements Subsystem {
         // Compute controller output
         double output = controller.calculate(state);
 
-        // Apply to both motors
+        // Apply to both moators
         turret.setPower(output);
     }
 }

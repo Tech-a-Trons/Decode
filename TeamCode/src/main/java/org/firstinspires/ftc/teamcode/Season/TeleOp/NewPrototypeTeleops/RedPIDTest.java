@@ -1,12 +1,12 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
 
-import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.TurretPID.turret;
+import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.BlueTurretPID.turret;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Hood;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.TurretPID;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.BlueTurretPID;
 
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
@@ -15,10 +15,11 @@ import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
 @TeleOp
-public class PIDTest extends NextFTCOpMode {
-    public PIDTest() {
+public class RedPIDTest extends NextFTCOpMode {
+    RedExperimentalDistanceLExtractor ll = new RedExperimentalDistanceLExtractor(hardwareMap);
+    public RedPIDTest() {
         addComponents(
-                new SubsystemComponent(TurretPID.INSTANCE, Hood.INSTANCE),
+                new SubsystemComponent(BlueTurretPID.INSTANCE, Hood.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE
         );
@@ -37,12 +38,11 @@ public class PIDTest extends NextFTCOpMode {
     @Override
     public void onStartButtonPressed() {
         final double STARGET_DISTANCE = 58; // inches 42.97
-         final double SANGLE_TOLERANCE = -1.8;
+        final double SANGLE_TOLERANCE = -1.8;
         //    private final double MTARGET_DISTANCE = 2838; // PLACEHOLDER
 //    private final double MANGLE_TOLERANCE = 134; // PLACEHOLDER
-         final double FTARGET_DISTANCE = 124; //115
-         final double FANGLE_TOLERANCE = 1; //3.47
-        BlueExperimentalDistanceLExtractor ll = new BlueExperimentalDistanceLExtractor(hardwareMap);
+        final double FTARGET_DISTANCE = 124; //115
+        final double FANGLE_TOLERANCE = 1; //3.47
         ll.startReading();
         ll.setTelemetry(telemetry);
         Double tx = ll.getTx();
@@ -66,38 +66,60 @@ public class PIDTest extends NextFTCOpMode {
 //        );
 
         //Set the speed FIRST
+        ll.update();
         Gamepads.gamepad1().b()
                 .whenBecomesTrue(() -> {
-                    TurretPID.INSTANCE.setCloseShooterSpeed().schedule();
-                    Hood.INSTANCE.open();
+                    ll.update();
+                    BlueTurretPID.INSTANCE.setCloseShooterSpeed().schedule();
+//                    Hood.INSTANCE.open();
 
 //                    TurretPID.INSTANCE.periodic();
                 });
         Gamepads.gamepad1().a()
                 .whenBecomesTrue(() -> {
-                    TurretPID.INSTANCE.setFarShooterSpeed().schedule();
-                    Hood.INSTANCE.open();
+                    ll.update();
+                    BlueTurretPID.INSTANCE.setFarShooterSpeed().schedule();
+//                    Hood.INSTANCE.open();
 //                    TurretPID.INSTANCE.periodic();
                 });
 
         //Ehh might remove this
         Gamepads.gamepad1().x()
                 .whenBecomesTrue(() -> {
-                    TurretPID.INSTANCE.resetShooter().schedule();
-                    Hood.INSTANCE.close();
+                    ll.update();
+                    BlueTurretPID.INSTANCE.resetShooter().schedule();
+//                    Hood.INSTANCE.close();
+                });
+
+        Gamepads.gamepad1().dpadLeft()
+                .whenBecomesTrue(() -> {
+                    ll.update();
+                    BlueTurretPID.INSTANCE.setMidCloseShooterSpeed().schedule();
+//                    Hood.INSTANCE.open();
+//                    TurretPID.INSTANCE.periodic();
+                });
+
+        Gamepads.gamepad1().dpadRight()
+                .whenBecomesTrue(() -> {
+                    ll.update();
+                    BlueTurretPID.INSTANCE.setMidFarShooterSpeed().schedule();
+//                    Hood.INSTANCE.open();
+//                    TurretPID.INSTANCE.periodic();
                 });
 
         //Then set periodic
         Gamepads.gamepad1().y()
                 .whenBecomesTrue(() -> {
-                   TurretPID.INSTANCE.periodic();
-                   TurretPID.INSTANCE.turret.setPower(0.6);
+                    ll.update();
+                    BlueTurretPID.INSTANCE.periodic();
+                    BlueTurretPID.INSTANCE.turret.setPower(0.6);
                 });
 
         //If anything goes wrong, use this
         Gamepads.gamepad1().leftBumper()
                 .whenBecomesTrue(() -> {
-                    TurretPID.INSTANCE.turret.setPower(0);
+                    ll.update();
+                    BlueTurretPID.INSTANCE.turret.setPower(0);
                 });
 // Toggle all off when left bumper is pressed
 //        Gamepads.gamepad1().leftBumper()

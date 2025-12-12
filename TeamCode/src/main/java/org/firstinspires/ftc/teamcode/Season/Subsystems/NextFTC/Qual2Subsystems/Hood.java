@@ -11,13 +11,14 @@ public class Hood implements Subsystem {
     public static final Hood INSTANCE = new Hood();
 
     public static double openPos = 0.6;
-    public static double midPos = 0.4;
+    public static double midopenPos = 0.4;
+    public static double midclosePos = 0.2;
     public static double closePos = 0;
 
     private final ServoEx hood;
     private boolean isOpen = false;
 
-    private Hood() {
+    public Hood() {
         hood = new ServoEx("hood");
     }
 
@@ -35,11 +36,19 @@ public class Hood implements Subsystem {
         isOpen = false;
     }
 
+    public void midopen() {
+        set(midopenPos);
+        isOpen = true;
+    }
+
+    public void midclose() {
+        set(midclosePos);
+        isOpen = true;
+    }
+
     public void toggle() {
         if (isOpen) close(); else open();
     }
-
-
 
     @Override
     public void periodic() { }

@@ -4,6 +4,8 @@ import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subs
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Hood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.TurretPID;
 
 import dev.nextftc.core.components.BindingsComponent;
@@ -16,7 +18,7 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 public class PIDTest extends NextFTCOpMode {
     public PIDTest() {
         addComponents(
-                new SubsystemComponent(TurretPID.INSTANCE),
+                new SubsystemComponent(TurretPID.INSTANCE, Hood.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE
         );
@@ -34,6 +36,23 @@ public class PIDTest extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
+        final double STARGET_DISTANCE = 58; // inches 42.97
+         final double SANGLE_TOLERANCE = -1.8;
+        //    private final double MTARGET_DISTANCE = 2838; // PLACEHOLDER
+//    private final double MANGLE_TOLERANCE = 134; // PLACEHOLDER
+         final double FTARGET_DISTANCE = 124; //115
+         final double FANGLE_TOLERANCE = 1; //3.47
+        BlueExperimentalDistanceLExtractor ll = new BlueExperimentalDistanceLExtractor(hardwareMap);
+        ll.startReading();
+        ll.setTelemetry(telemetry);
+        Double tx = ll.getTx();
+        if (tx == null) {
+            tx = 0.0;
+        }
+        Double distance = ll.getEuclideanDistance();
+        if (distance == null) {
+            distance = 0.0;
+        }
         telemetry.addData("Velo: ", turret.getVelocity());
         telemetry.update();
 //        Command driverControlled = new MecanumDriverControlled(
@@ -45,21 +64,40 @@ public class PIDTest extends NextFTCOpMode {
 //                Gamepads.gamepad1().leftStickX(),
 //                Gamepads.gamepad1().rightStickX()
 //        );
+
+        //Set the speed FIRST
         Gamepads.gamepad1().b()
                 .whenBecomesTrue(() -> {
                     TurretPID.INSTANCE.setCloseShooterSpeed().schedule();
+                    Hood.INSTANCE.open();
+
+//                    TurretPID.INSTANCE.periodic();
                 });
         Gamepads.gamepad1().a()
                 .whenBecomesTrue(() -> {
                     TurretPID.INSTANCE.setFarShooterSpeed().schedule();
+                    Hood.INSTANCE.open();
+//                    TurretPID.INSTANCE.periodic();
                 });
+
+        //Ehh might remove this
         Gamepads.gamepad1().x()
                 .whenBecomesTrue(() -> {
                     TurretPID.INSTANCE.resetShooter().schedule();
+                    Hood.INSTANCE.close();
                 });
+
+        //Then set periodic
         Gamepads.gamepad1().y()
                 .whenBecomesTrue(() -> {
-                   TurretPID.INSTANCE.turret.setPower(0.01);
+                   TurretPID.INSTANCE.periodic();
+                   TurretPID.INSTANCE.turret.setPower(0.6);
+                });
+
+        //If anything goes wrong, use this
+        Gamepads.gamepad1().leftBumper()
+                .whenBecomesTrue(() -> {
+                    TurretPID.INSTANCE.turret.setPower(0);
                 });
 // Toggle all off when left bumper is pressed
 //        Gamepads.gamepad1().leftBumper()

@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
 
-import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.BlueTurretPID.turret;
+//import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.BlueTurretPID.turret;
+import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RedTurretPID.turret;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Hood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.BlueTurretPID;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RedTurretPID;
 
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
@@ -19,7 +21,7 @@ public class RedPIDTest extends NextFTCOpMode {
     RedExperimentalDistanceLExtractor ll = new RedExperimentalDistanceLExtractor(hardwareMap);
     public RedPIDTest() {
         addComponents(
-                new SubsystemComponent(BlueTurretPID.INSTANCE, Hood.INSTANCE),
+                new SubsystemComponent(RedTurretPID.INSTANCE, Hood.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE
         );
@@ -70,7 +72,7 @@ public class RedPIDTest extends NextFTCOpMode {
         Gamepads.gamepad1().b()
                 .whenBecomesTrue(() -> {
                     ll.update();
-                    BlueTurretPID.INSTANCE.setCloseShooterSpeed().schedule();
+                    RedTurretPID.INSTANCE.setCloseShooterSpeed().schedule();
 //                    Hood.INSTANCE.open();
 
 //                    TurretPID.INSTANCE.periodic();
@@ -78,7 +80,7 @@ public class RedPIDTest extends NextFTCOpMode {
         Gamepads.gamepad1().a()
                 .whenBecomesTrue(() -> {
                     ll.update();
-                    BlueTurretPID.INSTANCE.setFarShooterSpeed().schedule();
+                    RedTurretPID.INSTANCE.setFarShooterSpeed().schedule();
 //                    Hood.INSTANCE.open();
 //                    TurretPID.INSTANCE.periodic();
                 });
@@ -87,14 +89,14 @@ public class RedPIDTest extends NextFTCOpMode {
         Gamepads.gamepad1().x()
                 .whenBecomesTrue(() -> {
                     ll.update();
-                    BlueTurretPID.INSTANCE.resetShooter().schedule();
+                    RedTurretPID.INSTANCE.resetShooter().schedule();
 //                    Hood.INSTANCE.close();
                 });
 
         Gamepads.gamepad1().dpadLeft()
                 .whenBecomesTrue(() -> {
                     ll.update();
-                    BlueTurretPID.INSTANCE.setMidCloseShooterSpeed().schedule();
+                    RedTurretPID.INSTANCE.setMidCloseShooterSpeed().schedule();
 //                    Hood.INSTANCE.open();
 //                    TurretPID.INSTANCE.periodic();
                 });
@@ -102,7 +104,7 @@ public class RedPIDTest extends NextFTCOpMode {
         Gamepads.gamepad1().dpadRight()
                 .whenBecomesTrue(() -> {
                     ll.update();
-                    BlueTurretPID.INSTANCE.setMidFarShooterSpeed().schedule();
+                    RedTurretPID.INSTANCE.setMidFarShooterSpeed().schedule();
 //                    Hood.INSTANCE.open();
 //                    TurretPID.INSTANCE.periodic();
                 });
@@ -111,15 +113,15 @@ public class RedPIDTest extends NextFTCOpMode {
         Gamepads.gamepad1().y()
                 .whenBecomesTrue(() -> {
                     ll.update();
-                    BlueTurretPID.INSTANCE.periodic();
-                    BlueTurretPID.INSTANCE.turret.setPower(0.6);
+                    RedTurretPID.INSTANCE.periodic();
+                    RedTurretPID.INSTANCE.turret.setPower(0.6);
                 });
 
         //If anything goes wrong, use this
         Gamepads.gamepad1().leftBumper()
                 .whenBecomesTrue(() -> {
                     ll.update();
-                    BlueTurretPID.INSTANCE.turret.setPower(0);
+                    RedTurretPID.INSTANCE.turret.setPower(0);
                 });
 // Toggle all off when left bumper is pressed
 //        Gamepads.gamepad1().leftBumper()

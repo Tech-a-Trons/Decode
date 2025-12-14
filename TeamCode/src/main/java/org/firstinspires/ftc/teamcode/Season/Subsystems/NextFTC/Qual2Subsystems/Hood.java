@@ -5,16 +5,17 @@ import dev.nextftc.hardware.impl.CRServoEx;
 import dev.nextftc.hardware.impl.ServoEx;
 import com.acmerobotics.dashboard.config.Config;
 
+import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
+
 @Config
 public class Hood implements Subsystem {
 
     public static final Hood INSTANCE = new Hood();
-
-    public static double openPos = 0.6;
-    public static double midopenPos = 0.4;
-    public static double midclosePos = 0.2;
-    public static double closePos = 0;
-
+    public static double openPos = 0.8;
+    public static double midopenPos = 0.6;
+    public static double midclosePos = 0.5;
+    public static double closePos = 0.3;
+    VoltageGet volt = new VoltageGet();
     private final ServoEx hood;
     private boolean isOpen = false;
 

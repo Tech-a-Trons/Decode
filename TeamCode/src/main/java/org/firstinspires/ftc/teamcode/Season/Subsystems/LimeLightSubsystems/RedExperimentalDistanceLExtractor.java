@@ -47,7 +47,7 @@ public class RedExperimentalDistanceLExtractor {
     public RedExperimentalDistanceLExtractor(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");
         limelight.setPollRateHz(100);
-        limelight.pipelineSwitch(3);
+        limelight.pipelineSwitch(0);
         limelight.start();
     }
 

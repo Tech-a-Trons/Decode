@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Hood;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.BlueTurretPID;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.ExperimentalBlueTurretPID;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
 
 import dev.nextftc.core.components.BindingsComponent;
@@ -19,13 +19,13 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 @TeleOp
 public class BluePIDTest extends LinearOpMode {
     //BlueExperimentalDistanceLExtractor ll = new BlueExperimentalDistanceLExtractor(hardwareMap);
-    private BlueTurretPID shooter;
+    private ExperimentalBlueTurretPID shooter;
 
     @Override
     public void runOpMode() {
 
         // Create subsystem AFTER hardwareMap exists
-        shooter = new BlueTurretPID(hardwareMap);
+        shooter = new ExperimentalBlueTurretPID(hardwareMap);
 
         telemetry.addLine("Ready");
         telemetry.update();

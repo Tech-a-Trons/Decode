@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
@@ -16,9 +16,9 @@ import dev.nextftc.hardware.impl.MotorEx;
 //For new intake
 
 @Config
-public class BlueTurretPID implements Subsystem {
+public class ExperimentalRedTurretPID implements Subsystem {
 
-    public static final BlueTurretPID INSTANCE = new BlueTurretPID();
+    public static final ExperimentalRedTurretPID INSTANCE = new ExperimentalRedTurretPID();
     public static double kP = 0.05; //before 0.0005
     public static double kI = 0.0;
     public static double kD = 0.0;
@@ -30,10 +30,10 @@ public class BlueTurretPID implements Subsystem {
     public static double fargoal = 700;
     Hood hood = new Hood();
     HardwareMap hardwareMap = new HardwareMap(null,null);
-    BlueExperimentalDistanceLExtractor ll = new BlueExperimentalDistanceLExtractor(hardwareMap);
+    RedExperimentalDistanceLExtractor ll = new RedExperimentalDistanceLExtractor(hardwareMap);
     double distance = ll.getEuclideanDistance();
 
-    private BlueTurretPID() {
+    private ExperimentalRedTurretPID() {
         ll.startReading();
     }
 

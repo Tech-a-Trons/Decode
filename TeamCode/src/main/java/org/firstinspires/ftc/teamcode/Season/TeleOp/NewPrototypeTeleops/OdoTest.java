@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
 
 import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
 
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -35,29 +37,59 @@ public class OdoTest extends OpMode {
 
     @Override
     public void loop() {
-        telemetry.addLine("Push your robot around to see it track");
-        telemetry.addLine("Press A to reset the position");
-        if(gamepad1.a){
-            // You could use readings from April Tags here to give a new known position to the pinpoint
-            pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0));
-        }
+
+        // Goal is fixed at field origin
+        double goalX = 0.0;
+        double goalY = 0.0;
+
         pinpoint.update();
-        Pose2D pose2D = pinpoint.getPosition();
+        Pose2D pose = pinpoint.getPosition();
 
-        double x = pose2D.getX(DistanceUnit.INCH);
-        double y = pose2D.getY(DistanceUnit.INCH);
-        double heading = pose2D.getHeading(AngleUnit.DEGREES);
+        double x = pose.getX(DistanceUnit.INCH);
+        double y = pose.getY(DistanceUnit.INCH);
 
-        double rangle = atan2(0-y,0-x);
-        double tangle = rangle - heading;
+        // Convert heading to radians
+        double headingRad = Math.toRadians(
+                pose.getHeading(AngleUnit.DEGREES)
+        );
 
-        telemetry.addData("X coordinate (IN)", x);
-        telemetry.addData("Y coordinate (IN)", y);
-        telemetry.addData("Heading angle (DEGREES)", heading);
+        // Vector from robot to goal
+        double dx = goalX - x;
+        double dy = goalY - y;
 
-        turret1.setPosition(tangle);
-        turret2.setPosition(tangle);
+        // Field-centric angle to goal
+        double fieldAngle = Math.atan2(dy, dx);
+
+        // Turret angle relative to robot
+        double turretAngle = fieldAngle - headingRad;
+
+        // Normalize to [-π, π]
+        turretAngle = Math.atan2(
+                Math.sin(turretAngle),
+                Math.cos(turretAngle)
+        );
+
+        /*
+         * Map turret angle to servo
+         * Assumes:
+         *   - 0.5 = forward
+         *   - ±90° turret travel
+         */
+        double servoPos = (turretAngle / Math.toRadians(180.0)) + 0.5;
+
+        // Clamp for safety
+        servoPos = Math.max(0.0, Math.min(1.0, servoPos));
+
+        turret1.setPosition(servoPos);
+        turret2.setPosition(servoPos);
+
+        telemetry.addData("Robot X", x);
+        telemetry.addData("Robot Y", y);
+        telemetry.addData("Robot Heading (deg)", Math.toDegrees(headingRad));
+        telemetry.addData("Turret Angle (deg)", Math.toDegrees(turretAngle));
+        telemetry.addData("Servo Pos", servoPos);
     }
+
 
     public void configurePinpoint(){
         /*

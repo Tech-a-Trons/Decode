@@ -120,47 +120,38 @@
 //}
 package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems;
 
+import static dev.nextftc.extensions.pedro.PedroComponent.follower;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.follower.Follower;
 
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.impl.ServoEx;
+
+import dev.nextftc.extensions.pedro.PedroComponent;
 
 @Config
 public class OdoTurretSubsystem implements Subsystem {
 
     public static final OdoTurretSubsystem INSTANCE = new OdoTurretSubsystem();
 
-    public static double center = 0.5;       // servo center
-    public static double range = Math.PI;    // max rotation in radians (180°)
+    public static double center = 0.5;
+    public static double range = Math.PI;
     public static double servoMin = 0.0, servoMax = 1.0;
 
     private final ServoEx turret;
-
     private boolean manual = false;
     private double manualPower = 0;
-    private double targetYaw = 0;  // radians
-    private boolean enabled = true;
+    private double targetYaw = 0;
     private boolean autoTrack = false;
 
-    private Follower follower;      // Pedro Pathing follower
-    private Pose currentGoal;       // Pose of the goal you want to track
+    private Pose currentGoal = new Pose(129, 129, 0); // default goal
 
     private OdoTurretSubsystem() {
         turret = new ServoEx("turret");
         turret.setPosition(center);
-
-        // Example default goal (red goal)
-        currentGoal = new Pose(129, 129, 0);
     }
 
-    /** ------------------------ Initialization ------------------------ **/
-    public void init(Follower follower) {
-        this.follower = follower;  // inject Pedro Pathing follower/localizer
-    }
-
-    /** ------------------------ Control Functions ------------------------ **/
     public void manual(double power) {
         manual = true;
         manualPower = power;
@@ -170,52 +161,35 @@ public class OdoTurretSubsystem implements Subsystem {
         manual = false;
     }
 
-    public void on() {
-        enabled = true;
-    }
-
-    public void off() {
-        enabled = false;
+    public void setGoal(Pose goalPose) {
+        currentGoal = goalPose;
     }
 
     public void toggleAutoTrack() {
         autoTrack = !autoTrack;
-        if (autoTrack) on();
-        else off();
-    }
-
-    public void setGoal(Pose goalPose) {
-        currentGoal = goalPose;
     }
 
     public void setYaw(double radians) {
         targetYaw = normalizeAngle(radians);
     }
 
-    public void addYaw(double radians) {
-        setYaw(getYaw() + radians);
-    }
-
     public double getYaw() {
-        double pos = turret.getPosition();
-        return normalizeAngle((pos - center) * range);
+        return normalizeAngle((turret.getPosition() - center) * range);
     }
 
-    /** ------------------------ Periodic ------------------------ **/
     @Override
     public void periodic() {
-        if (!enabled) return;
-
-        // Auto-tracking using follower's current pose
-        if (autoTrack && follower != null) {
-            Pose robotPose = follower.getPose(); // get robot's current pose from localizer
-            double angleToTarget = Math.atan2(currentGoal.getY() - robotPose.getY(),
-                    currentGoal.getX() - robotPose.getX());
+        // Track only if enabled
+        if (autoTrack) {
+            Pose robotPose = PedroComponent.follower().getPose();; // provided automatically by PedroComponent
+            double angleToTarget = Math.atan2(
+                    currentGoal.getY() - robotPose.getY(),
+                    currentGoal.getX() - robotPose.getX()
+            );
             double relative = normalizeAngle(angleToTarget - robotPose.getHeading());
-            setYaw(relative);
+            targetYaw = relative;
         }
 
-        // Servo control
         double servoPos;
         if (manual) {
             servoPos = center + manualPower * 0.5;
@@ -226,16 +200,14 @@ public class OdoTurretSubsystem implements Subsystem {
             servoPos = center + power * 0.5;
         }
 
-        servoPos = clamp(servoPos, servoMin, servoMax);
-        turret.setPosition(servoPos);
+        turret.setPosition(clamp(servoPos, servoMin, servoMax));
     }
 
-    /** ------------------------ Utilities ------------------------ **/
-    public static double normalizeAngle(double angleRadians) {
-        double angle = angleRadians % (2 * Math.PI);
-        if (angle <= -Math.PI) angle += 2 * Math.PI;
-        if (angle > Math.PI) angle -= 2 * Math.PI;
-        return angle;
+    public static double normalizeAngle(double angle) {
+        double a = angle % (2 * Math.PI);
+        if (a <= -Math.PI) a += 2 * Math.PI;
+        if (a > Math.PI) a -= 2 * Math.PI;
+        return a;
     }
 
     private double clamp(double val, double min, double max) {

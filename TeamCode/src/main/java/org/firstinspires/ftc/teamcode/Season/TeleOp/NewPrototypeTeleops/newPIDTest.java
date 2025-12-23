@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subs
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
+import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Hood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.OdoTurretSubsystem;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Turret;
@@ -18,7 +19,7 @@ import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 import dev.nextftc.hardware.driving.MecanumDriverControlled;
 import dev.nextftc.hardware.impl.MotorEx;
-
+import dev.nextftc.extensions.pedro.PedroComponent;
 @TeleOp
 public class newPIDTest extends NextFTCOpMode {
     public newPIDTest() {
@@ -30,7 +31,8 @@ public class newPIDTest extends NextFTCOpMode {
                         OdoTurretSubsystem.INSTANCE  // This enables periodic() to be called
                 ),
                 BulkReadComponent.INSTANCE,
-                BindingsComponent.INSTANCE
+                BindingsComponent.INSTANCE,
+                new PedroComponent(Constants::createFollower)
         );
     }
 

@@ -9,6 +9,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.PIDVoltageGet;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
 
@@ -80,26 +81,20 @@ public class ExperimentalBlueTurretPID implements Subsystem {
     }
 
     /* ---------------- Control Loop ---------------- */
-    @Override
-    public void periodic() {
+
+    public void periodic(Telemetry telemetry){
+        if(turret == null || volt == null) return;
+
         double currentVelocity = turret.getVelocity();
-
-        // measured, target
-        KineticState state = new KineticState(
-                currentVelocity,
-                targetVelocity
-        );
-
-        telemetry.addData("Shooter Velocity", currentVelocity);
-        telemetry.addData("Target", targetVelocity);
-        telemetry.update();
+        KineticState state = new KineticState(currentVelocity, targetVelocity);
 
         double output = controller.calculate(state);
-
         double compensated = volt.regulate(output);
 
-        turret.setPower(
-                Math.max(-1.0, Math.min(1.0, compensated))
-        );
+        turret.setPower(Math.max(-1, Math.min(1, compensated)));
+
+        telemetry.addData("Shooter Velocity", currentVelocity);
+        telemetry.addData("Target Velocity", targetVelocity);
+        telemetry.update();
     }
 }

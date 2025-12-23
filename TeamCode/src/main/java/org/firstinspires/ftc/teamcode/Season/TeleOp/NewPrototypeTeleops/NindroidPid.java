@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.Outtake;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.TurretPID;
 
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
@@ -15,7 +16,7 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 public class NindroidPid extends NextFTCOpMode {
     public NindroidPid() {
         addComponents(
-                new SubsystemComponent(Outtake.INSTANCE),
+                new SubsystemComponent(TurretPID.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE
         );
@@ -43,7 +44,7 @@ public class NindroidPid extends NextFTCOpMode {
 // Toggle all off when left bumper is pressed
         Gamepads.gamepad1().leftBumper()
                 .whenBecomesTrue(() -> {
-                    Outtake.INSTANCE.resetShooter().schedule();
+                    TurretPID.INSTANCE.resetShooter().schedule();
                     ;// stop outtake
 //                    Midtake.INSTANCE.newtake.setPower(0);    // stop ramp/midtake
 //                    Intake.INSTANCE.activeintake.setPower(0);     // stop intake

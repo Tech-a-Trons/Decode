@@ -26,9 +26,9 @@ public class BluePIDTest extends LinearOpMode {
 
         // Create subsystem AFTER hardwareMap exists
         shooter = new ExperimentalBlueTurretPID(hardwareMap);
-
-        telemetry.addLine("Ready");
-        telemetry.update();
+//
+//        telemetry.addLine("Ready");
+//        telemetry.update();
 
         waitForStart();
 
@@ -47,9 +47,9 @@ public class BluePIDTest extends LinearOpMode {
 
             // 🚨 THIS IS REQUIRED
             shooter.periodic();
-
-            telemetry.addData("Velocity", shooter.getVelocity()); // optional
-            telemetry.update();
+//
+//            telemetry.addData("Velocity", shooter.getVelocity()); // optional
+//            telemetry.update();
         }
     }
 }

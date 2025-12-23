@@ -20,59 +20,44 @@ import dev.nextftc.hardware.impl.MotorEx;
 
 //For new intake
 
-@Config
+//@Config
 public class TurretPID implements Subsystem {
 
     public static final TurretPID INSTANCE = new TurretPID();
-    public static double kP = 0.05; //before 0.0005
+    public static double kP = 0.0; //before 0.0005
     public static double kI = 0.0;
     public static double kD = 0.0;
 
-    public static double kV = 0.002;
+    public static double kV = 0.0;
     public static double kA = 0.0;
     public static double kS = 0.01;
     public static double closegoal = 500;
     public static double fargoal = 700;
-    PIDVoltageGet volt = new PIDVoltageGet(
-            hardwareMap.voltageSensor.iterator().next()
-    );
 
-    Hood hood = new Hood();
-//    BlueExperimentalDistanceLExtractor ll = new BlueExperimentalDistanceLExtractor();
-//    double distance = ll.getEuclideanDistance();
 
-    public TurretPID() {
-        //ll.startReading();
-    }
+
+
 
     public static MotorGroup turret = new MotorGroup(
-            new MotorEx("outtakeright"),
-            new MotorEx("outtakeleft").reversed()
+            new MotorEx("outtakeleft"),
+            new MotorEx("outtakeright").reversed()
     );
 
     ControlSystem controller = ControlSystem.builder()
-            .velPid(0.0006, 0, 0) // Velocity PID with kP=0.0005, kI=0.01, kD=0.05
+            .velPid(0.0015, 0, 0) // Velocity PID with kP=0.0005, kI=0.01, kD=0.05
             .basicFF(0.0001, 0, 0.044) // Basic feedforward with kV=0.0001, kA=0.0, kS=0.01
             .build();
 
     // Set the goal velocity to 500 units per second
 
-    public Command motor1 () {
-        turret.setPower(1);
-        return new Command() {
-            @Override
-            public boolean isDone() {
-                return false;
-            }
-        };
-    }
+
 
     public Command setCloseShooterSpeed(){
         //ll.update();
         //hood.INSTANCE.close();
         return new RunToVelocity(
                 controller,
-                825, // distance*3.03
+                1500, // distance*3.03 1500 close
                 5
         ).requires(this);
     }
@@ -82,7 +67,7 @@ public class TurretPID implements Subsystem {
         //hood.INSTANCE.open();
         return new RunToVelocity(
                 controller,
-                1025, // 700
+                1800, //1800 for far
                 5
         ).requires(this);
     }
@@ -117,7 +102,11 @@ public class TurretPID implements Subsystem {
     }
 
     @Override
-    public void periodic() {
-
+    public void periodic(){
+        turret.setPower(
+                controller.calculate(
+                        turret.getState()
+                )
+        );
     }
 }

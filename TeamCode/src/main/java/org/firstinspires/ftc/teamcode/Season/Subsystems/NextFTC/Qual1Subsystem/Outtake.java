@@ -26,13 +26,13 @@ public class Outtake implements Subsystem {
     private Outtake() { }
 
     public static MotorGroup outtake = new MotorGroup(
-            new MotorEx("out1").reversed(),
-            new MotorEx("out2")
+            new MotorEx("outtakeleft"),
+            new MotorEx("outtakeright").reversed()
     );
 
     ControlSystem controller = ControlSystem.builder()
-            .velPid(0.0005, 0.01, 0.005) // Velocity PID with kP=0.1, kI=0.01, kD=0.05
-            .basicFF(0.01, 0.0, 0.01) // Basic feedforward with kV=0.02, kA=0.0, kS=0.01
+            .velPid(0.0006, 0, 0) // Velocity PID with kP=0.1, kI=0.01, kD=0.05
+            .basicFF(0.0001, 0.0, 0.044) // Basic feedforward with kV=0.02, kA=0.0, kS=0.01
             .build();
 
     // Set the goal velocity to 500 units per second
@@ -41,7 +41,7 @@ public class Outtake implements Subsystem {
 
         return new RunToVelocity(
                 controller,
-                700,
+                825,
                 5
         ).requires(this);
     }

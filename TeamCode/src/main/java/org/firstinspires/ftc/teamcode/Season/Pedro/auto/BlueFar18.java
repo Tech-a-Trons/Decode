@@ -25,6 +25,7 @@ import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
+
 @Autonomous(name = "BlueAuto18?", group = "Examples")
 public class BlueFar18 extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
@@ -41,16 +42,16 @@ public class BlueFar18 extends NextFTCOpMode {
     private Timer pathTimer, opmodeTimer;
     private int pathState;
 
-    private final Pose startPose = new Pose(56, 8.000, Math.toRadians(270));
+    private final Pose startPose = new Pose(56, 8.000, Math.toRadians(90));
     //    private final Pose scorePose = new Pose(90, 90, Math.toRadians(215));
     private final Pose scorePose = new Pose(54.5, 17.5, Math.toRadians(180));
 
-    private final Pose preprePickup1 = new Pose(8.372, 9.000, Math.toRadians(180));
+    private final Pose preprePickup1 = new Pose(12, 12, Math.toRadians(180));
     private final Pose prePickup1 = new Pose(17.581, 10.0470, Math.toRadians(180));
     private final Pose prePickup2 = new Pose(48, 52, Math.toRadians(180)); //55
     private final Pose prePickup3 = new Pose(46.5, 84, Math.toRadians(180));
     //    private final Pose dropoff2 = new Pose(100, 54, Math.toRadians(180)); //55
-    private final Pose pickup1Pose = new Pose(8.483, 6.8287, Math.toRadians(180));
+    private final Pose pickup1Pose = new Pose(12, 11, Math.toRadians(180));
     private final Pose pickup2Pose = new Pose(9, 52, Math.toRadians(180));
     private final Pose pickup3Pose = new Pose(12, 84, Math.toRadians(180));
 
@@ -133,8 +134,8 @@ public class BlueFar18 extends NextFTCOpMode {
 
             case 2:
                 if (!follower.isBusy()) {
-                    CompliantIntake.INSTANCE.off();
-                    TurretPID.INSTANCE.setFarShooterSpeed();
+//                    CompliantIntake.INSTANCE.off();
+//                    TurretPID.INSTANCE.setFarShooterSpeed();
                     follower.followPath(scorePickup1, true);
                     setPathState(3);
                 }
@@ -216,14 +217,14 @@ public class BlueFar18 extends NextFTCOpMode {
 
     }
     private void Intake() {
-        CompliantIntake.INSTANCE.on();
-        Transfer.INSTANCE.repel();
+//        CompliantIntake.INSTANCE.on();
+//        Transfer.INSTANCE.repel();
     }
     private void shootThreeBalls() {
-    TurretPID.INSTANCE.setFarShooterSpeed();
-    Hood.INSTANCE.midclose();
-    CompliantIntake.INSTANCE.on();
-    Transfer.INSTANCE.on();
+//    TurretPID.INSTANCE.setFarShooterSpeed();
+//    Hood.INSTANCE.midclose();
+//    CompliantIntake.INSTANCE.on();
+//    Transfer.INSTANCE.on();
     }
 
     public void setPathState(int pState) {

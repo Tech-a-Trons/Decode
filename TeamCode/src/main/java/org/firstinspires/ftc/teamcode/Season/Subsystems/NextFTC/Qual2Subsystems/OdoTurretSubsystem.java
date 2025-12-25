@@ -1,216 +1,106 @@
 //package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems;
 //
-//import com.acmerobotics.dashboard.config.Config;
 //import com.pedropathing.geometry.Pose;
+//import com.pedropathing.math.Vector;
 //
 //import dev.nextftc.core.subsystems.Subsystem;
 //import dev.nextftc.hardware.impl.ServoEx;
+//import dev.nextftc.extensions.pedro.PedroComponent;
 //
-//@Config
 //public class OdoTurretSubsystem implements Subsystem {
 //
 //    public static final OdoTurretSubsystem INSTANCE = new OdoTurretSubsystem();
 //
-//    public static double center = 0.5;
 //    public static double range = Math.PI;
-//    public static double servoMin = 0.0, servoMax = 1.0;
+//    public static final double GEAR_RATIO = 80.0 / 200.0; // 0.4
+//    public double debugTargetYaw = 0;
+//    public double debugServoCmd = 0;
+//    public double debugServoActual = 0;
+//    public double debugRobotX = 0;
+//    public double debugRobotY = 0;
+//    public double debugRobotHeading = 0;
 //
-//    private final ServoEx turret;
-//    private boolean manual = false;
-//    private double manualPower = 0;
-//    private double targetYaw = 0; // radians
-//    private boolean enabled = true;
+//    private ServoEx turret; // lazy init
 //
-//    // Optional: store a target pose if you want continuous tracking
-//    private Pose targetPose = null;
-//    private Pose robotPose = null;
+//    private double targetYaw = 0;
+//    public boolean autoTrack = false;
 //
-//    public OdoTurretSubsystem() {
-//        turret = new ServoEx("turret");
-//        turret.setPosition(center);
-//    }
+//    private Pose currentGoal = new Pose(129, 129, 0);
 //
-//    public void setYaw(double radians) {
-//        targetYaw = normalizeAngle(radians);
-//    }
+//    private OdoTurretSubsystem() { }
 //
-//    public void addYaw(double radians) {
-//        setYaw(getYaw() + radians);
-//    }
-//
-//    public double getYaw() {
-//        double pos = turret.getPosition();
-//        return normalizeAngle((pos - center) * range);
-//    }
-//
-//    public void manual(double power) {
-//        manual = true;
-//        manualPower = power;
-//    }
-//
-//    public void automatic() {
-//        manual = false;
-//    }
-//
-//    public void on() {
-//        enabled = true;
-//    }
-//
-//    public void off() {
-//        enabled = false;
-//    }
-//
-//    // Set the robot and target poses for auto-tracking
-//    public void setTargetPose(Pose targetPose, Pose robotPose) {
-//        this.targetPose = targetPose;
-//        this.robotPose = robotPose;
-//        if (targetPose != null && robotPose != null) {
-//            face(targetPose, robotPose);
+//    // Call this from onStartButtonPressed() in your OpMode
+//    public void init() {
+//        if (turret == null) {
+//            turret = new ServoEx("turret");
+//            turret.setPosition(0.5); // center hardware position
 //        }
 //    }
 //
-//    public void face(Pose targetPose, Pose robotPose) {
-//        double angleToTarget = Math.atan2(targetPose.getY() - robotPose.getY(),
-//                targetPose.getX() - robotPose.getX());
-//        double relative = normalizeAngle(angleToTarget - robotPose.getHeading());
-//        setYaw(relative);
+//    public void setGoal(Pose goalPose) {
+//        currentGoal = goalPose;
 //    }
 //
-//    public void setPosition(double radians) {
-//        setYaw(radians);
-//    }
-//
-//    public void addPosition(double radians) {
-//        addYaw(radians);
+//    public void toggleAutoTrack() {
+//        autoTrack = !autoTrack;
 //    }
 //
 //    @Override
 //    public void periodic() {
-//        if (!enabled) return;
+//        if (turret == null) return;
 //
-//        // If a target pose is set, update targetYaw
-//        if (targetPose != null && robotPose != null) {
-//            face(targetPose, robotPose);
+//        PedroComponent.follower().update();
+//
+//        Pose robotPose = PedroComponent.follower().getPose();
+//        if (!autoTrack || robotPose == null) return;
+//
+//        // OPTIONAL: velocity-corrected pose (Pedro-style)
+//        Pose currPose = robotPose;
+//        Vector vel = PedroComponent.follower().getVelocity();
+//        if (vel != null) {
+//            currPose = new Pose(
+//                    currPose.getX() + vel.getXComponent(),
+//                    currPose.getY() + vel.getYComponent(),
+//                    currPose.getHeading()
+//            );
 //        }
 //
-//        double servoPos;
-//        if (manual) {
-//            servoPos = center + manualPower * 0.5;
-//        } else {
-//            double error = normalizeAngle(targetYaw - getYaw());
-//            double power = error / range;
-//            power = clamp(power, -1, 1);
-//            servoPos = center + power * 0.5;
-//        }
+//        // Absolute angle to goal
+//        double angleToGoal = Math.atan2(
+//                currentGoal.getY() - currPose.getY(),
+//                currentGoal.getX() - currPose.getX()
+//        );
 //
-//        servoPos = clamp(servoPos, servoMin, servoMax);
-//        turret.setPosition(servoPos);
+//        // Relative turret angle
+//        targetYaw = normalizeAngle(angleToGoal - currPose.getHeading());
+//
+//        // Apply gear ratio (turret rotates slower than robot frame)
+//        double turretAngle = targetYaw * GEAR_RATIO;
+//
+//        // Convert radians → Axon [-1, 1]
+//        double servoCmd = clamp(turretAngle / Math.PI, -1, 1);
+//
+//        // Axon MAX servo-mode → [0, 1]
+//        double hwPos = (servoCmd + 1.0) * 0.5;
+//        turret.setPosition(hwPos);
+//
+//        // Debug
+//        debugTargetYaw = targetYaw;
+//        debugServoCmd = servoCmd;
+//        debugServoActual = turret.getPosition();
+//        debugRobotX = currPose.getX();
+//        debugRobotY = currPose.getY();
+//        debugRobotHeading = currPose.getHeading();
 //    }
 //
-//    public static double normalizeAngle(double angleRadians) {
-//        double angle = angleRadians % (2 * Math.PI);
-//        if (angle <= -Math.PI) angle += 2 * Math.PI;
-//        if (angle > Math.PI) angle -= 2 * Math.PI;
-//        return angle;
+//    private static double normalizeAngle(double angle) {
+//        double a = angle % (2 * Math.PI);
+//        if (a <= -Math.PI) a += 2 * Math.PI;
+//        if (a > Math.PI) a -= 2 * Math.PI;
+//        return a;
 //    }
 //
-//    private double clamp(double val, double min, double max) {
+//    private static double clamp(double val, double min, double max) {
 //        return Math.max(min, Math.min(max, val));
 //    }
 //}
-package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems;
-
-import static dev.nextftc.extensions.pedro.PedroComponent.follower;
-
-import com.acmerobotics.dashboard.config.Config;
-import com.pedropathing.geometry.Pose;
-
-import dev.nextftc.core.subsystems.Subsystem;
-import dev.nextftc.hardware.impl.ServoEx;
-
-import dev.nextftc.extensions.pedro.PedroComponent;
-
-@Config
-public class OdoTurretSubsystem implements Subsystem {
-
-    public static final OdoTurretSubsystem INSTANCE = new OdoTurretSubsystem();
-
-    public static double center = 0.5;
-    public static double range = Math.PI;
-    public static double servoMin = 0.0, servoMax = 1.0;
-
-    private final ServoEx turret;
-    private boolean manual = false;
-    private double manualPower = 0;
-    private double targetYaw = 0;
-    private boolean autoTrack = false;
-
-    private Pose currentGoal = new Pose(129, 129, 0); // default goal
-
-    private OdoTurretSubsystem() {
-        turret = new ServoEx("turret");
-        turret.setPosition(center);
-    }
-
-    public void manual(double power) {
-        manual = true;
-        manualPower = power;
-    }
-
-    public void automatic() {
-        manual = false;
-    }
-
-    public void setGoal(Pose goalPose) {
-        currentGoal = goalPose;
-    }
-
-    public void toggleAutoTrack() {
-        autoTrack = !autoTrack;
-    }
-
-    public void setYaw(double radians) {
-        targetYaw = normalizeAngle(radians);
-    }
-
-    public double getYaw() {
-        return normalizeAngle((turret.getPosition() - center) * range);
-    }
-
-    @Override
-    public void periodic() {
-        // Track only if enabled
-        if (autoTrack) {
-            Pose robotPose = PedroComponent.follower().getPose();; // provided automatically by PedroComponent
-            double angleToTarget = Math.atan2(
-                    currentGoal.getY() - robotPose.getY(),
-                    currentGoal.getX() - robotPose.getX()
-            );
-            double relative = normalizeAngle(angleToTarget - robotPose.getHeading());
-            targetYaw = relative;
-        }
-
-        double servoPos;
-        if (manual) {
-            servoPos = center + manualPower * 0.5;
-        } else {
-            double error = normalizeAngle(targetYaw - getYaw());
-            double power = error / range;
-            power = clamp(power, -1, 1);
-            servoPos = center + power * 0.5;
-        }
-
-        turret.setPosition(clamp(servoPos, servoMin, servoMax));
-    }
-
-    public static double normalizeAngle(double angle) {
-        double a = angle % (2 * Math.PI);
-        if (a <= -Math.PI) a += 2 * Math.PI;
-        if (a > Math.PI) a -= 2 * Math.PI;
-        return a;
-    }
-
-    private double clamp(double val, double min, double max) {
-        return Math.max(min, Math.min(max, val));
-    }
-}

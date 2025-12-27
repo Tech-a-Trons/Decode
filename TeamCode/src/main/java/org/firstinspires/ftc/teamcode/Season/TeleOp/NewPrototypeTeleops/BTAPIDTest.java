@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subs
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueTurretAlign;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedTurretAlign;
@@ -22,14 +23,14 @@ import dev.nextftc.hardware.driving.MecanumDriverControlled;
 import dev.nextftc.hardware.impl.MotorEx;
 
 @TeleOp
-public class RTAPIDTest extends NextFTCOpMode {
+public class BTAPIDTest extends NextFTCOpMode {
     @Override
     public void onStartButtonPressed() {
 
-        RedTurretAlign turretAlign = RedTurretAlign.INSTANCE;
+        BlueTurretAlign turretAlign = BlueTurretAlign.INSTANCE;
         turretAlign.initHardware(hardwareMap);
 
-        RedExperimentalDistanceLExtractor ll = new RedExperimentalDistanceLExtractor(hardwareMap);
+        BlueExperimentalDistanceLExtractor ll = new BlueExperimentalDistanceLExtractor(hardwareMap);
         turretAlign.setLimelight(ll);
 
         ll.setTelemetry(telemetry);

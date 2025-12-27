@@ -92,8 +92,8 @@ public class Turret implements Subsystem {
 
     public static final Turret INSTANCE = new Turret();
     public static double closePos = 1;
-    public static double midclosePos = 0.6;
-    public static double midopenPos = 0.5;
+    public static double midclosePos = -0.0001;
+    public static double midopenPos = 0.00001;
     public static double openPos = -1;
     VoltageGet volt = new VoltageGet();
     private final ServoEx Turret;

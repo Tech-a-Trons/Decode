@@ -10,6 +10,9 @@ public class CompliantIntake implements Subsystem {
     public void on() {
        intake.setPower(1);
     }
+    public void repel() {
+        intake.setPower(-1);
+    }
     public void mid() {
         intake.setPower(0.5);
     }

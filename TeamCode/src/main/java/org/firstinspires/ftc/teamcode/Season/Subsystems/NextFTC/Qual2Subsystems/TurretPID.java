@@ -44,7 +44,7 @@ public class TurretPID implements Subsystem {
     );
 
     ControlSystem controller = ControlSystem.builder()
-            .velPid(0.0015, 0, 0) // Velocity PID with kP=0.0005, kI=0.01, kD=0.05
+            .velPid(0.003, 0, 0) // Velocity PID with kP=0.0005, kI=0.01, kD=0.05
             .basicFF(0.0001, 0, 0.044) // Basic feedforward with kV=0.0001, kA=0.0, kS=0.01
             .build();
 
@@ -77,7 +77,7 @@ public class TurretPID implements Subsystem {
         //hood.INSTANCE.midclose();
         return new RunToVelocity(
                 controller,
-                900, // 500
+                1300, // 500
                 5
         ).requires(this);
     }

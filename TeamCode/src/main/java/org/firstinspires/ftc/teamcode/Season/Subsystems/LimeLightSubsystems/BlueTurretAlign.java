@@ -74,6 +74,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import dev.nextftc.core.subsystems.Subsystem;
 
+//Lines 230,231,234,237,238,240 & 241 need to be tuned
 public class BlueTurretAlign implements Subsystem {
 
     public static final BlueTurretAlign INSTANCE = new BlueTurretAlign();

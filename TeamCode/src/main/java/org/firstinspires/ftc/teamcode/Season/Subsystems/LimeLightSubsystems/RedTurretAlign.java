@@ -257,6 +257,10 @@ public class RedTurretAlign implements Subsystem {
     private boolean alignmentActive = false;
     public RedTurretAlign() {}
 
+    public void setLimelight(RedExperimentalDistanceLExtractor ll) {
+        this.ll = ll;
+    }
+
     public void initHardware(HardwareMap hw) {
         turret = hw.get(Servo.class, "turret");
 //        turret.setPosition(SERVO_CENTER);
@@ -264,10 +268,6 @@ public class RedTurretAlign implements Subsystem {
         initialized = true;
         ll = new RedExperimentalDistanceLExtractor(hw);
         ll.startReading();
-    }
-
-    public void setLimelight(RedExperimentalDistanceLExtractor ll) {
-        this.ll = ll;
     }
 
     public void setAlignmentActive(boolean active) {
@@ -279,7 +279,7 @@ public class RedTurretAlign implements Subsystem {
     @Override
     public void periodic() {
         ll.update();
-        if (!alignmentActive || ll == null) return;
+        if (alignmentActive == false || ll == null) return;
         if (!ll.isTargetVisible()) return;
 
         Double tx = ll.getTx();

@@ -40,10 +40,12 @@ public class RTAPIDTest extends NextFTCOpMode {
 
         // Enable ALWAYS-ON alignment
         turretAlign.setAlignmentActive(true);
+
     }
     @Override
     public void onUpdate() {
         ll.update();
         //turretAlign.periodic();
+        telemetry.update();
     }
 }

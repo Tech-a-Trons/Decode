@@ -23,18 +23,27 @@ import dev.nextftc.hardware.impl.MotorEx;
 
 @TeleOp
 public class RTAPIDTest extends NextFTCOpMode {
+    RedExperimentalDistanceLExtractor ll;
+    RedTurretAlign turretAlign;
     @Override
     public void onStartButtonPressed() {
+        ll = new RedExperimentalDistanceLExtractor(hardwareMap);
+        ll.startReading();
+        ll.update();
 
-        RedTurretAlign turretAlign = RedTurretAlign.INSTANCE;
+        turretAlign = RedTurretAlign.INSTANCE;
         turretAlign.initHardware(hardwareMap);
 
-        RedExperimentalDistanceLExtractor ll = new RedExperimentalDistanceLExtractor(hardwareMap);
         turretAlign.setLimelight(ll);
 
         ll.setTelemetry(telemetry);
 
         // Enable ALWAYS-ON alignment
         turretAlign.setAlignmentActive(true);
+    }
+    @Override
+    public void onUpdate() {
+        ll.update();
+        //turretAlign.periodic();
     }
 }

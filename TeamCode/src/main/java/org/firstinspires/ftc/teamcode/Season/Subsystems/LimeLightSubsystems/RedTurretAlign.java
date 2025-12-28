@@ -216,6 +216,9 @@
 //}
 package org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -230,15 +233,15 @@ public class RedTurretAlign implements Subsystem {
     public static double kP = 0.2; //0.02
     public static double kD = 0.00; //0.001
 
-    public static double ALIGN_TOLERANCE_DEG = 1.5;
-    public static double MAX_SERVO_STEP = 0.03;
+    public static double ALIGN_TOLERANCE_DEG = 0;
+    public static double MAX_SERVO_STEP = 0.02;
 
     /* ================= SERVO MODEL ================= */
-    private static final double SERVO_MIN = 0.0;
+    private static final double SERVO_MIN = 0;
     private static final double SERVO_MAX = 1.0;
 
-    private static final double TURRET_MIN_DEG = -180.0;
-    private static final double TURRET_MAX_DEG =  180.0;
+    private static final double TURRET_MIN_DEG = 0.0;
+    private static final double TURRET_MAX_DEG = 180.0;
 
     private static final double SERVO_CENTER = 0.5;
 
@@ -252,14 +255,15 @@ public class RedTurretAlign implements Subsystem {
 
     private boolean initialized = false;
     private boolean alignmentActive = false;
-
     public RedTurretAlign() {}
 
     public void initHardware(HardwareMap hw) {
         turret = hw.get(Servo.class, "turret");
-        turret.setPosition(SERVO_CENTER);
+//        turret.setPosition(SERVO_CENTER);
         lastTimeNs = System.nanoTime();
         initialized = true;
+        ll = new RedExperimentalDistanceLExtractor(hw);
+        ll.startReading();
     }
 
     public void setLimelight(RedExperimentalDistanceLExtractor ll) {
@@ -274,7 +278,8 @@ public class RedTurretAlign implements Subsystem {
 
     @Override
     public void periodic() {
-        if (!initialized || !alignmentActive || ll == null) return;
+        ll.update();
+        if (!alignmentActive || ll == null) return;
         if (!ll.isTargetVisible()) return;
 
         Double tx = ll.getTx();
@@ -323,6 +328,8 @@ public class RedTurretAlign implements Subsystem {
         );
 
         turret.setPosition(currentServo + delta);
+
+        telemetry.addData("Tx: ", tx);
     }
 
     public double getCurrentPosition() {

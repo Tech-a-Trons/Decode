@@ -1,63 +1,63 @@
-////package org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems;
-////
-////import com.qualcomm.robotcore.hardware.HardwareMap;
-////import com.qualcomm.robotcore.hardware.Servo;
-////
-////import dev.nextftc.core.subsystems.Subsystem;
-////
-////public class RedTurretAlign implements Subsystem {
-////
-////    public static final RedTurretAlign INSTANCE = new RedTurretAlign();
-////
-////    public static double kP = 0.01;
-////    public static double ALIGN_TOLERANCE_DEG = 1.0;
-////
-////    public static double SERVO_MIN = -1.0;
-////    public static double SERVO_MAX = 1.0;
-////
-////    private Servo turret;
-////    private double servoPosition = 0.0;
-////
-////    private RedExperimentalDistanceLExtractor limelight;
-////    private boolean initialized = false;
-////
-////    private RedTurretAlign() {} // private for singleton
-////
-////    // Call this after OpMode starts
-////    public void initHardware(HardwareMap hw) {
-////        if (!initialized) {
-////            turret = hw.get(Servo.class, "turret"); // change to your servo name
-////            initialized = true;
-////        }
-////    }
-////
-////    public void setLimelight(RedExperimentalDistanceLExtractor ll) {
-////        this.limelight = ll;
-////    }
-////
-////    private boolean isRedTag(Integer tagId) {
-////        return tagId != null && (tagId == 21 || tagId == 23);
-////    }
-////
-////    @Override
-////    public void periodic() {
-////        if (!initialized || limelight == null) return;
-////        if (!limelight.isTargetVisible()) return;
-////
-////        Integer tagId = limelight.getTagId();
-////        if (!isRedTag(tagId)) return;
-////
-////        Double tx = limelight.getTx();
-////        if (tx == null) return;
-////
-////        if (Math.abs(tx) <= ALIGN_TOLERANCE_DEG) return;
-////
-////        servoPosition -= kP * tx;
-////        servoPosition = Math.max(SERVO_MIN, Math.min(SERVO_MAX, servoPosition));
-////
-////        turret.setPosition(0.5 + servoPosition);
-////    }
-////}
+//package org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems;
+//
+//import com.qualcomm.robotcore.hardware.HardwareMap;
+//import com.qualcomm.robotcore.hardware.Servo;
+//
+//import dev.nextftc.core.subsystems.Subsystem;
+//
+//public class RedTurretAlign implements Subsystem {
+//
+//    public static final RedTurretAlign INSTANCE = new RedTurretAlign();
+//
+//    public static double kP = 0.01;
+//    public static double ALIGN_TOLERANCE_DEG = 1.0;
+//
+//    public static double SERVO_MIN = -1.0;
+//    public static double SERVO_MAX = 1.0;
+//
+//    private Servo turret;
+//    private double servoPosition = 0.0;
+//
+//    private RedExperimentalDistanceLExtractor limelight;
+//    private boolean initialized = false;
+//
+//    private RedTurretAlign() {} // private for singleton
+//
+//    // Call this after OpMode starts
+//    public void initHardware(HardwareMap hw) {
+//        if (!initialized) {
+//            turret = hw.get(Servo.class, "turret"); // change to your servo name
+//            initialized = true;
+//        }
+//    }
+//
+//    public void setLimelight(RedExperimentalDistanceLExtractor ll) {
+//        this.limelight = ll;
+//    }
+//
+//    private boolean isRedTag(Integer tagId) {
+//        return tagId != null && (tagId == 21 || tagId == 23);
+//    }
+//
+//    @Override
+//    public void periodic() {
+//        if (!initialized || limelight == null) return;
+//        if (!limelight.isTargetVisible()) return;
+//
+//        Integer tagId = limelight.getTagId();
+//        if (!isRedTag(tagId)) return;
+//
+//        Double tx = limelight.getTx();
+//        if (tx == null) return;
+//
+//        if (Math.abs(tx) <= ALIGN_TOLERANCE_DEG) return;
+//
+//        servoPosition -= kP * tx;
+//        servoPosition = Math.max(SERVO_MIN, Math.min(SERVO_MAX, servoPosition));
+//
+//        turret.setPosition(0.5 + servoPosition);
+//    }
+//}
 //package org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems;
 //
 //import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -83,11 +83,11 @@
 //    private double targetPosition = SERVO_CENTER;
 //    private double lastError = 0.0;
 //
-//    private RedExperimentalDistanceLExtractor limelight;
+//    private RedExperimentalDistanceLExtractor ll;
 //    private boolean initialized = false;
 //    private boolean alignmentActive = false;
 //
-//    private RedTurretAlign() {} // private for singleton
+//    public RedTurretAlign() {} // private for singleton
 //
 //    /**
 //     * Initialize hardware - call this in onStartButtonPressed()
@@ -98,6 +98,7 @@
 //            turret.setPosition(SERVO_CENTER);
 //            targetPosition = SERVO_CENTER;
 //            initialized = true;
+//            ll = new RedExperimentalDistanceLExtractor(hw);
 //        }
 //    }
 //
@@ -105,7 +106,7 @@
 //     * Set the limelight instance to use for vision data
 //     */
 //    public void setLimelight(RedExperimentalDistanceLExtractor ll) {
-//        this.limelight = ll;
+//        this.ll = ll;
 //    }
 //
 //    /**
@@ -122,8 +123,8 @@
 //     * Check if currently aligned to target
 //     */
 //    public boolean isAligned() {
-//        if (!initialized || limelight == null) return false;
-//        Double tx = limelight.getTx();
+//        if (!initialized || ll == null) return false;
+//        Double tx = ll.getTx();
 //        return tx != null && Math.abs(tx) <= ALIGN_TOLERANCE_DEG;
 //    }
 //
@@ -150,21 +151,22 @@
 //     */
 //    @Override
 //    public void periodic() {
-//        if (!initialized || limelight == null || !alignmentActive) {
+//
+//        if (!initialized || ll == null || !alignmentActive) {
 //            return;
 //        }
 //
 //        // Check if we have a valid target
-//        if (!limelight.isTargetVisible()) {
+//        if (!ll.isTargetVisible()) {
 //            return;
 //        }
 //
-//        Integer tagId = limelight.getTagId();
+//        Integer tagId = ll.getTagId();
 //        if (!isRedTag(tagId)) {
 //            return;
 //        }
 //
-//        Double tx = limelight.getTx();
+//        Double tx = ll.getTx();
 //        if (tx == null) {
 //            return;
 //        }
@@ -212,3 +214,139 @@
 //        return initialized;
 //    }
 //}
+package org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems;
+
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
+
+import dev.nextftc.core.subsystems.Subsystem;
+
+//Lines 230,231,234,237,238,240 & 241 need to be tuned
+public class RedTurretAlign implements Subsystem {
+
+    public static final RedTurretAlign INSTANCE = new RedTurretAlign();
+
+    /* ================= PID TUNING ================= */
+    public static double kP = 0.2; //0.02
+    public static double kD = 0.00; //0.001
+
+    public static double ALIGN_TOLERANCE_DEG = 0;
+    public static double MAX_SERVO_STEP = 0.02;
+
+    /* ================= SERVO MODEL ================= */
+    private static final double SERVO_MIN = 0;
+    private static final double SERVO_MAX = 1.0;
+
+    private static final double TURRET_MIN_DEG = 0.0;
+    private static final double TURRET_MAX_DEG = 180.0;
+
+    private static final double SERVO_CENTER = 0.5;
+
+    /* ================= HARDWARE ==================== */
+    private Servo turret;
+    private RedExperimentalDistanceLExtractor ll;
+
+    /* ================= STATE ======================= */
+    private double lastError = 0.0;
+    private long lastTimeNs = 0;
+
+    private boolean initialized = false;
+    private boolean alignmentActive = false;
+    public RedTurretAlign() {}
+
+    public void setLimelight(RedExperimentalDistanceLExtractor ll) {
+        this.ll = ll;
+    }
+
+    public void initHardware(HardwareMap hw) {
+        turret = hw.get(Servo.class, "turret");
+//        turret.setPosition(SERVO_CENTER);
+        lastTimeNs = System.nanoTime();
+        initialized = true;
+        ll = new RedExperimentalDistanceLExtractor(hw);
+        ll.startReading();
+    }
+
+    public void setAlignmentActive(boolean active) {
+        alignmentActive = active;
+        lastError = 0.0;
+        lastTimeNs = System.nanoTime();
+    }
+
+    @Override
+    public void periodic() {
+        ll.update();
+        if (alignmentActive == false || ll == null) return;
+        if (!ll.isTargetVisible()) return;
+
+        Double tx = ll.getTx();
+        if (tx == null) return;
+
+        /* ---------- DEAD BAND ---------- */
+        if (Math.abs(tx) <= ALIGN_TOLERANCE_DEG) {
+            lastError = tx;
+            return;
+        }
+
+        /* ---------- PID (ANGLE SPACE) ---------- */
+        long now = System.nanoTime();
+        double dt = (now - lastTimeNs) / 1e9;
+        lastTimeNs = now;
+
+        double error = -tx;                // desiredAngle - currentAngle
+        double derivative = (error - lastError) / dt;
+        lastError = error;
+
+        double outputDeg = (kP * error) + (kD * derivative);
+
+        /* ---------- MAP ANGLE → SERVO ---------- */
+        double currentServo = turret.getPosition();
+        double currentAngle = map(
+                currentServo,
+                SERVO_MIN, SERVO_MAX,
+                TURRET_MIN_DEG, TURRET_MAX_DEG
+        );
+
+        double targetAngle = currentAngle + outputDeg;
+
+        targetAngle = clamp(targetAngle, TURRET_MIN_DEG, TURRET_MAX_DEG);
+
+        double targetServo = map(
+                targetAngle,
+                TURRET_MIN_DEG, TURRET_MAX_DEG,
+                SERVO_MIN, SERVO_MAX
+        );
+
+        /* ---------- LIMIT STEP SIZE ---------- */
+        double delta = clamp(
+                targetServo - currentServo,
+                -MAX_SERVO_STEP,
+                MAX_SERVO_STEP
+        );
+
+        turret.setPosition(currentServo + delta);
+
+        telemetry.addData("Tx: ", tx);
+    }
+
+    public double getCurrentPosition() {
+        return turret.getPosition();
+    }
+
+
+    /* ================= UTILS ================= */
+
+    private static double map(double x,
+                              double inMin, double inMax,
+                              double outMin, double outMax) {
+        return (x - inMin) * (outMax - outMin)
+                / (inMax - inMin) + outMin;
+    }
+
+    private static double clamp(double v, double min, double max) {
+        return Math.max(min, Math.min(max, v));
+    }
+}

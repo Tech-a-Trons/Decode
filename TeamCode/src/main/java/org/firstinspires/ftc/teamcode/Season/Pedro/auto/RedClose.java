@@ -53,7 +53,7 @@ public class RedClose extends NextFTCOpMode {
     private final Pose prePickup2 = new Pose(126.207, 59.379, Math.toRadians(180)); //55
     private final Pose prePickup3 = new Pose(46.5, 84, Math.toRadians(180));
     //    private final Pose dropoff2 = new Pose(100, 54, Math.toRadians(180)); //55
-    private final Pose pickup1Pose = new Pose(126.41379310344828, 83.79310344827586, Math.toRadians(0));
+    private final Pose pickup1Pose = new Pose(126.41379310344828, 87, Math.toRadians(0));
     private final Pose pickup2Pose = new Pose(9, 52, Math.toRadians(180));
     private final Pose pickup3Pose = new Pose(12, 84, Math.toRadians(180));
 
@@ -74,7 +74,7 @@ public class RedClose extends NextFTCOpMode {
                         new BezierCurve(
                                 new Pose(96.000, 96.000),
                                 new Pose(67.241, 78.414),
-                                new Pose(126.41379310344828, 83.79310344827586)
+                                new Pose(117, 83.79310344827586)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
@@ -89,7 +89,7 @@ public class RedClose extends NextFTCOpMode {
                         new BezierCurve(
                                 new Pose(96.000, 96.000),
                                 new Pose(92.690, 53.793),
-                                new Pose(126.207, 59.379)
+                                new Pose(117, 59.379)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))

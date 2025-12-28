@@ -34,6 +34,10 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 
 @TeleOp
 public class newPIDTest extends NextFTCOpMode {
+
+    // OdometryTracker instance
+    private TurretSubsystem odometryTracker;
+
     public newPIDTest() {
         addComponents(
                 new SubsystemComponent(
@@ -41,8 +45,7 @@ public class newPIDTest extends NextFTCOpMode {
                         Hood.INSTANCE,
                         Turret.INSTANCE,
                         CompliantIntake.INSTANCE,
-                        Transfer.INSTANCE,
-                        TurretSubsystem.INSTANCE  // Added turret subsystem
+                        Transfer.INSTANCE
                 ),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE,
@@ -64,13 +67,17 @@ public class newPIDTest extends NextFTCOpMode {
     private boolean slowMode = false;
     private double slowModeMultiplier = 0.5;
 
-    // Target position for turret (adjust to your field coordinates)
+    // Target position for odometry tracker (adjust to your field coordinates)
     private static final double TARGET_X = 121;  // Example: center of field
     private static final double TARGET_Y = 121;  // Example: center of field
+    private Pose targetPose = new Pose(TARGET_X, TARGET_Y);
 
 
     @Override
     public void onStartButtonPressed() {
+        // Initialize OdometryTracker
+        odometryTracker = new TurretSubsystem(hardwareMap);
+
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         farscore = () -> PedroComponent.follower().pathBuilder() //Lazy Curve Generation
                 .addPath(new Path(new BezierLine(PedroComponent.follower()::getPose, new Pose(83.17241379310344, 12.620689655172416))))
@@ -80,7 +87,7 @@ public class newPIDTest extends NextFTCOpMode {
                 .addPath(new Path(new BezierLine(PedroComponent.follower()::getPose, new Pose(72, 72))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(PedroComponent.follower()::getHeading, Math.toRadians(90), 0.8))
                 .build();
-        TurretSubsystem.INSTANCE.init();
+
         PedroComponent.follower().setPose(new Pose(72, 35, Math.toRadians(90)));
         PedroComponent.follower().startTeleopDrive();
 
@@ -94,45 +101,46 @@ public class newPIDTest extends NextFTCOpMode {
                 Gamepads.gamepad1().leftStickX(),
                 Gamepads.gamepad1().rightStickX()
         );
+
+        // ========== ODOMETRY TRACKER CONTROLS ==========
+
+        // Left Bumper: Toggle auto-tracking on/off
         Gamepads.gamepad1().leftBumper()
                 .whenBecomesTrue(() -> {
-                    if (TurretSubsystem.INSTANCE.isAutoAimEnabled()) {
-                        TurretSubsystem.INSTANCE.disableAutoAim();
-                        telemetryM.addData("Turret", "Manual Mode");
+                    if (odometryTracker.enabled) {
+                        odometryTracker.setEnabled(false);
+                        telemetryM.addData("OdometryTracker", "Disabled");
                     } else {
-                        TurretSubsystem.INSTANCE.enableAutoAim(TARGET_X, TARGET_Y);
-                        telemetryM.addData("Turret", "Auto-Tracking Enabled");
+                        odometryTracker.setEnabled(true);
+                        telemetryM.addData("OdometryTracker", "Auto-Tracking Enabled");
                     }
                 });
-        // ========== TURRET ALIGNMENT CONTROLS ==========
 
-        // Right Trigger: Toggle auto-tracking on/off
+        // D-pad Left: Rotate tracker counterclockwise (when not auto-tracking)
         Gamepads.gamepad1().dpadLeft()
                 .whenBecomesTrue(() -> {
-                    if (!TurretSubsystem.INSTANCE.isAutoAimEnabled()) {
-                        double currentAngle = TurretSubsystem.INSTANCE.getTurretAngle();
-                        TurretSubsystem.INSTANCE.setTurretAngle(currentAngle + Math.toRadians(30));
+                    if (!odometryTracker.enabled) {
+                        odometryTracker.addAngle(Math.toRadians(30));
+                        telemetryM.addData("OdometryTracker", "Manual Rotate Left");
                     }
                 });
 
+        // D-pad Right: Rotate tracker clockwise (when not auto-tracking)
         Gamepads.gamepad1().dpadRight()
                 .whenBecomesTrue(() -> {
-                    if (!TurretSubsystem.INSTANCE.isAutoAimEnabled()) {
-                        double currentAngle = TurretSubsystem.INSTANCE.getTurretAngle();
-                        TurretSubsystem.INSTANCE.setTurretAngle(currentAngle - Math.toRadians(30));
+                    if (!odometryTracker.enabled) {
+                        odometryTracker.addAngle(Math.toRadians(-30));
+                        telemetryM.addData("OdometryTracker", "Manual Rotate Right");
                     }
                 });
 
-        // Right Bumper: Center turret
+        // Right Bumper: Reset tracker to center and run intake
         Gamepads.gamepad1().rightBumper()
                 .whenBecomesTrue(() -> {
+                    odometryTracker.reset();
                     CompliantIntake.INSTANCE.repel();
+                    telemetryM.addData("OdometryTracker", "Reset to Center");
                 });
-
-        // D-pad Left/Right: Manual turret control when auto-aim is off
-
-
-
 
         // ========== EXISTING CONTROLS ==========
 
@@ -144,14 +152,9 @@ public class newPIDTest extends NextFTCOpMode {
 
         Gamepads.gamepad1().b()
                 .whenBecomesTrue(() -> TurretPID.INSTANCE.setCloseShooterSpeed().schedule());
-//                .whenBecomesTrue(() -> PedroComponent.follower().followPath(closescore.get()))
-//                .whenBecomesTrue(() -> automatedDrive = true);
 
         Gamepads.gamepad1().a()
                 .whenBecomesTrue(() -> TurretPID.INSTANCE.setFarShooterSpeed().schedule());
-//                .whenBecomesTrue(() -> Transfer.INSTANCE.on());
-//            .whenBecomesTrue(() -> PedroComponent.follower().followPath(farscore.get()))
-//                .whenBecomesTrue(() -> automatedDrive = true);
 
         Gamepads.gamepad1().x()
                 .whenBecomesTrue(() -> {
@@ -165,17 +168,20 @@ public class newPIDTest extends NextFTCOpMode {
                 .whenBecomesTrue(() -> {
                     Transfer.INSTANCE.on();
                     CompliantIntake.INSTANCE.on();
-                    // Reserved for future use
                 });
-
-
-
-
     }
 
     @Override
     public void onUpdate() {
         PedroComponent.follower().update();
+
+        // Update odometry tracker with current robot pose
+        Pose robotPose = PedroComponent.follower().getPose();
+        if (odometryTracker.enabled) {
+            odometryTracker.trackTarget(targetPose, robotPose);
+        }
+        odometryTracker.periodic();
+
         telemetryM.update();
 
         if (!automatedDrive) {
@@ -196,9 +202,6 @@ public class newPIDTest extends NextFTCOpMode {
             }
         }
 
-        // Automated PathFollowing
-
-
         // Stop automated following if the follower is done
         if (automatedDrive && (gamepad1.bWasPressed() || !PedroComponent.follower().isBusy())) {
             PedroComponent.follower().startTeleopDrive();
@@ -206,15 +209,20 @@ public class newPIDTest extends NextFTCOpMode {
         }
 
         // ========== TELEMETRY ==========
-        Pose robotPose = PedroComponent.follower().getPose();
         telemetryM.debug("position", robotPose);
         telemetryM.debug("velocity", PedroComponent.follower().getVelocity());
         telemetryM.debug("automatedDrive", automatedDrive);
-        telemetryM.debug("turretAngle", Math.toDegrees(TurretSubsystem.INSTANCE.getTurretAngle()));
-        telemetryM.debug("turretAutoAim", TurretSubsystem.INSTANCE.isAutoAimEnabled());
+
+        // Odometry tracker telemetry
+        telemetryM.debug("tracker_angle", Math.toDegrees(odometryTracker.getAngle()));
+        telemetryM.debug("tracker_target", Math.toDegrees(odometryTracker.getTargetAngle()));
+        telemetryM.debug("tracker_error", Math.toDegrees(odometryTracker.getError()));
+        telemetryM.debug("tracker_enabled", odometryTracker.enabled);
+        telemetryM.debug("tracker_ready", odometryTracker.isReady());
 
         // Show angle to target
         double angleToTarget = Math.atan2(TARGET_Y - robotPose.getY(), TARGET_X - robotPose.getX());
-        telemetryM.debug("angleToTarget", Math.toDegrees(angleToTarget));
+        double relativeAngle = TurretSubsystem.normalizeAngle(angleToTarget - robotPose.getHeading());
+        telemetryM.debug("angleToTarget", Math.toDegrees(relativeAngle));
     }
 }

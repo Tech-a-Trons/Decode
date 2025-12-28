@@ -1,190 +1,249 @@
 package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems;
 
-import com.pedropathing.geometry.Pose;
+import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
 
+@Config
+public class TurretSubsystem {
+    // Dashboard tunable parameters
+    public static double currentAngle = 0, targetAngle = 0, error = 0;
+    public static double servoMin = 0.0, servoMax = 1.0;
+    public static double angleMin = -Math.PI, angleMax = Math.PI;
+    public static double trackingSpeed = 0.1; // smoothing factor for servo movement
+    public static double errorThreshold = 0.05; // radians
 
-import dev.nextftc.core.subsystems.Subsystem;
-import dev.nextftc.ftc.NextFTCOpMode;
+    // Servo and sensor hardware
+    private final Servo turretServo;
+    private final AnalogInput angleEncoder; // optional: for absolute positioning
 
-import dev.nextftc.extensions.pedro.PedroComponent;
-import dev.nextftc.hardware.impl.ServoEx;
+    // State management
+    public static boolean enabled = true;
+    public static boolean manualMode = false;
+    public static double manualPosition = 0.5;
 
-public class TurretSubsystem implements Subsystem {
-    public static final TurretSubsystem INSTANCE = new TurretSubsystem();
+    // Odometry data
+    private Pose lastRobotPose = new Pose(0, 0, 0);
+    private Pose targetPose = new Pose(0, 0, 0);
 
-    private Servo turret;
+    public TurretSubsystem(HardwareMap hardwareMap) {
+        turretServo = hardwareMap.get(Servo.class, "turret");
+        angleEncoder = null; // hardwareMap.get(AnalogInput.class, "angle_encoder"); // optional
 
-
-    // Turret configuration
-    private static final double CENTER_POSITION = 0.5;
-    private static final double MIN_POSITION = 0.0;
-    private static final double MAX_POSITION = 1.0;
-    private static final double ROBOT_FRONT_HEADING = Math.toRadians(90); // 90 degrees in radians
-
-    // Servo range in degrees (adjust based on your servo's actual range)
-    private static final double SERVO_RANGE_DEGREES = 180.0;
-
-    private double targetAngle = ROBOT_FRONT_HEADING;
-    private boolean autoAimEnabled = false;
-    private Pose targetPose = null;
-
-    private TurretSubsystem() {
-        // Private constructor for singleton
+        turretServo.setPosition(0.5); // center position
+        currentAngle = 0;
+        targetAngle = 0;
     }
 
-        public void init() {
-        if (turret == null) {
-            turret = new ServoEx("turret",-0.1).getServo();
-            turret.setPosition(0); // center hardware position
-        }
+    public TurretSubsystem(Servo turretServo, AnalogInput angleEncoder) {
+        this.turretServo = turretServo;
+        this.angleEncoder = angleEncoder;
     }
 
     /**
-     * Update the turret - called automatically by NextFTC periodic
+     * Main update loop - call this in your periodic/loop method
      */
-    @Override
     public void periodic() {
-        if (autoAimEnabled && targetPose != null) {
-            // Get current robot pose from PedroPathing
-            Pose currentPose = PedroComponent.follower().getPose();
+        if (!enabled) {
+            turretServo.setPosition(0.5);
+            return;
+        }
 
-            // Calculate angle to target
-            double angleToTarget = calculateAngleToTarget(currentPose, targetPose);
+        if (manualMode) {
+            turretServo.setPosition(manualPosition);
+            currentAngle = servoPositionToAngle(manualPosition);
+            return;
+        }
 
-            // Set turret to aim at target
-            setTurretAngle(angleToTarget);
+        // Calculate error
+        error = normalizeAngle(targetAngle - currentAngle);
+
+        // Smooth servo movement
+        double targetServoPos = angleToServoPosition(targetAngle);
+        double currentServoPos = turretServo.getPosition();
+        double newServoPos = currentServoPos + (targetServoPos - currentServoPos) * trackingSpeed;
+
+        // Clamp to servo limits
+        newServoPos = Math.max(servoMin, Math.min(servoMax, newServoPos));
+
+        turretServo.setPosition(newServoPos);
+        currentAngle = servoPositionToAngle(newServoPos);
+
+        // Optional: read from absolute encoder if available
+        if (angleEncoder != null) {
+            currentAngle = readEncoderAngle();
         }
     }
 
     /**
-     * Set turret angle relative to robot's front (90 degrees)
-     * @param angle Angle in radians (0 = right, PI/2 = front, PI = left)
+     * Set target angle in radians
      */
-    public void setTurretAngle(double angle) {
-        targetAngle = angle;
-
-        // Calculate offset from robot front (90 degrees)
-        double angleOffset = angle - ROBOT_FRONT_HEADING;
-
-        // Normalize to [-PI, PI]
-        angleOffset = normalizeAngle(angleOffset);
-
-        // Convert to servo position [-1, 1]
-        double servoPosition = angleToServoPosition(angleOffset);
-
-        // Clamp to valid range
-        servoPosition = Math.max(MIN_POSITION, Math.min(MAX_POSITION, servoPosition));
-
-        setServoPosition(servoPosition);
+    public void setAngle(double radians) {
+        targetAngle = normalizeAngle(radians);
     }
 
     /**
-     * Set turret to face a specific field position
-     * @param targetX Target X coordinate
-     * @param targetY Target Y coordinate
+     * Add to current target angle
      */
-    public void aimAt(double targetX, double targetY) {
-        Pose currentPose = PedroComponent.follower().getPose();
-        targetPose = new Pose(targetX, targetY, 0);
-
-        double angleToTarget = calculateAngleToTarget(currentPose, targetPose);
-        setTurretAngle(angleToTarget);
+    public void addAngle(double radians) {
+        targetAngle = normalizeAngle(targetAngle + radians);
     }
 
     /**
-     * Enable automatic aiming at a target pose
-     * @param targetX Target X coordinate
-     * @param targetY Target Y coordinate
+     * Get current angle in radians
      */
-    public void enableAutoAim(double targetX, double targetY) {
-        targetPose = new Pose(targetX, targetY, 0);
-        autoAimEnabled = true;
+    public double getAngle() {
+        return currentAngle;
     }
 
     /**
-     * Disable automatic aiming
+     * Get target angle in radians
      */
-    public void disableAutoAim() {
-        autoAimEnabled = false;
-    }
-
-    /**
-     * Check if auto-aim is enabled
-     * @return true if auto-aim is active
-     */
-    public boolean isAutoAimEnabled() {
-        return autoAimEnabled;
-    }
-
-    /**
-     * Set turret to center position (facing robot front)
-     */
-    public void centerTurret() {
-        setTurretAngle(ROBOT_FRONT_HEADING);
-    }
-
-    /**
-     * Manually set servo position
-     * @param position Position from -1 (left) to 1 (right), 0 is center
-     */
-    public void setServoPosition(double position) {
-        TurretSubsystem.INSTANCE.turret.setPosition((position + 1.0) / 2.0); // Convert [-1,1] to [0,1] for servo
-    }
-
-    /**
-     * Get current turret angle
-     * @return Current angle in radians
-     */
-    public double getTurretAngle() {
+    public double getTargetAngle() {
         return targetAngle;
     }
 
     /**
-     * Get current robot pose from PedroPathing
-     * @return Current robot pose
+     * Point the odometry pod toward a target pose
      */
-    public Pose getRobotPose() {
-        return PedroComponent.follower().getPose();
+    public void trackTarget(Pose target, Pose robotPose) {
+        this.targetPose = target;
+        this.lastRobotPose = robotPose;
+
+        double angleToTarget = Math.atan2(
+                target.getY() - robotPose.getY(),
+                target.getX() - robotPose.getX()
+        );
+
+        double relativeAngle = normalizeAngle(angleToTarget - robotPose.getHeading());
+        setAngle(relativeAngle);
     }
 
     /**
-     * Calculate angle from current pose to target pose
+     * Track a moving target continuously
      */
-    private double calculateAngleToTarget(Pose current, Pose target) {
-        double dx = target.getX() - current.getX();
-        double dy = target.getY() - current.getY();
-        return Math.atan2(dy, dx);
+    public void continuousTracking(Pose target, Pose robotPose) {
+        trackTarget(target, robotPose);
     }
 
     /**
-     * Convert angle offset to servo position
-     * Assumes servo can rotate SERVO_RANGE_DEGREES total
+     * Convert servo position (0-1) to angle in radians
      */
-    private double angleToServoPosition(double angleOffset) {
-        double maxAngle = Math.toRadians(SERVO_RANGE_DEGREES / 2.0);
-        return angleOffset / maxAngle;
+    private double servoPositionToAngle(double servoPos) {
+        double normalized = (servoPos - servoMin) / (servoMax - servoMin);
+        return angleMin + normalized * (angleMax - angleMin);
+    }
+
+    /**
+     * Convert angle in radians to servo position (0-1)
+     */
+    private double angleToServoPosition(double angle) {
+        double normalized = (angle - angleMin) / (angleMax - angleMin);
+        return servoMin + normalized * (servoMax - servoMin);
+    }
+
+    /**
+     * Read angle from absolute encoder (if available)
+     */
+    private double readEncoderAngle() {
+        if (angleEncoder == null) return currentAngle;
+
+        double voltage = angleEncoder.getVoltage();
+        double maxVoltage = angleEncoder.getMaxVoltage();
+        double normalized = voltage / maxVoltage;
+
+        return angleMin + normalized * (angleMax - angleMin);
     }
 
     /**
      * Normalize angle to [-PI, PI]
      */
-    private double normalizeAngle(double angle) {
-        while (angle > Math.PI) angle -= 2 * Math.PI;
-        while (angle < -Math.PI) angle += 2 * Math.PI;
+    public static double normalizeAngle(double angleRadians) {
+        double angle = angleRadians % (Math.PI * 2.0);
+        if (angle <= -Math.PI) angle += Math.PI * 2.0;
+        if (angle > Math.PI) angle -= Math.PI * 2.0;
         return angle;
     }
 
     /**
-     * Check if turret is within tolerance of target angle
-     * @param tolerance Tolerance in radians
+     * Check if tracker is at target position
      */
-    public boolean isAtTarget(double tolerance) {
-        Pose current = PedroComponent.follower().getPose();
-        if (targetPose == null) return true;
+    public boolean isReady() {
+        return Math.abs(error) < errorThreshold;
+    }
 
-        double angleToTarget = calculateAngleToTarget(current, targetPose);
-        return Math.abs(normalizeAngle(angleToTarget - targetAngle)) < tolerance;
+    /**
+     * Reset to center position
+     */
+    public void reset() {
+        currentAngle = 0;
+        targetAngle = 0;
+        turretServo.setPosition(0.5);
+    }
+
+    /**
+     * Enable/disable the tracker
+     */
+    public void setEnabled(boolean enabled) {
+        TurretSubsystem.enabled = enabled;
+    }
+
+    /**
+     * Enter manual control mode
+     */
+    public void setManualMode(boolean manual, double position) {
+        manualMode = manual;
+        if (manual) {
+            manualPosition = Math.max(servoMin, Math.min(servoMax, position));
+        }
+    }
+
+    // Utility methods for common operations
+
+    /**
+     * Convenience method to reset and return this instance for chaining
+     */
+    public TurretSubsystem resetAndReturn() {
+        reset();
+        return this;
+    }
+
+    /**
+     * Convenience method to set angle and return this instance for chaining
+     */
+    public TurretSubsystem setAngleAndReturn(double radians) {
+        setAngle(radians);
+        return this;
+    }
+
+    /**
+     * Convenience method to enable/disable and return this instance for chaining
+     */
+    public TurretSubsystem setEnabledAndReturn(boolean enable) {
+        setEnabled(enable);
+        return this;
+    }
+
+    /**
+     * Get current tracking error in radians
+     */
+    public double getError() {
+        return error;
+    }
+
+    /**
+     * Get the last tracked target pose
+     */
+    public Pose getTargetPose() {
+        return targetPose;
+    }
+
+    /**
+     * Get the last robot pose used for tracking
+     */
+    public Pose getLastRobotPose() {
+        return lastRobotPose;
     }
 }

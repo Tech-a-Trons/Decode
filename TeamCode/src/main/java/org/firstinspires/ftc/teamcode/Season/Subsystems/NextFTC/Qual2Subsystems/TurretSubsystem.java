@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.pedropathing.geometry.Pose;
 
+import dev.nextftc.extensions.pedro.PedroComponent;
+
 @Config
 public class TurretSubsystem {
     // Dashboard tunable parameters
@@ -25,8 +27,8 @@ public class TurretSubsystem {
     public static double manualPosition = 0.5;
 
     // Odometry data
-    private Pose lastRobotPose = new Pose(0, 0, 0);
-    private Pose targetPose = new Pose(0, 0, 0);
+    private Pose lastRobotPose = PedroComponent.follower().getPose();
+    private Pose targetPose = new Pose(122, 122, 0);
 
     public TurretSubsystem(HardwareMap hardwareMap) {
         turretServo = hardwareMap.get(Servo.class, "turret");

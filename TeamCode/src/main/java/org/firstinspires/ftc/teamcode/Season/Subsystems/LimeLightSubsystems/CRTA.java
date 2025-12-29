@@ -36,7 +36,7 @@ public class CRTA implements Subsystem {
     public void initHardware(HardwareMap hw) {
         turret = hw.get(CRServo.class, "turret");
         ll = new RedExperimentalDistanceLExtractor(hw);
-        axonEncoder = hw.get(AnalogInput.class, "turretEncoder");  // config as Analog Input
+        axonEncoder = hw.get(AnalogInput.class, "turret_encoder");  // config as Analog Input
         // For a CR servo there is no "position"; ensure it is stopped at init
         turret.setPower(0.0);
         tx = ll.getTx();

@@ -214,139 +214,201 @@
 //        return initialized;
 //    }
 //}
+//package org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems;
+//
+//import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+//
+//import com.qualcomm.robotcore.hardware.HardwareMap;
+//import com.qualcomm.robotcore.hardware.Servo;
+//
+//import dev.nextftc.core.subsystems.Subsystem;
+//
+//// Lines 230,231,234,237,238,240 & 241 need to be tuned
+//public class RedTurretAlign implements Subsystem {
+//
+//    public static final RedTurretAlign INSTANCE = new RedTurretAlign();
+//
+//    /* ================= PID TUNING ================= */
+//    public static double kP = 0.2; //0.02
+//    public static double kD = 0.00; //0.001
+//
+//    public static double ALIGN_TOLERANCE_DEG = 0;
+//    public static double MAX_SERVO_STEP = 0.02;
+//
+//    /* ================= SERVO MODEL ================= */
+//    private static final double SERVO_MIN = 0;
+//    private static final double SERVO_MAX = 1.0;
+//
+//    private static final double TURRET_MIN_DEG = 0.0;
+//    private static final double TURRET_MAX_DEG = 180.0;
+//
+//    private static final double SERVO_CENTER = 0.5;
+//
+//    /* ================= HARDWARE ==================== */
+//    private Servo turret;
+//    private RedExperimentalDistanceLExtractor ll;
+//
+//    /* ================= STATE ======================= */
+//    private double lastError = 0.0;
+//    private long lastTimeNs = 0;
+//
+//    private boolean initialized = false;
+//    private boolean alignmentActive = false;
+//    public RedTurretAlign() {}
+//
+//    public void setLimelight(RedExperimentalDistanceLExtractor ll) {
+//        this.ll = ll;
+//    }
+//
+//    public void initHardware(HardwareMap hw) {
+//        turret = hw.get(Servo.class, "turret");
+////        turret.setPosition(SERVO_CENTER);
+//        lastTimeNs = System.nanoTime();
+//        initialized = true;
+//        ll = new RedExperimentalDistanceLExtractor(hw);
+//        ll.startReading();
+//    }
+//
+//    public void setAlignmentActive(boolean active) {
+//        alignmentActive = active;
+//        lastError = 0.0;
+//        lastTimeNs = System.nanoTime();
+//    }
+//
+//    @Override
+//    public void periodic() {
+//        ll.update();
+//        if (alignmentActive == false || ll == null) return;
+//        if (!ll.isTargetVisible()) return;
+//
+//        Double tx = ll.getTx();
+//        if (tx == null) return;
+//
+//        /* ---------- DEAD BAND ---------- */
+//        if (Math.abs(tx) <= ALIGN_TOLERANCE_DEG) {
+//            lastError = tx;
+//            return;
+//        }
+//
+//        /* ---------- PID (ANGLE SPACE) ---------- */
+//        long now = System.nanoTime();
+//        double dt = (now - lastTimeNs) / 1e9;
+//        lastTimeNs = now;
+//
+//        double error = -tx;                // desiredAngle - currentAngle
+//        double derivative = (error - lastError) / dt;
+//        lastError = error;
+//
+//        double outputDeg = (kP * error) + (kD * derivative);
+//
+//        /* ---------- MAP ANGLE → SERVO ---------- */
+//        double currentServo = turret.getPosition();
+//        double currentAngle = map(
+//                currentServo,
+//                SERVO_MIN, SERVO_MAX,
+//                TURRET_MIN_DEG, TURRET_MAX_DEG
+//        );
+//
+//        double targetAngle = currentAngle + outputDeg;
+//
+//        targetAngle = clamp(targetAngle, TURRET_MIN_DEG, TURRET_MAX_DEG);
+//
+//        double targetServo = map(
+//                targetAngle,
+//                TURRET_MIN_DEG, TURRET_MAX_DEG,
+//                SERVO_MIN, SERVO_MAX
+//        );
+//
+//        /* ---------- LIMIT STEP SIZE ---------- */
+//        double delta = clamp(
+//                targetServo - currentServo,
+//                -MAX_SERVO_STEP,
+//                MAX_SERVO_STEP
+//        );
+//
+//        turret.setPosition(currentServo + delta);
+//
+//        telemetry.addData("Tx: ", tx);
+//    }
+//
+//    public double getCurrentPosition() {
+//        return turret.getPosition();
+//    }
+//
+//
+//    /* ================= UTILS ================= */
+//
+//    private static double map(double x,
+//                              double inMin, double inMax,
+//                              double outMin, double outMax) {
+//        return (x - inMin) * (outMax - outMin)
+//                / (inMax - inMin) + outMin;
+//    }
+//
+//    private static double clamp(double v, double min, double max) {
+//        return Math.max(min, Math.min(max, v));
+//    }
+//}
+
 package org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import dev.nextftc.core.subsystems.Subsystem;
 
-//Lines 230,231,234,237,238,240 & 241 need to be tuned
 public class RedTurretAlign implements Subsystem {
 
     public static final RedTurretAlign INSTANCE = new RedTurretAlign();
-
-    /* ================= PID TUNING ================= */
-    public static double kP = 0.2; //0.02
-    public static double kD = 0.00; //0.001
-
-    public static double ALIGN_TOLERANCE_DEG = 0;
-    public static double MAX_SERVO_STEP = 0.02;
-
-    /* ================= SERVO MODEL ================= */
-    private static final double SERVO_MIN = 0;
-    private static final double SERVO_MAX = 1.0;
-
-    private static final double TURRET_MIN_DEG = 0.0;
-    private static final double TURRET_MAX_DEG = 180.0;
-
-    private static final double SERVO_CENTER = 0.5;
-
-    /* ================= HARDWARE ==================== */
     private Servo turret;
     private RedExperimentalDistanceLExtractor ll;
+    private Double tx;
+    private double turretPos;
 
-    /* ================= STATE ======================= */
-    private double lastError = 0.0;
-    private long lastTimeNs = 0;
+    private static final double TX_TOLERANCE = 0.5; // degrees
+    private static final double STEP = 0.02;       // smaller = slower
 
-    private boolean initialized = false;
-    private boolean alignmentActive = false;
-    public RedTurretAlign() {}
-
-    public void setLimelight(RedExperimentalDistanceLExtractor ll) {
-        this.ll = ll;
-    }
 
     public void initHardware(HardwareMap hw) {
         turret = hw.get(Servo.class, "turret");
-//        turret.setPosition(SERVO_CENTER);
-        lastTimeNs = System.nanoTime();
-        initialized = true;
         ll = new RedExperimentalDistanceLExtractor(hw);
-        ll.startReading();
+        tx = ll.getTx();
+        turretPos = turret.getPosition();
     }
 
-    public void setAlignmentActive(boolean active) {
-        alignmentActive = active;
-        lastError = 0.0;
-        lastTimeNs = System.nanoTime();
-    }
-
-    @Override
-    public void periodic() {
+    public void rotate() {
         ll.update();
-        if (alignmentActive == false || ll == null) return;
-        if (!ll.isTargetVisible()) return;
+        tx = ll.getTx();
+        if (tx == null) {
+            tx = 0.0;
+        }
 
-        Double tx = ll.getTx();
-        if (tx == null) return;
-
-        /* ---------- DEAD BAND ---------- */
-        if (Math.abs(tx) <= ALIGN_TOLERANCE_DEG) {
-            lastError = tx;
+        if (!ll.isTargetVisible()) {
+            telemetry.addLine("Target is not visible!");
+            telemetry.update();
             return;
         }
 
-        /* ---------- PID (ANGLE SPACE) ---------- */
-        long now = System.nanoTime();
-        double dt = (now - lastTimeNs) / 1e9;
-        lastTimeNs = now;
+        if (Math.abs(tx) <= TX_TOLERANCE) {
+            return;
+        }
 
-        double error = -tx;                // desiredAngle - currentAngle
-        double derivative = (error - lastError) / dt;
-        lastError = error;
+        if (tx < 0) {
+            turretPos -= STEP; // target left
+        } else {
+            turretPos += STEP; // target right
+        }
 
-        double outputDeg = (kP * error) + (kD * derivative);
+        turretPos = clamp(turretPos);
+        turret.setPosition(turretPos);
 
-        /* ---------- MAP ANGLE → SERVO ---------- */
-        double currentServo = turret.getPosition();
-        double currentAngle = map(
-                currentServo,
-                SERVO_MIN, SERVO_MAX,
-                TURRET_MIN_DEG, TURRET_MAX_DEG
-        );
-
-        double targetAngle = currentAngle + outputDeg;
-
-        targetAngle = clamp(targetAngle, TURRET_MIN_DEG, TURRET_MAX_DEG);
-
-        double targetServo = map(
-                targetAngle,
-                TURRET_MIN_DEG, TURRET_MAX_DEG,
-                SERVO_MIN, SERVO_MAX
-        );
-
-        /* ---------- LIMIT STEP SIZE ---------- */
-        double delta = clamp(
-                targetServo - currentServo,
-                -MAX_SERVO_STEP,
-                MAX_SERVO_STEP
-        );
-
-        turret.setPosition(currentServo + delta);
-
-        telemetry.addData("Tx: ", tx);
     }
 
-    public double getCurrentPosition() {
-        return turret.getPosition();
-    }
+    public void periodic() {}
 
-
-    /* ================= UTILS ================= */
-
-    private static double map(double x,
-                              double inMin, double inMax,
-                              double outMin, double outMax) {
-        return (x - inMin) * (outMax - outMin)
-                / (inMax - inMin) + outMin;
-    }
-
-    private static double clamp(double v, double min, double max) {
-        return Math.max(min, Math.min(max, v));
+    private double clamp(double v) {
+        return Math.max(0.0, Math.min(1.0, v));
     }
 }

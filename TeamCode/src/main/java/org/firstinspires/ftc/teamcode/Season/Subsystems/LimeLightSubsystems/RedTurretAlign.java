@@ -409,14 +409,14 @@ public class RedTurretAlign implements Subsystem {
     private Double tx;
 
     // Tuning constants (start with these and adjust)
-    private static final double TX_TOLERANCE = 1.0;   // degrees of "good enough"
-    private static final double KP = 0.004;  // proportional gain
-    private static final double MAX_STEP = 0.04;   // max servo movement per loop
+    private static final double TX_TOLERANCE = 0;   // degrees of "good enough"
+    private static final double KP = 0.0002;  // proportional gain
+    private static final double MAX_STEP = 0.01;   // max servo movement per loop
 
     // Limit turret to a range where Limelight still sees the target
-    private static final double MIN_POS = 0.85;
+    private static final double MIN_POS = 0.7;
     private static final double MAX_POS = 1.00;
-    private static final double CENTER  = 0.95; // tune this by experiment
+    private static final double CENTER  = 0.9; // tune this by experiment
 
     public void initHardware(HardwareMap hw) {
         turret = hw.get(Servo.class, "turret");

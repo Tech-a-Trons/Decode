@@ -22,6 +22,8 @@ public class RTATest extends OpMode {
 
         ll = new RedExperimentalDistanceLExtractor(hardwareMap);
         ll.setTelemetry(telemetry);
+
+        ll.startReading();
     }
 
     @Override

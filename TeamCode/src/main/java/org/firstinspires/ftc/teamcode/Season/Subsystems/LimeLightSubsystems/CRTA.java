@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems;
 
+import static android.os.SystemClock.sleep;
+
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import java.util.Base64;
+import java.util.Objects;
 
 import dev.nextftc.core.subsystems.Subsystem;
 
@@ -15,6 +17,7 @@ public class CRTA implements Subsystem {
     private AnalogInput axonEncoder;  // Axon encoder on analog port
     private RedExperimentalDistanceLExtractor ll;
     private Double tx;
+    private Double lastTx;
 
     // Encoder constants (tune for your setup)
     private static final double VOLTAGE_PER_DEGREE = 3.3 / 360.0;  // 0-3.3V = 0-360°
@@ -25,10 +28,7 @@ public class CRTA implements Subsystem {
 
 
     // Tuning constants
-    private static final double TX_TOLERANCE = 0.5; // degrees "good enough"
-    private static final double KP = 0.01;          // tune for CR servo power
-    private static final double MAX_POWER = 0.6;    // max power magnitude
-    private static final double MIN_POWER = 0.1;   // minimum to overcome friction
+    private static final double TX_TOLERANCE = 2.5;  // Wider deadband
 
     // Optional: small recenter behavior if target lost
 //    private static final double RECENTER_POWER = 0.12; // slow, gentle recenter
@@ -38,65 +38,76 @@ public class CRTA implements Subsystem {
         ll = new RedExperimentalDistanceLExtractor(hw);
         axonEncoder = hw.get(AnalogInput.class, "turret_encoder");  // config as Analog Input
         // For a CR servo there is no "position"; ensure it is stopped at init
-        turret.setPower(0.0);
+//        turret.setPower(0.2);
         tx = ll.getTx();
         homed = false;
         ll.startReading();
+        lastTx = 0.0;
     }
 
+    private double targetAngleDeg = 0.0;  // Desired absolute turret angle
+    private static final double KP = 0.04;  // Position gains
+    private static final double KI = 0.001;
+    private static final double KD = 0.12;
+    private double integral = 0.0, lastError = 0.0;
+
     public void rotate() {
-
-        if (turret == null || ll == null) return;
-
         ll.update();
 
-        // --- SCAN TO START POSITION when no target ---
-        // In rotate(), when no target:
+        if (Objects.equals(ll.getStatus(), "No data (stale)")) {
+            turret.setPower(-0.75);
+            sleep(10);
+            turret.setPower(0.75);
+            return;
+        }
+
         if (!ll.isTargetVisible()) {
-            double currentAngle = readEncoderAngleDeg();  // 0° = your physical start position
-
-            double angleError = 0.0 - currentAngle;  // Always return to 0° (start)
-
-            if (Math.abs(angleError) <= ANGLE_TOLERANCE) {
-                turret.setPower(0.0);
-                return;
+            // No target: hold last target angle or scan gently
+            double currentAngle = readEncoderAngleDeg();
+            double holdError = targetAngleDeg - currentAngle;
+            if (Math.abs(holdError) > 3.0) {  // Only correct if drifted
+                applyPower(KP * holdError);
             }
-
-            double power = 0.015 * angleError;
-            power = Math.max(-0.25, Math.min(0.25, power));
-            turret.setPower(power);
+            return;
         }
 
-
+        // Compute target angle from tx (calibrate offset once)
         tx = ll.getTx();
-        if (tx == null || Double.isNaN(tx) || Double.isInfinite(tx)) {
-            turret.setPower(0.0);
+        if (tx == null || tx.isInfinite() || tx.isNaN()) {
+            tx = 0.0;
+        }
+        targetAngleDeg = readEncoderAngleDeg() + tx;  // tx=0 → current encoder angle
+
+        // Position PID to targetAngleDeg
+        double currentAngle = readEncoderAngleDeg();
+        double error = targetAngleDeg - currentAngle;
+
+        // Normalize error to -180/+180
+        while (error > 180) error -= 360;
+        while (error < -180) error += 360;
+
+        if (Math.abs(error) <= 2.0) {  // Wider tolerance
+            turret.setPower(0);
+            integral = 0;
             return;
         }
 
-        double error = tx;
+        integral += error * 0.02;  // dt=50ms
+        integral = Math.max(-1.0, Math.min(1.0, integral));
+        double derivative = error - lastError;
+        double power = KP * error + KI * integral + KD * derivative;
 
-        // Deadband around center
-        if (Math.abs(error) <= TX_TOLERANCE) {
-            turret.setPower(0.0);
-            return;
-        }
+//        applyPower(power);  // Clamps -0.4 to 0.4
+//        lastError = error;
+    }
 
-        // P-control -> power
-        double power = KP * error;
-
-        // Enforce minimum and maximum power so it actually moves but not too fast
-        double sign = Math.signum(power);
-        power = Math.abs(power);
-        if (power > MAX_POWER) power = MAX_POWER;
-        if (power < MIN_POWER) power = MIN_POWER;
-        power *= sign;
-
-        // For CRServo: -1 = full one way, +1 = full other way, 0 = stop
+    private void applyPower(double power) {
+        power = Math.max(-0.75, Math.min(0.75, power));
         turret.setPower(power);
     }
 
-    private static final double START_VOLTAGE = 1.65;  // Example: tune to your physical start angle
+
+    private static final double START_VOLTAGE = 2.8;  // Example: tune to your physical start angle
     private static final double VOLTAGE_RANGE = 3.3;   // Full 0-3.3V = 360°
 
     private double readEncoderAngleDeg() {
@@ -116,5 +127,9 @@ public class CRTA implements Subsystem {
 
     public double ServoPower() {
         return turret.getPower();
+    }
+
+    public double EncoderVoltage() {
+        return axonEncoder.getVoltage();
     }
 }

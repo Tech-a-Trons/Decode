@@ -31,7 +31,7 @@ public class RedExperimentalDistanceLExtractor {
 
     private volatile String connectionStatus = "Not connected";
     private volatile long lastUpdateTime = 0;
-
+    LLResult result;
     private Thread pollingThread;
     private volatile boolean running = false;
     private final double LIMELIGHT_HEIGHT = 9.25; // inches
@@ -62,7 +62,7 @@ public class RedExperimentalDistanceLExtractor {
         pollingThread = new Thread(() -> {
             while (running && !Thread.currentThread().isInterrupted()) {
                 try {
-                    LLResult result = limelight.getLatestResult();
+                    result = limelight.getLatestResult();
                     long now = System.currentTimeMillis();
 
                     if (result != null && result.isValid()) {
@@ -145,6 +145,7 @@ public class RedExperimentalDistanceLExtractor {
             addTelemetry(opModeTelemetry);
             opModeTelemetry.update();
         }
+        result = limelight.getLatestResult();
     }
 
     private double smooth(double oldVal, double newVal) {

@@ -361,54 +361,113 @@ import dev.nextftc.core.subsystems.Subsystem;
 
 public class RedTurretAlign implements Subsystem {
 
+    //    public static final RedTurretAlign INSTANCE = new RedTurretAlign();
+//    private Servo turret;
+//    private RedExperimentalDistanceLExtractor ll;
+//    private Double tx;
+//    private static final double TX_TOLERANCE = 0.5; // degrees
+//    private static final double STEP = 0.2;       // smaller = slower
+//
+//
+//    public void initHardware(HardwareMap hw) {
+//        turret = hw.get(Servo.class, "turret");
+//        ll = new RedExperimentalDistanceLExtractor(hw);
+//        tx = ll.getTx();
+//        ll.setTelemetry(telemetry);
+//
+//        turret.setPosition(0.5);   // known center each OpMode run
+//    }
+//
+//    public void rotate() {
+//        if (ll == null || turret == null) return;
+//
+//        ll.update();
+//        tx = ll.getTx();
+//        if (tx == null) tx = 0.0;
+//
+//        double pos = turret.getPosition();
+//        if (tx < -TX_TOLERANCE) {
+//            pos -= STEP;
+//        } else if (tx > TX_TOLERANCE) {
+//            pos += STEP;
+//        }
+//
+//        pos = clamp(pos);
+//        turret.setPosition(pos);
+//    }
+//
+//    public void periodic() {}
+//
+//    private double clamp(double v) {
+//        return Math.max(0.2, Math.min(0.8, v));
+//    }
+//}
     public static final RedTurretAlign INSTANCE = new RedTurretAlign();
+
     private Servo turret;
     private RedExperimentalDistanceLExtractor ll;
     private Double tx;
-    private double turretPos;
 
-    private static final double TX_TOLERANCE = 0.5; // degrees
-    private static final double STEP = 0.02;       // smaller = slower
+    // Tuning constants (start with these and adjust)
+    private static final double TX_TOLERANCE = 0;   // degrees of "good enough"
+    private static final double KP = 0.0002;  // proportional gain
+    private static final double MAX_STEP = 0.01;   // max servo movement per loop
 
+    // Limit turret to a range where Limelight still sees the target
+    private static final double MIN_POS = 0.7;
+    private static final double MAX_POS = 1.00;
+    private static final double CENTER  = 0.9; // tune this by experiment
 
     public void initHardware(HardwareMap hw) {
         turret = hw.get(Servo.class, "turret");
         ll = new RedExperimentalDistanceLExtractor(hw);
-        tx = ll.getTx();
-        turretPos = turret.getPosition();
+        // Start turret at a known center every run
+        turret.setPosition(CENTER);
+        ll.startReading();
     }
 
     public void rotate() {
+        if (turret == null || ll == null) return;
+
         ll.update();
-        tx = ll.getTx();
-        if (tx == null) {
-            tx = 0.0;
-        }
 
         if (!ll.isTargetVisible()) {
-            telemetry.addLine("Target is not visible!");
-            telemetry.update();
+            double pos = turret.getPosition();
+            if (pos < CENTER) pos += 0.005;
+            else if (pos > CENTER) pos -= 0.005;
+            turret.setPosition(clamp(pos));
             return;
         }
 
-        if (Math.abs(tx) <= TX_TOLERANCE) {
+        tx = ll.getTx();
+        if (tx == null || Double.isNaN(tx) || Double.isInfinite(tx)) {
             return;
         }
 
-        if (tx < 0) {
-            turretPos -= STEP; // target left
-        } else {
-            turretPos += STEP; // target right
+        double error = tx;
+
+        if (Math.abs(error) <= TX_TOLERANCE) {
+            return;
         }
 
-        turretPos = clamp(turretPos);
-        turret.setPosition(turretPos);
+        double pos = turret.getPosition();
+        double delta = KP * error;
+        if (delta >  MAX_STEP) delta =  MAX_STEP;
+        if (delta < -MAX_STEP) delta = -MAX_STEP;
 
+        pos += delta;
+        pos = clamp(pos);
+        turret.setPosition(pos);
     }
+
 
     public void periodic() {}
 
+    public double ServoPos() {
+        return turret.getPosition();
+    }
+
     private double clamp(double v) {
-        return Math.max(0.0, Math.min(1.0, v));
+        return Math.max(MIN_POS, Math.min(MAX_POS, v));
     }
 }

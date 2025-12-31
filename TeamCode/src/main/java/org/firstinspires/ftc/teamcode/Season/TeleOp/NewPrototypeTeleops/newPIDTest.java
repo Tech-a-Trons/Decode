@@ -154,7 +154,17 @@ public class newPIDTest extends NextFTCOpMode {
                 .whenBecomesTrue(() -> TurretPID.INSTANCE.setCloseShooterSpeed().schedule());
 
         Gamepads.gamepad1().a()
-                .whenBecomesTrue(() -> TurretPID.INSTANCE.setFarShooterSpeed().schedule());
+//                .whenBecomesTrue(() -> TurretPID.INSTANCE.setFarShooterSpeed().schedule());
+                .whenBecomesTrue(() -> {
+                    Pose pose = PedroComponent.follower().getPose();
+                    double d = Math.hypot(
+                            TARGET_X - pose.getX(),
+                            TARGET_Y - pose.getY()
+                    );
+                    TurretPID.INSTANCE.setShooterFromDistance(d).schedule();
+                    TurretPID.shootRequested = true;
+                    TurretPID.hasShot = false;
+                });
 
         Gamepads.gamepad1().x()
                 .whenBecomesTrue(() -> {
@@ -174,6 +184,11 @@ public class newPIDTest extends NextFTCOpMode {
     @Override
     public void onUpdate() {
         PedroComponent.follower().update();
+        double targetVel = TurretPID.activeTargetVelocity;
+        double actualVel = TurretPID.turret.getVelocity();
+        if (targetVel > 500) {
+            Hood.INSTANCE.compensateFromVelocity(targetVel, actualVel);
+        }
 
         // Update odometry tracker with current robot pose
         Pose robotPose = PedroComponent.follower().getPose();

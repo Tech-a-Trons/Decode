@@ -16,7 +16,7 @@ public class Transfer implements Subsystem {
         transfer.setPower(0.2);
     }
     public void advance() {
-        transfer.setPower(-0.3);
+        transfer.setPower(-0.4);
     }
     public void off() {
         transfer.setPower(0);

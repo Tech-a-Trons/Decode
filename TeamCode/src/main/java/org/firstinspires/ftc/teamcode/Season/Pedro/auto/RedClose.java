@@ -61,7 +61,7 @@ public class RedClose extends NextFTCOpMode {
 
 
     private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
-    private PathChain grabPrePickup1, grabPrePickup2, grabPrePickup3;
+    private PathChain grabPrePickup1, grabPrePickup2, grabPrePickup3, gatepickup, curvescore;
 
     private PathChain dropofftwo;
 
@@ -70,11 +70,18 @@ public class RedClose extends NextFTCOpMode {
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
 
         grabPrePickup1 = follower.pathBuilder()
+//                .addPath(
+//                        new BezierCurve(
+//                                new Pose(96.000, 96.000),
+//                                new Pose(67.241, 78.414),
+//                                new Pose(117, 83.79310344827586)
+//                        )
+//                )
                 .addPath(
                         new BezierCurve(
-                                new Pose(96.000, 96.000),
-                                new Pose(67.241, 78.414),
-                                new Pose(117, 83.79310344827586)
+                                new Pose(122.600, 122.500),
+                                new Pose(66.207, 52.759),
+                                new Pose(129.310, 56.276)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
@@ -87,16 +94,35 @@ public class RedClose extends NextFTCOpMode {
         grabPrePickup2 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
-                                new Pose(96.000, 96.000),
-                                new Pose(92.690, 53.793),
-                                new Pose(117, 59.379)
+                                new Pose(122.600, 122.500),
+                                new Pose(66.207, 52.759),
+                                new Pose(129.310, 56.276)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .addPath(new BezierLine(prePickup2, scorePose))
                 .setLinearHeadingInterpolation(prePickup2.getHeading(), scorePose.getHeading())
                 .build();
-//
+        gatepickup = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                new Pose(129.310, 56.276),
+                                new Pose(59.793, 90.207),
+                                new Pose(96.000, 96.000)
+                        )
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(55))
+                .build();
+        curvescore = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                new Pose(96.000, 96.000),
+                                new Pose(42.414, 72.414),
+                                new Pose(136.138, 59.379)
+                        )
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(55), Math.toRadians(55))
+                .build();
 //        grabPickup2 = follower.pathBuilder()
 //
 //                .build();
@@ -173,15 +199,14 @@ public class RedClose extends NextFTCOpMode {
                     setPathState(5);
                 }
                 break;
-//
-//            case 5:
-//                if (!follower.isBusy()) {
-//                    follower.setMaxPower(0.8);
-//                    follower.followPath(grabPickup2, true);
-//                    follower.setMaxPower(1);
-//                    setPathState(6);
-//                }
-//                break;
+
+            case 5:
+                if (!follower.isBusy()) {
+                    follower.followPath(gatepickup, true);
+                    GateIntake();
+                    setPathState(6);
+                }
+                break;
 //
 //            case 6:
 //                if (!follower.isBusy()) {
@@ -235,6 +260,11 @@ public class RedClose extends NextFTCOpMode {
     private void Intake() {
         CompliantIntake.INSTANCE.on();
         Transfer.INSTANCE.repel();
+    }
+    private void GateIntake() {
+        CompliantIntake.INSTANCE.on();
+        Transfer.INSTANCE.repel();
+        sleep(3500);
     }
 
     private void shootThreeBalls() {

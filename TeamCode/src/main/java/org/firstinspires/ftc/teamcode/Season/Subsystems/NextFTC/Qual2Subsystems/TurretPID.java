@@ -33,8 +33,10 @@ public class TurretPID implements Subsystem {
     public static double kS = 0.01;
     public static double closegoal = 500;
     public static double fargoal = 700;
-
-
+    public static boolean shootRequested = false;
+    public static boolean hasShot = false;
+    public static double VELO_TOL = 75;
+    public static double activeTargetVelocity = 0;
 
 
 
@@ -60,6 +62,14 @@ public class TurretPID implements Subsystem {
                 1500, // distance*3.03 1500 close
                 5
         ).requires(this);
+    }
+    public Command setShooterFromDistance(double distance) {
+        double velocity = 0.041 * distance * distance - 2.9 * distance + 1350;
+        velocity = Math.max(1200, Math.min(2000, velocity));
+        activeTargetVelocity = velocity;
+        shootRequested = true;
+        hasShot = false;
+        return new RunToVelocity(controller, velocity, 5).requires(this);
     }
 
     public Command setFarShooterSpeed(){

@@ -68,8 +68,8 @@ public class CRTurretTest extends NextFTCOpMode {
     private double slowModeMultiplier = 0.5;
 
     // Target position for turret (adjust to your field coordinates)
-    private static final double TARGET_X = 121;  // Example: center of field
-    private static final double TARGET_Y = 121;  // Example: center of field
+    private static final double TARGET_X = 122;  // Example: center of field
+    private static final double TARGET_Y = 122;  // Example: center of field
     private Pose targetPose = new Pose(TARGET_X, TARGET_Y);
 
 

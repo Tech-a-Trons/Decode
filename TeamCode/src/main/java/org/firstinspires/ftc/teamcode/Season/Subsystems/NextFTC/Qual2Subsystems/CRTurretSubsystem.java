@@ -13,37 +13,64 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 public class CRTurretSubsystem {
     // Dashboard tunable parameters
     public static double currentAngle = 0, targetAngle = 0, error = 0;
-    public static double angleMin = -Math.PI * 2, angleMax = Math.PI * 2; // 4π range (2 full rotations each direction)
-    public static double maxSpeed = 0.8; // maximum CR servo power (reduced from 1.0)
+
+    // Gear ratio: servo 80T to output 200T = 2.5x mechanical advantage
+    public static double gearRatio = 200.0 / 80.0; // 2.5
+
+    // Physical limits in DEGREES (easier to tune)
+    // Center is 0°, adjust these to match your physical hard stops
+    public static double negativeRangeMax = -180; // degrees - how far CCW from center
+    public static double positiveRangeMax = 20;  // degrees - how far CW from center
+
+    // Calculated limits in radians (don't modify these directly)
+    public static double angleMin = Math.toRadians(negativeRangeMax);
+    public static double angleMax = Math.toRadians(positiveRangeMax);
+
+
+    // Wrap threshold - triggers wrap when this close to limits (in degrees)
+    public static double wrapMarginDegrees = 20;
+    public static double posWrapThreshold = Math.toRadians(positiveRangeMax - wrapMarginDegrees);
+    public static double negWrapThreshold = Math.toRadians(negativeRangeMax + wrapMarginDegrees);// start wrapping 20° before hitting hard stop
+    public static double wrapThreshold = Math.toRadians(Math.max(
+            Math.abs(positiveRangeMax) - wrapMarginDegrees,
+            Math.abs(negativeRangeMax) - wrapMarginDegrees
+    ));
+
+
+    public static double maxSpeed = 0.8; // maximum CR servo power
     public static double minSpeed = 0.12; // minimum power to overcome friction
 
     // PID gains
-    public static double kP = 1.8; // proportional gain (reduced from 2.5)
-    public static double kI = 0.0; // integral gain (helps eliminate steady-state error)
-    public static double kD = 0.15; // derivative gain (reduces overshoot and oscillation)
+    public static double kP = 1.8;
+    public static double kI = 0.0;
+    public static double kD = 0.15;
 
     public static double errorThreshold = 0.05; // radians (about 3 degrees)
-    public static double deadband = 0.03; // stop moving if error is this small (increased from 0.02)
+    public static double deadband = 0.03;
 
     // Low-pass filter for encoder readings
-    public static double encoderFilterAlpha = 0.7; // 0.0 = all filtering, 1.0 = no filtering
+    public static double encoderFilterAlpha = 0.7;
 
     // Acceleration limiting
-    public static double maxAcceleration = 2.0; // max power change per second
+    public static double maxAcceleration = 2.0;
     public static boolean useAccelLimit = true;
 
     // CR Servo and sensor hardware
     private final CRServo turretServo;
-    private final AnalogInput angleEncoder; // REQUIRED for CR servo - tracks absolute position
+    private final AnalogInput angleEncoder; // REQUIRED - tracks absolute position
 
     // State management
     public static boolean enabled = true;
     public static boolean manualMode = false;
     public static double manualPower = 0.0;
 
-    // Odometry data
-    private Pose lastRobotPose = PedroComponent.follower().getPose();
+    // Target tracking
+    private Pose lastRobotPose = new Pose(0, 0, 0);
     private Pose targetPose = new Pose(122, 122, 0);
+
+    // Turret offset on robot (relative to robot center)
+    public static double turretOffsetX = 0.0; // inches from robot center
+    public static double turretOffsetY = 0.0; // inches from robot center
 
     // Encoder calibration
     public static double encoderOffsetRadians = 0.0;
@@ -62,9 +89,12 @@ public class CRTurretSubsystem {
     private double filteredAngle = 0;
     private boolean firstRead = true;
 
+    // Wrapping state
+    private int wraps = 0; // how many times we've wrapped around
+
     public CRTurretSubsystem(HardwareMap hardwareMap) {
         turretServo = hardwareMap.get(CRServo.class, "turret");
-        angleEncoder = hardwareMap.get(AnalogInput.class, "turret_encoder"); // REQUIRED
+        angleEncoder = hardwareMap.get(AnalogInput.class, "turret_encoder");
 
         turretServo.setPower(0);
         timer.reset();
@@ -117,6 +147,9 @@ public class CRTurretSubsystem {
             return;
         }
 
+        // Check if we need to wrap around to avoid hitting limits
+        handleWrapping();
+
         // Calculate error with shortest path
         error = normalizeAngle(targetAngle - currentAngle);
 
@@ -144,12 +177,11 @@ public class CRTurretSubsystem {
 
         // Integral with anti-windup
         integralSum += error * dt;
-        // Clamp integral to prevent windup
         double maxIntegral = 0.5;
         integralSum = Math.max(-maxIntegral, Math.min(maxIntegral, integralSum));
         double integral = integralSum * kI;
 
-        // Derivative (with filter on error to reduce noise)
+        // Derivative
         double derivative = 0;
         if (dt > 0) {
             derivative = ((error - lastError) / dt) * kD;
@@ -167,7 +199,7 @@ public class CRTurretSubsystem {
             power = Math.signum(power) * minSpeed;
         }
 
-        // Acceleration limiting (optional, helps reduce jitter)
+        // Acceleration limiting
         if (useAccelLimit && dt > 0) {
             double maxDeltaPower = maxAcceleration * dt;
             double powerChange = power - lastPower;
@@ -181,7 +213,41 @@ public class CRTurretSubsystem {
     }
 
     /**
-     * Set target angle in radians
+     * Handle intelligent wrapping to avoid hitting hard stops
+     */
+    private void handleWrapping() {
+        // Recalculate limits in case they were changed via dashboard
+        angleMin = Math.toRadians(negativeRangeMax);
+        angleMax = Math.toRadians(positiveRangeMax);
+        wrapThreshold = Math.toRadians(Math.max(
+                Math.abs(positiveRangeMax) - wrapMarginDegrees,
+                Math.abs(negativeRangeMax) - wrapMarginDegrees
+        ));
+
+        // Check if we're approaching limits
+        if (currentAngle > wrapThreshold) {
+            // Near positive limit - wrap to negative side
+            double equivalentAngle = currentAngle - (Math.PI * 2);
+            if (equivalentAngle >= angleMin) {
+                // Adjust target to equivalent angle on the other side
+                double targetNormalized = normalizeAngle(targetAngle);
+                targetAngle = equivalentAngle - normalizeAngle(currentAngle) + targetNormalized;
+                wraps--;
+            }
+        } else if (currentAngle < -wrapThreshold) {
+            // Near negative limit - wrap to positive side
+            double equivalentAngle = currentAngle + (Math.PI * 2);
+            if (equivalentAngle <= angleMax) {
+                // Adjust target to equivalent angle on the other side
+                double targetNormalized = normalizeAngle(targetAngle);
+                targetAngle = equivalentAngle - normalizeAngle(currentAngle) + targetNormalized;
+                wraps++;
+            }
+        }
+    }
+
+    /**
+     * Set target angle in radians (output shaft angle)
      */
     public void setAngle(double radians) {
         targetAngle = Math.max(angleMin, Math.min(angleMax, radians));
@@ -200,7 +266,7 @@ public class CRTurretSubsystem {
     }
 
     /**
-     * Get current angle in radians
+     * Get current angle in radians (output shaft angle)
      */
     public double getAngle() {
         return currentAngle;
@@ -214,31 +280,61 @@ public class CRTurretSubsystem {
     }
 
     /**
-     * Point the turret toward a target pose
+     * Point the turret toward a target pose using robot X, Y, and heading
      */
     public void trackTarget(Pose target, Pose robotPose) {
         this.targetPose = target;
         this.lastRobotPose = robotPose;
 
+        // Calculate turret's actual position on the field (accounting for offset from robot center)
+        double cosHeading = Math.cos(robotPose.getHeading());
+        double sinHeading = Math.sin(robotPose.getHeading());
+
+        double turretWorldX = robotPose.getX() + (turretOffsetX * cosHeading - turretOffsetY * sinHeading);
+        double turretWorldY = robotPose.getY() + (turretOffsetX * sinHeading + turretOffsetY * cosHeading);
+
+        // Calculate angle from turret to target in world frame
         double angleToTarget = Math.atan2(
-                target.getY() - robotPose.getY(),
-                target.getX() - robotPose.getX()
+                target.getY() - turretWorldY,
+                target.getX() - turretWorldX
         );
 
+        // Convert to robot-relative angle (this is what the turret needs to point at)
         double relativeAngle = normalizeAngle(angleToTarget - robotPose.getHeading());
 
-        // Find the closest equivalent angle within our range
-        double currentNormalized = normalizeAngle(currentAngle);
-        double targetCandidate = currentAngle - currentNormalized + relativeAngle;
+        // Find the best target angle considering our current position and wrapping
+        setOptimalTargetAngle(relativeAngle);
+    }
 
-        // Check if we need to go the "long way" around
-        if (targetCandidate > angleMax) {
-            targetCandidate -= Math.PI * 2;
-        } else if (targetCandidate < angleMin) {
-            targetCandidate += Math.PI * 2;
+    /**
+     * Set target angle intelligently, considering current position and wrapping
+     */
+    private void setOptimalTargetAngle(double desiredAngle) {
+        // Normalize desired angle to [-π, π]
+        desiredAngle = normalizeAngle(desiredAngle);
+
+        // Find the closest equivalent angle to our current position
+        // Options: desiredAngle, desiredAngle ± 2π, etc.
+        double option1 = desiredAngle;
+        double option2 = desiredAngle + Math.PI * 2;
+        double option3 = desiredAngle - Math.PI * 2;
+
+        // Choose the option that requires minimum rotation and stays within limits
+        double[] options = {option1, option2, option3};
+        double bestOption = option1;
+        double minDistance = Double.MAX_VALUE;
+
+        for (double option : options) {
+            if (option >= angleMin && option <= angleMax) {
+                double distance = Math.abs(option - currentAngle);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    bestOption = option;
+                }
+            }
         }
 
-        setAngle(targetCandidate);
+        setAngle(bestOption);
     }
 
     /**
@@ -249,7 +345,7 @@ public class CRTurretSubsystem {
     }
 
     /**
-     * Read angle from absolute encoder (REQUIRED for CR servo)
+     * Read angle from absolute encoder with gear ratio applied
      */
     private double readEncoderAngle() {
         if (angleEncoder == null) {
@@ -260,18 +356,21 @@ public class CRTurretSubsystem {
         double maxVoltage = angleEncoder.getMaxVoltage();
         double normalized = voltage / maxVoltage;
 
-        // Convert to radians (0 to 2π for one rotation)
-        double rawAngle = normalized * Math.PI * 2.0;
+        // Convert to servo angle (0 to 2π for one servo rotation)
+        double servoAngle = normalized * Math.PI * 2.0;
 
         if (encoderReversed) {
-            rawAngle = Math.PI * 2.0 - rawAngle;
+            servoAngle = Math.PI * 2.0 - servoAngle;
         }
 
         // Apply offset
-        rawAngle += encoderOffsetRadians;
+        servoAngle += encoderOffsetRadians;
+
+        // Convert from servo angle to output shaft angle using gear ratio
+        // Output rotates 2.5x faster than servo input
+        double rawAngle = servoAngle * gearRatio;
 
         // Handle multi-turn tracking
-        // This keeps track of how many full rotations we've made
         double angleDiff = normalizeAngle(rawAngle - (currentAngle % (Math.PI * 2.0)));
         if (Math.abs(angleDiff) > Math.PI) {
             // We've crossed the 0/2π boundary
@@ -318,10 +417,11 @@ public class CRTurretSubsystem {
         lastPower = 0;
         timer.reset();
         lastTime = 0;
+        wraps = 0;
     }
 
     /**
-     * Read raw encoder angle without offset or multi-turn tracking
+     * Read raw encoder angle without offset, multi-turn tracking, or gear ratio
      */
     private double readRawEncoderAngle() {
         if (angleEncoder == null) return 0;
@@ -330,12 +430,12 @@ public class CRTurretSubsystem {
         double maxVoltage = angleEncoder.getMaxVoltage();
         double normalized = voltage / maxVoltage;
 
-        double rawAngle = normalized * Math.PI * 2.0;
+        double servoAngle = normalized * Math.PI * 2.0;
         if (encoderReversed) {
-            rawAngle = Math.PI * 2.0 - rawAngle;
+            servoAngle = Math.PI * 2.0 - servoAngle;
         }
 
-        return rawAngle;
+        return servoAngle;
     }
 
     /**
@@ -343,13 +443,15 @@ public class CRTurretSubsystem {
      */
     public void calibrateToAngle(double angleRadians) {
         double rawAngle = readRawEncoderAngle();
-        encoderOffsetRadians = angleRadians - rawAngle;
+        // Divide by gear ratio since we're calibrating the servo angle
+        encoderOffsetRadians = (angleRadians / gearRatio) - rawAngle;
         currentAngle = angleRadians;
         filteredAngle = angleRadians;
         targetAngle = angleRadians;
         integralSum = 0;
         lastError = 0;
         firstRead = true;
+        wraps = 0;
     }
 
     /**
@@ -378,63 +480,39 @@ public class CRTurretSubsystem {
         }
     }
 
-    // Utility methods for common operations
+    // Utility methods
 
-    /**
-     * Convenience method to reset and return this instance for chaining
-     */
     public CRTurretSubsystem resetAndReturn() {
         reset();
         return this;
     }
 
-    /**
-     * Convenience method to set angle and return this instance for chaining
-     */
     public CRTurretSubsystem setAngleAndReturn(double radians) {
         setAngle(radians);
         return this;
     }
 
-    /**
-     * Convenience method to enable/disable and return this instance for chaining
-     */
     public CRTurretSubsystem setEnabledAndReturn(boolean enable) {
         setEnabled(enable);
         return this;
     }
 
-    /**
-     * Get current tracking error in radians
-     */
     public double getError() {
         return error;
     }
 
-    /**
-     * Get the last tracked target pose
-     */
     public Pose getTargetPose() {
         return targetPose;
     }
 
-    /**
-     * Get the last robot pose used for tracking
-     */
     public Pose getLastRobotPose() {
         return lastRobotPose;
     }
 
-    /**
-     * Get current servo power
-     */
     public double getPower() {
         return lastPower;
     }
 
-    /**
-     * Emergency stop
-     */
     public void stop() {
         turretServo.setPower(0);
         targetAngle = currentAngle;
@@ -443,17 +521,29 @@ public class CRTurretSubsystem {
         lastPower = 0;
     }
 
-    /**
-     * Get PID integral term (for debugging)
-     */
     public double getIntegral() {
         return integralSum;
     }
 
-    /**
-     * Get filtered angle (for debugging)
-     */
     public double getFilteredAngle() {
         return filteredAngle;
+    }
+
+    public int getWraps() {
+        return wraps;
+    }
+
+    /**
+     * Get the output shaft angle in degrees (for debugging)
+     */
+    public double getAngleDegrees() {
+        return Math.toDegrees(currentAngle);
+    }
+
+    /**
+     * Get the servo angle in degrees (before gear ratio)
+     */
+    public double getServoAngleDegrees() {
+        return Math.toDegrees(currentAngle / gearRatio);
     }
 }

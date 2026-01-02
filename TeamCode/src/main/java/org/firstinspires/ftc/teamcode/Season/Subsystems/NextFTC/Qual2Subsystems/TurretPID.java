@@ -71,6 +71,24 @@ public class TurretPID implements Subsystem {
         hasShot = false;
         return new RunToVelocity(controller, velocity, 5).requires(this);
     }
+    public Command newshooterdistance(double distance) {
+        double velocity =
+                0.041 * distance * distance
+                        - 2.9 * distance
+                        + 1350;
+
+        if (distance > 60) {
+            velocity -= 2.2 * (distance - 60);
+        }
+
+        velocity = Math.max(1200, Math.min(2000, velocity));
+
+        activeTargetVelocity = velocity;
+        shootRequested = true;
+        hasShot = false;
+
+        return new RunToVelocity(controller, velocity, 5).requires(this);
+    }
 
     public Command setFarShooterSpeed(){
         //ll.update();
@@ -81,13 +99,22 @@ public class TurretPID implements Subsystem {
                 5
         ).requires(this);
     }
+    public Command shotforyou(){
+        //ll.update();
+        //hood.INSTANCE.open();
+        return new RunToVelocity(
+                controller,
+                1375, //1800 for far
+                5
+        ).requires(this);
+    }
 
     public Command setMidCloseShooterSpeed(){
         //ll.update();
         //hood.INSTANCE.midclose();
         return new RunToVelocity(
                 controller,
-                1300, // 500
+                1285, // 500
                 5
         ).requires(this);
     }

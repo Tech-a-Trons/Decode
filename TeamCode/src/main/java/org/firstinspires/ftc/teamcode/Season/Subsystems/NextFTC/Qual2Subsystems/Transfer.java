@@ -12,6 +12,9 @@ public class Transfer implements Subsystem {
     public void on() {
         transfer.setPower(-1);
     }
+    public void slight() {
+        transfer.setPower(-0.6);
+    }
     public void repel() {
         transfer.setPower(0.2);
     }

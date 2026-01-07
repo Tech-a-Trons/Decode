@@ -32,9 +32,9 @@ public class ColorSensor implements Subsystem {
 
     float distance;
 
-    int green = 0;
+    public int green = 0;
 
-    int purple = 0;
+    public int purple = 0;
 
     public int artifactcounter = 0;
 
@@ -116,18 +116,6 @@ public class ColorSensor implements Subsystem {
         // ----------------------------
         // 1️⃣ Primary HSV detection
         // ----------------------------
-        if (csat > 0.15 && cval > 0.15) { // ignore dim/gray
-            // Green
-            if (chue >= 80 && chue <= 150) {
-                return "green";
-            } else if (chue >= 250 && chue <= 300) {
-                return "purple";
-//            } else if (chue >= 142 && chue <= 155){
-//                return "red";
-            }else {
-                return "VALUE";
-            }
-        }
 
         //if (csat2 > 0.15 && cval2 > 0.15) { // ignore dim/gray
         // Green

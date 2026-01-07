@@ -10,9 +10,9 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.ExperimentalArti
 public class ColorSensorTesting extends LinearOpMode {
 
     ExperimentalArtifacts colorparser;
-    Servo rgbindicator;
+    //Servo rgbindicator;
     public int artifactcounter = 0;
-    public float last_alphavalue = 32;
+    public float last_alphavalue = 45;
     public float last_alphavalue2 = 32;
 
     public float current_alphavalue = 0;
@@ -23,7 +23,7 @@ public class ColorSensorTesting extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         colorparser = new ExperimentalArtifacts(hardwareMap);
-        rgbindicator = hardwareMap.get(Servo.class, "rgbled");
+//        rgbindicator = hardwareMap.get(Servo.class, "rgbled");
 
         telemetry.addLine("Ready!");
         telemetry.update();
@@ -32,7 +32,7 @@ public class ColorSensorTesting extends LinearOpMode {
 
         while (opModeIsActive()) {
             IncountBalls();
-            light();
+            //light();
             telemetry.addData("Ball count: ", artifactcounter);
             telemetry.addData("Alpha: ", colorparser.getalpha());
             //telemetry.addData("Alpha2: ", colorparser.getAlpha2());
@@ -50,7 +50,7 @@ public class ColorSensorTesting extends LinearOpMode {
     public void IncountBalls() {
         String color = colorparser.getColor();
         current_alphavalue = colorparser.getalpha();
-        if (current_alphavalue > 41 && last_alphavalue < 41){
+        if (current_alphavalue > 45 && last_alphavalue < 45){
             artifactcounter += 1;
         }
         last_alphavalue = current_alphavalue;
@@ -80,21 +80,21 @@ public class ColorSensorTesting extends LinearOpMode {
 //    }
 
     // For RGB indicator
-
-    public void light() {
-        //if (artifactcounter == 0) {
-        //    rgbindicator.setPosition(0);
-        //} else if (artifactcounter == 1) {
-        //    rgbindicator.setPosition(0.3);
-        //} else if (artifactcounter == 2) {
-        //    rgbindicator.setPosition(0.375);
-        //}
-        if (artifactcounter == 3) {
-            rgbindicator.setPosition(0.5);
-        } else if (artifactcounter > 3) {
-            rgbindicator.setPosition(0.6);
-        }
-    }
+//
+//    public void light() {
+//        //if (artifactcounter == 0) {
+//        //    rgbindicator.setPosition(0);
+//        //} else if (artifactcounter == 1) {
+//        //    rgbindicator.setPosition(0.3);
+//        //} else if (artifactcounter == 2) {
+//        //    rgbindicator.setPosition(0.375);
+//        //}
+//        if (artifactcounter == 3) {
+//            rgbindicator.setPosition(0.5);
+//        } else if (artifactcounter > 3) {
+//            rgbindicator.setPosition(0.6);
+//        }
+//    }
 
     //DO NOT USE
 

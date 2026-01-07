@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 
 import android.graphics.Color;
@@ -173,7 +174,6 @@ public class ColorSensor implements Subsystem {
             return "VALUE";
         }
 
-
     }
     public void IncountBalls() {
         String color = getColor();
@@ -198,6 +198,9 @@ public class ColorSensor implements Subsystem {
 
                 activeslot += 1;
                 IncountTimer.reset();
+            }
+            if (artifactcounter > 2) {
+                gamepad1.rumble(0.4,0.4,500);
             }
         }
         // remove activeslot = artifactcounter when new robot is made

@@ -68,6 +68,7 @@ public class LimelightTrackTele extends NextFTCOpMode {
     private boolean automatedDrive;
     private Supplier<PathChain> farscore;
     private Supplier<PathChain> closescore;
+    private Supplier<PathChain> Parkpath;
     private TelemetryManager telemetryM;
     private boolean slowMode = false;
     private double slowModeMultiplier = 0.5;
@@ -77,6 +78,7 @@ public class LimelightTrackTele extends NextFTCOpMode {
     private static final double TARGET_Y = 121;  // Example: center of field
     private Pose targetPose = new Pose(TARGET_X, TARGET_Y);
     private Pose Middle = new Pose(72,35,180);
+    private Pose Park = new Pose(38.74532374100719,33.358273381294964,0);
     private boolean intakeToggle = false;
     private long intakeStartTime = 0;
 
@@ -96,6 +98,10 @@ public class LimelightTrackTele extends NextFTCOpMode {
                 .build();
         closescore = () -> PedroComponent.follower().pathBuilder() //Lazy Curve Generation
                 .addPath(new Path(new BezierLine(PedroComponent.follower()::getPose, new Pose(72, 72))))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(PedroComponent.follower()::getHeading, Math.toRadians(90), 0.8))
+                .build();
+        Parkpath = () -> PedroComponent.follower().pathBuilder() //Lazy Curve Generation
+                .addPath(new Path(new BezierLine(PedroComponent.follower()::getPose, new Pose(38.74532374100719,33.358273381294964,0))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(PedroComponent.follower()::getHeading, Math.toRadians(90), 0.8))
                 .build();
 
@@ -180,7 +186,6 @@ public class LimelightTrackTele extends NextFTCOpMode {
                     TurretPID.INSTANCE.newshooterdistance(d).schedule();
                     TurretPID.shootRequested = true;
                     TurretPID.hasShot = false;
-
                 });
 
         // D-pad Down: Reset position to corner
@@ -205,6 +210,11 @@ public class LimelightTrackTele extends NextFTCOpMode {
                     CompliantIntake.INSTANCE.off();
                     Transfer.INSTANCE.off();
                 });
+        Gamepads.gamepad1().y()
+                .whenBecomesTrue(() -> {
+                    PedroComponent.follower().followPath(Parkpath.get());
+                    automatedDrive = true;
+                });
     }
 
     @Override
@@ -213,14 +223,7 @@ public class LimelightTrackTele extends NextFTCOpMode {
             //Make the last parameter false for field-centric
             //In case the drivers want to use a "slowMode" you can scale the vectors
             //This is the normal version to use in the TeleOp
-            if (!slowMode) PedroComponent.follower().setTeleOpDrive(
-                    -gamepad1.left_stick_y,
-                    -gamepad1.left_stick_x,
-                    -gamepad1.right_stick_x,
-                    true // Robot Centric
-            );
-                //This is how it looks with slowMode on
-            else PedroComponent.follower().setTeleOpDrive(
+          PedroComponent.follower().setTeleOpDrive(
                     -gamepad1.left_stick_y * slowModeMultiplier,
                     -gamepad1.left_stick_x * slowModeMultiplier,
                     -gamepad1.right_stick_x * slowModeMultiplier,
@@ -261,5 +264,6 @@ public class LimelightTrackTele extends NextFTCOpMode {
         // Show distance to odometry target (for reference)
         double distanceToTarget = Math.hypot(TARGET_X - robotPose.getX(), TARGET_Y - robotPose.getY());
         telemetryM.debug("distance_to_odom_target", distanceToTarget);
+
     }
 }

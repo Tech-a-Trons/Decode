@@ -14,11 +14,11 @@ public class SimpleLL {
     // Alignment parameters
     // Alignment parameters
     private final double ALIGNMENT_THRESHOLD = 3;   // tighter
-    private final double BASE_POWER = 0.03;         // was 0.01
+    private final double BASE_POWER = 0.03;         // was 0.03
     private final double MAX_POWER  = 1;   //1-0.8      // was 0.1
 
     // Proportional gain
-    private final double kP = 0.005; //0.005                // was 0.3 (too aggressive with small MAX_POWER)
+    private final double kP = 0.01; //0.01 for close               // was 0.3 (too aggressive with small MAX_POWER)
 
     // Proportional gain - increases power as error gets larger
 

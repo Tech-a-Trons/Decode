@@ -83,7 +83,7 @@ public class RedClose extends NextFTCOpMode {
 //                )
                 .addPath(
                         new BezierCurve(
-                                new Pose(96.000, 96.000),
+                                new Pose(96, 96),
                                 new Pose(79.56258992805755, 78.11223021582734),
                                 new Pose(120, 84.53525179856116)
                         )
@@ -115,7 +115,7 @@ public class RedClose extends NextFTCOpMode {
                 .addPath(
                         new BezierCurve(
                                 new Pose(96.000, 96.000),
-                                new Pose(84.74244604316547, 55.32086330935252),
+                                new Pose(75.41870503597121, 55.32086330935252),
                                 new Pose(128, 53)
                         )
                 )
@@ -123,7 +123,7 @@ public class RedClose extends NextFTCOpMode {
                 .build();
         scorePickup1 = follower.pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(127, 70), new Pose(83.000, 83.000))
+                        new BezierLine(new Pose(123, 70), new Pose(83.000, 83.000))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -171,13 +171,14 @@ public class RedClose extends NextFTCOpMode {
                 Hood.INSTANCE.midopen();
                 scheduleOuttake();
                 follower.followPath(scorePreload, true);
+                turretAlignment.closeAlign();
                 setPathState(1);
 
                 break;
 
             case 1:
                 if (!follower.isBusy()) {
-                    turretAlignment.align();
+                    turretAlignment.closeAlign();
                     // SHOOT after preload
                     shootThreeBalls();
 
@@ -194,6 +195,7 @@ public class RedClose extends NextFTCOpMode {
 //                    CompliantIntake.INSTANCE.off();
 //                    TurretPID.INSTANCE.setFarShooterSpeed();
                     secondshotforyouuuuu();
+                    turretAlignment.closeAlign();
                     follower.followPath(scorePickup1, true);
                     setPathState(3);
                 }
@@ -201,7 +203,7 @@ public class RedClose extends NextFTCOpMode {
 
             case 3:
                 if (!follower.isBusy()) {
-                    turretAlignment.align();
+                    turretAlignment.closeAlign();
                     shootThreeBalls();
                     Intake();
                     setPathState(4);
@@ -226,7 +228,7 @@ public class RedClose extends NextFTCOpMode {
 //
             case 6:
                 if (!follower.isBusy()) {
-                    turretAlignment.align();
+                    turretAlignment.closeAlign();
                     shootThreeBalls();
                     Intake();
                     follower.followPath(grabPickup3);
@@ -244,7 +246,7 @@ public class RedClose extends NextFTCOpMode {
 //
             case 8:
                 if (!follower.isBusy()) {
-                   turretAlignment.align();
+                   turretAlignment.closeAlign();
                    shootThreeBalls();
                    follower.followPath(leave);
                     setPathState(-1);

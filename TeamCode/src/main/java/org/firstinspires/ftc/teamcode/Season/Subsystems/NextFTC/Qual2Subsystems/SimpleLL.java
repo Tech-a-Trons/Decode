@@ -6,29 +6,19 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 
-import dev.nextftc.extensions.pedro.PedroComponent;
-import com.pedropathing.geometry.Pose;
-
 public class SimpleLL {
     private CRServo turretServo;
     private RedExperimentalDistanceLExtractor limelight;
     private Telemetry telemetry;
-
-    // Target position for distance calculation
-    private static final double TARGET_X = 122;
-    private static final double TARGET_Y = 122;
-
-    // Distance threshold for kP switching
-    private static final double DISTANCE_THRESHOLD = 82;
 
     // Alignment parameters
     private final double ALIGNMENT_THRESHOLD = 3;   // tighter
     private final double BASE_POWER = 0.03;         // was 0.03
     private final double MAX_POWER  = 1;   //1-0.8      // was 0.1
 
-    // Proportional gains - dynamically selected based on distance
-    private final double kP_FAR = 0.004;   // For distances > 82
-    private final double kP_CLOSE = 0.01; // For distances <= 82
+    // Proportional gains for different distances
+    private final double kP_CLOSE = 0.013;  // For close alignment
+    private final double kP_FAR = 0.006;   // For far alignment
 
     private boolean isAligning = false;
 
@@ -42,34 +32,30 @@ public class SimpleLL {
     }
 
     /**
-     * Calculate Euclidean distance from robot to target
+     * Aligns the turret for CLOSE distances (kP = 0.01)
      */
-    private double getDistanceToTarget() {
-        Pose robotPose = PedroComponent.follower().getPose();
-        double deltaX = TARGET_X - robotPose.getX();
-        double deltaY = TARGET_Y - robotPose.getY();
-        return Math.hypot(deltaX, deltaY);
+    public void closeAlign() {
+        alignWithKp(kP_CLOSE);
     }
 
     /**
-     * Get the appropriate kP value based on distance to target
+     * Aligns the turret for FAR distances (kP = 0.004)
      */
-    private double getDynamicKp() {
-        double distance = getDistanceToTarget();
-        return distance > DISTANCE_THRESHOLD ? kP_FAR : kP_CLOSE;
+    public void farAlign() {
+        alignWithKp(kP_FAR);
     }
 
     /**
-     * Aligns the turret to center on the target using tx value.
-     * Logic: If tx > 1, move RIGHT. If tx < -1, move LEFT.
+     * Internal alignment method with configurable kP
      */
-    public void align() {
+    private void alignWithKp(double kP) {
         Double tx = limelight.getTx();
 
         // Check if we have valid target data
         if (tx == null) {
             tx = 0.0;
             stopTurret();
+            return;
         }
 
         isAligning = true;
@@ -79,9 +65,6 @@ public class SimpleLL {
             stopTurret();
             return;
         }
-
-        // Get dynamic kP based on distance
-        double kP = getDynamicKp();
 
         // Determine power based on error magnitude
         double power = BASE_POWER + (kP * Math.abs(tx));
@@ -104,10 +87,18 @@ public class SimpleLL {
     }
 
     /**
+     * Legacy align() method - defaults to far alignment
+     */
+    public void align() {
+        farAlign();
+    }
+
+    /**
      * Stops turret movement
      */
     public void stopTurret() {
         turretServo.setPower(0);
+        isAligning = false;
     }
 
     /**
@@ -139,14 +130,9 @@ public class SimpleLL {
     public void updateTelemetry() {
         if (telemetry != null) {
             Double tx = limelight.getTx();
-            double distance = getDistanceToTarget();
-            double currentKp = getDynamicKp();
-
             telemetry.addData("--- Turret Alignment ---", "");
             telemetry.addData("Target Visible", limelight.isTargetVisible());
             telemetry.addData("tx Error", tx != null ? String.format("%.2f°", tx) : "N/A");
-            telemetry.addData("Distance to Target", String.format("%.2f", distance));
-            telemetry.addData("Current kP", String.format("%.3f", currentKp));
             telemetry.addData("Is Aligned", isAligned());
             telemetry.addData("Is Aligning", isAligning);
         }

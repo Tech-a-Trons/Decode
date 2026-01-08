@@ -11,6 +11,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
@@ -37,15 +38,14 @@ import dev.nextftc.hardware.driving.MecanumDriverControlled;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.extensions.pedro.PedroComponent;
 
-@TeleOp
-public class LimelightTrackTele extends NextFTCOpMode {
+@Disabled
+public class OldLLCode extends NextFTCOpMode {
 
     // Limelight and alignment controller
     private RedExperimentalDistanceLExtractor limelight;
     private SimpleLL turretAlignment;
-    private ColorSensor colorSensor;
 
-    public LimelightTrackTele() {
+    public OldLLCode() {
         addComponents(
                 new SubsystemComponent(
                         TurretPID.INSTANCE,
@@ -65,6 +65,7 @@ public class LimelightTrackTele extends NextFTCOpMode {
     private final MotorEx backLeftMotor = new MotorEx("bl").reversed();
     private final MotorEx backRightMotor = new MotorEx("br");
     private boolean turretLimelightEnabled = false;
+    private ColorSensor colorSensor;
 
     private boolean automatedDrive;
     private Supplier<PathChain> farscore;
@@ -92,7 +93,6 @@ public class LimelightTrackTele extends NextFTCOpMode {
         // Initialize Limelight and turret alignment
         limelight = new RedExperimentalDistanceLExtractor(hardwareMap);
         turretAlignment = new SimpleLL(hardwareMap, limelight);
-        colorSensor = new ColorSensor(hardwareMap);
 
         limelight.startReading();
         turretAlignment.setTelemetry(telemetry);
@@ -151,31 +151,19 @@ public class LimelightTrackTele extends NextFTCOpMode {
 
         // ========== EXISTING CONTROLS ==========
 
-        // Right Bumper: Toggle intake with color sensor ball counting
+        // Right Bumper: Toggle intake
         Gamepads.gamepad1().rightBumper()
                 .whenBecomesTrue(() -> {
                     intakeToggle = !intakeToggle;
 
                     if (intakeToggle) {
-                        // Starting intake
                         intakeStartTime = System.currentTimeMillis();
                         CompliantIntake.INSTANCE.on();
                         Transfer.INSTANCE.slight();
-
-                        // Reset ball counter when starting intake
-                        colorSensor.artifactcounter = 0;
-
-                        telemetryM.addData("Intake", "ON - Counting Balls");
                     } else {
-                        // Manually stopping intake
                         intakeStartTime = 0;
                         CompliantIntake.INSTANCE.off();
                         Transfer.INSTANCE.off();
-
-                        // Reset ball counter
-                        colorSensor.artifactcounter = 0;
-
-                        telemetryM.addData("Intake", "OFF - Manual Stop");
                     }
                 });
 
@@ -241,24 +229,13 @@ public class LimelightTrackTele extends NextFTCOpMode {
         PedroComponent.follower().update();
         double targetVel = TurretPID.activeTargetVelocity;
         double actualVel = TurretPID.turret.getVelocity();
-        Pose robotPose = PedroComponent.follower().getPose();
-        double distanceToTarget = Math.hypot(TARGET_X - robotPose.getX(), TARGET_Y - robotPose.getY());
-
-        // Distance threshold for close hood mode (in inches, tune this value)
-        final double CLOSE_HOOD_DISTANCE = 20.0;
-
-
-        if (distanceToTarget <= CLOSE_HOOD_DISTANCE) {
-            // Close to goal: Use close hood mode, NO velocity correction
-            Hood.INSTANCE.close();
-        } else {
-            // Far from goal: Use velocity correction if shooter is spinning
-            if (targetVel > 500) {
-                Hood.INSTANCE.compensateFromVelocity(targetVel, actualVel);
-            }
+        if (targetVel > 500) {
+            Hood.INSTANCE.compensateFromVelocity(targetVel, actualVel);
         }
 
         // Calculate distance to target for alignment mode selection
+        Pose robotPose = PedroComponent.follower().getPose();
+        double distanceToTarget = Math.hypot(TARGET_X - robotPose.getX(), TARGET_Y - robotPose.getY());
 
         // Update Limelight turret alignment when enabled with automatic mode selection
         if (turretLimelightEnabled) {
@@ -270,36 +247,27 @@ public class LimelightTrackTele extends NextFTCOpMode {
             }
         }
 
-        // ========== COLOR SENSOR BALL COUNTING ==========
-        // Only count balls when intake is active
-        if (intakeToggle) {
-            colorSensor.IncountBalls();
-            if (colorSensor.artifactcounter >= 2) {
-                Transfer.INSTANCE.advance();
-                // Reset toggle state
-            }
-            // Auto-stop when 3 balls are collected
-            if (colorSensor.artifactcounter >= 3) {
-                // Turn off intake and transfer
-                CompliantIntake.INSTANCE.off();
-                Transfer.INSTANCE.off();
-
-                // Reset toggle state
-                intakeToggle = false;
-                intakeStartTime = 0;
-
-                // Optional: Rumble controller to alert driver
-                gamepad1.rumble(500);
-
-                // Reset ball counter
-                colorSensor.artifactcounter = 0;
-            }
-        }
-
         limelight.update();
 
+        telemetryM.update();
 
         // ========== TELEMETRY ==========
+        telemetryM.debug("position", robotPose);
+        telemetryM.debug("velocity", PedroComponent.follower().getVelocity());
+        telemetryM.debug("automatedDrive", automatedDrive);
 
+        // Limelight Turret telemetry
+        telemetryM.debug("LL_turret_enabled", turretLimelightEnabled);
+        telemetryM.debug("LL_target_visible", limelight.isTargetVisible());
+        telemetryM.debug("LL_tx", limelight.getTx() != null ? String.format("%.2f°", limelight.getTx()) : "N/A");
+        telemetryM.debug("LL_ty", limelight.getTy() != null ? String.format("%.2f°", limelight.getTy()) : "N/A");
+        telemetryM.debug("LL_tag_id", limelight.getTagId() != null ? limelight.getTagId() : "None");
+        telemetryM.debug("LL_distance", limelight.getDistance() != null ? String.format("%.2f in", limelight.getDistance()) : "N/A");
+        telemetryM.debug("LL_aligned", turretAlignment.isAligned());
+
+        // Show distance to odometry target and which alignment mode is active
+        telemetryM.debug("distance_to_odom_target", String.format("%.2f", distanceToTarget));
+        telemetryM.debug("alignment_mode", distanceToTarget > DISTANCE_THRESHOLD ? "FAR (kP=0.004)" : "CLOSE (kP=0.01)");
+        telemetryM.debug("distance_threshold", DISTANCE_THRESHOLD);
     }
 }

@@ -43,11 +43,14 @@ public class ColorSensor implements Subsystem {
 
     public float current_hue = 0;
 
+    public float current_val = 0;
 
-    public int activeslot = 0;
+
+
+//    public int activeslot = 0;
     public int asc = 0;
     // asc = active slot color
-    int[] slots = new int[10];
+//    int[] slots = new int[10];
 
     int[] motif = new int[3];
 
@@ -62,7 +65,8 @@ public class ColorSensor implements Subsystem {
         colorsensor = hardwareMap.get(RevColorSensorV3.class, "ColorSensor");
         //colorsensor2 = hardwareMap.get(RevColorSensorV3.class, "ColorSensor2");
     }
-    Servo rgbindicator = hardwareMap.get(Servo.class, "rgbled");
+//    Servo rgbindicator = hardwareMap.get(Servo.class, "rgbled");
+
 
     public String Getcolor() {
 //        colorsensor.enableLed(e);
@@ -167,54 +171,56 @@ public class ColorSensor implements Subsystem {
         String color = getColor();
         current_sat = getsat();
         current_hue = gethue();
+        current_val = getval();
+
         int ColorSensing = 0;
         if (IncountTimer.milliseconds() > 800) {
             if (current_sat > 0.5) {
                 artifactcounter += 1;
                 asc += 5;
-                light();
-                AssignColors();
-                activeslot += 1;
+//                light();
+//                AssignColors();
+//                activeslot += 1;
                 IncountTimer.reset();
 
             } else if (current_hue > 167) {
                 artifactcounter += 1;
-                asc += 1;
+//                asc += 1;
 
-                light();
-                AssignColors();
+//                light();
+//                AssignColors();
 
-                activeslot += 1;
+//                activeslot += 1;
                 IncountTimer.reset();
             }
-            if (artifactcounter > 2) {
-                gamepad1.rumble(0.4,0.4,500);
-            }
+//            if (artifactcounter > 2) {
+//                gamepad1.rumble(0.4,0.4,500);
+//            }
         }
         // remove activeslot = artifactcounter when new robot is made
 
-        green = (slots[0] + slots[1] + slots[2]) / 5;
-        purple = (slots[0] + slots[1] + slots[2]) % 5;
+//        green = (slots[0] + slots[1] + slots[2]) / 5;
+//        purple = (slots[0] + slots[1] + slots[2]) % 5;
     }
-    public void light() {
-        if (artifactcounter == 0) {
-            rgbindicator.setPosition(0);
-        } else if (artifactcounter == 1) {
-            rgbindicator.setPosition(0.3);
-        } else if (artifactcounter == 2) {
-            rgbindicator.setPosition(0.375);
-        } else if (artifactcounter == 3) {
-            rgbindicator.setPosition(0.5);
-        } else if (artifactcounter > 3) {
-            rgbindicator.setPosition(0.6);
-        }
-    }
+//    public void light() {
+//        if (artifactcounter == 0) {
+//            rgbindicator.setPosition(0);
+//        } else if (artifactcounter == 1) {
+//            rgbindicator.setPosition(0.3);
+//        } else if (artifactcounter == 2) {
+//            rgbindicator.setPosition(0.375);
+//        } else if (artifactcounter == 3) {
+//            rgbindicator.setPosition(0.5);
+//        } else if (artifactcounter > 3) {
+//            rgbindicator.setPosition(0.6);
+//        }
+//    }
 
-    public void AssignColors() {
-        slots[activeslot] = asc;
-        asc = 0;
-
-    }
+//    public void AssignColors() {
+//        slots[activeslot] = asc;
+//        asc = 0;
+//
+//    }
 
 
     public float gethue() {

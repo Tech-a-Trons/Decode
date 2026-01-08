@@ -5,7 +5,7 @@ import dev.nextftc.hardware.impl.MotorEx;
 
 public class CompliantIntake implements Subsystem {
     public static final CompliantIntake INSTANCE = new CompliantIntake();
-    private CompliantIntake() { }
+    public CompliantIntake() { }
     public MotorEx intake = new MotorEx("in");
     public void on() {
        intake.setPower(1);

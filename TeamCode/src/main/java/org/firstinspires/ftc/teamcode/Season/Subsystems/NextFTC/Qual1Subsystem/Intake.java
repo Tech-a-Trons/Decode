@@ -8,4 +8,7 @@ public class Intake implements Subsystem {
     private Intake() { }
     public MotorEx activeintake = new MotorEx("activeintake");
 
+    public static void on() {
+
+    }
 }

@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 public class VoltageGet {
-    private static double nominalVoltage = 12.5;//prev 12.75
+    private static double nominalVoltage = 14.0;//prev 12.5
     private static VoltageSensor voltageSensor;
 
     // Initialize once in your OpMode or Robot class

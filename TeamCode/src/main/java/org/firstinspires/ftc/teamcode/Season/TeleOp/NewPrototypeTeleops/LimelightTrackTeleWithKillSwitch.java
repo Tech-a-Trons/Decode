@@ -5,7 +5,6 @@ import static dev.nextftc.bindings.Bindings.button;
 
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
-import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
@@ -26,7 +25,6 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.
 
 import java.util.function.Supplier;
 
-import dev.nextftc.bindings.BindingManager;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
@@ -38,14 +36,14 @@ import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.extensions.pedro.PedroComponent;
 
 @TeleOp
-public class LimelightTrackTeleWithoutKillSwitch extends NextFTCOpMode {
+public class LimelightTrackTeleWithKillSwitch extends NextFTCOpMode {
 
     // Limelight and alignment controller
     private RedExperimentalDistanceLExtractor limelight;
     private SimpleLL turretAlignment;
     private ColorSensor colorSensor;
 
-    public LimelightTrackTeleWithoutKillSwitch() {
+    public LimelightTrackTeleWithKillSwitch() {
         addComponents(
                 new SubsystemComponent(
                         TurretPID.INSTANCE,
@@ -115,15 +113,17 @@ public class LimelightTrackTeleWithoutKillSwitch extends NextFTCOpMode {
         PedroComponent.follower().startTeleopDrive();
 
         // Setup driving
-        Command driverControlled = new MecanumDriverControlled(
-                frontLeftMotor,
-                frontRightMotor,
-                backLeftMotor,
-                backRightMotor,
-                Gamepads.gamepad1().leftStickY().negate(),
-                Gamepads.gamepad1().leftStickX(),
-                Gamepads.gamepad1().rightStickX()
-        );
+            Command driverControlled = new MecanumDriverControlled(
+
+                    frontLeftMotor,
+                    frontRightMotor,
+                    backLeftMotor,
+                    backRightMotor,
+                    Gamepads.gamepad1().leftStickY().negate(),
+                    Gamepads.gamepad1().leftStickX(),
+                    Gamepads.gamepad1().rightStickX()
+            );
+
 
         // ========== LIMELIGHT TURRET CONTROLS ==========
 
@@ -149,6 +149,8 @@ public class LimelightTrackTeleWithoutKillSwitch extends NextFTCOpMode {
                     telemetryM.addData("Turret", "Stopped & Intake Reset");
                 });
 
+
+
         // ========== EXISTING CONTROLS ==========
 
         // Right Bumper: Toggle intake with color sensor ball counting
@@ -156,14 +158,13 @@ public class LimelightTrackTeleWithoutKillSwitch extends NextFTCOpMode {
                 .whenBecomesTrue(() -> {
                     intakeToggle = !intakeToggle;
 
-                    if (intakeToggle) {
+                    if (intakeToggle && !gamepad2.a) {
                         // Starting intake
                         intakeStartTime = System.currentTimeMillis();
                         CompliantIntake.INSTANCE.on();
                         Transfer.INSTANCE.slight();
 
                         // Reset ball counter when starting intake
-                        colorSensor.artifactcounter = 0;
 
                         telemetryM.addData("Intake", "ON - Counting Balls");
                     } else {
@@ -173,7 +174,6 @@ public class LimelightTrackTeleWithoutKillSwitch extends NextFTCOpMode {
                         Transfer.INSTANCE.off();
 
                         // Reset ball counter
-                        colorSensor.artifactcounter = 0;
 
                         telemetryM.addData("Intake", "OFF - Manual Stop");
                     }
@@ -191,6 +191,8 @@ public class LimelightTrackTeleWithoutKillSwitch extends NextFTCOpMode {
                     TurretPID.INSTANCE.newshooterdistance(d).schedule();
                     TurretPID.shootRequested = true;
                     TurretPID.hasShot = false;
+                    colorSensor.artifactcounter = Math.max(0, colorSensor.artifactcounter -= 1);
+                    colorSensor.light();
                 });
 
         // D-pad Down: Reset position to corner
@@ -273,14 +275,33 @@ public class LimelightTrackTeleWithoutKillSwitch extends NextFTCOpMode {
         // ========== COLOR SENSOR BALL COUNTING ==========
         // Only count balls when intake is active
         if (intakeToggle) {
-            colorSensor.IncountBalls();
-            if (colorSensor.artifactcounter >= 2) {
-                Transfer.INSTANCE.advance();
-                // Reset toggle state
+            if(!gamepad2.a) {
+                colorSensor.IncountBalls();
+                if (colorSensor.artifactcounter >= 2) {
+                    Transfer.INSTANCE.advance();
+                    // Reset toggle state
+                }
+                // Auto-stop when 3 balls are collected
+                if (colorSensor.artifactcounter >= 3) {
+                    // Turn off intake and transfer
+                    CompliantIntake.INSTANCE.off();
+                    Transfer.INSTANCE.off();
+
+                    // Reset toggle state
+                    intakeToggle = false;
+                    intakeStartTime = 0;
+
+                    // Optional: Rumble controller to alert driver
+                    gamepad1.rumble(500);
+
+                    // Reset ball counter
+
+                }
             }
-            // Auto-stop when 3 balls are collected
-            if (colorSensor.artifactcounter >= 3) {
-                // Turn off intake and transfer
+        }
+        //KillSwitches
+        Gamepads.gamepad2().a()
+                .whenTrue(() -> {
                 CompliantIntake.INSTANCE.off();
                 Transfer.INSTANCE.off();
 
@@ -290,16 +311,33 @@ public class LimelightTrackTeleWithoutKillSwitch extends NextFTCOpMode {
 
                 // Optional: Rumble controller to alert driver
                 gamepad1.rumble(500);
+            });
 
-                // Reset ball counter
-                colorSensor.artifactcounter = 0;
-            }
-        }
+        Gamepads.gamepad2().b()
+                .whenTrue(() -> {
+                            turretLimelightEnabled = false;
+                            turretAlignment.stopTurret();
+                            CompliantIntake.INSTANCE.repel();
+                            telemetryM.addData("Turret", "Stopped & Intake Reset");
+                        });
 
+        Gamepads.gamepad2().y()
+                .whenTrue(() -> {
+                    frontLeftMotor.setPower(0);
+                    frontRightMotor.setPower(0);
+                    backLeftMotor.setPower(0);
+                    backRightMotor.setPower(0);
+                });
         limelight.update();
 
-
+        Gamepads.gamepad2().leftBumper()
+                .whenBecomesTrue(() -> {
+                    colorSensor.artifactcounter -= 1;
+                });
+        Gamepads.gamepad2().rightBumper()
+                .whenBecomesTrue(() -> {
+                    colorSensor.artifactcounter += 1;
+                });
         // ========== TELEMETRY ==========
-
+        }
     }
-}

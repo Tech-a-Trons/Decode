@@ -43,7 +43,7 @@ public class RedFar extends NextFTCOpMode {
                 BindingsComponent.INSTANCE
         );
     }
-
+    private VoltageGet voltageGet;
 
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
@@ -197,7 +197,7 @@ public class RedFar extends NextFTCOpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                TurretPID.INSTANCE.setMidFarShooterSpeed().schedule();
+               setShooterFromOdometry();
                 Hood.INSTANCE.midopen();
                 turretAlignment.align();
                 setPathState(1);
@@ -222,7 +222,7 @@ public class RedFar extends NextFTCOpMode {
                     Transfer.INSTANCE.off();
 //                    CompliantIntake.INSTANCE.off();
 //                    TurretPID.INSTANCE.setFarShooterSpeed();
-                    TurretPID.INSTANCE.tuffashell().schedule();
+                    setShooterFromOdometry();
                     follower.followPath(scorePickup1, true);
                     setPathState(3);
                 }
@@ -248,7 +248,7 @@ public class RedFar extends NextFTCOpMode {
             case 5:
                 if (!follower.isBusy()) {
                     follower.followPath(scorePickup2);
-                    TurretPID.INSTANCE.tuffashell().schedule();
+                    setShooterFromOdometry();
                     setPathState(6);
                 }
                 break;
@@ -265,7 +265,7 @@ public class RedFar extends NextFTCOpMode {
 
             case 7:
                 if (!follower.isBusy()) {
-                    TurretPID.INSTANCE.tuffashell().schedule();
+                    setShooterFromOdometry();
                     follower.followPath(scorePickup3);
                     setPathState(8);
                 }
@@ -327,7 +327,7 @@ public class RedFar extends NextFTCOpMode {
                 96 - pose.getX(),  // TARGET_X = 96 (your scorePose X)
                 96 - pose.getY()   // TARGET_Y = 96 (your scorePose Y)
         );
-        TurretPID.INSTANCE.setShooterFromDistance(distance).schedule();
+        TurretPID.INSTANCE.newshooterdistance(distance).schedule();
     }
     private void GateIntake() {
         CompliantIntake.INSTANCE.on();
@@ -379,7 +379,7 @@ public class RedFar extends NextFTCOpMode {
         opmodeTimer.resetTimer();
         volt.init(hardwareMap);
         limelight = new RedExperimentalDistanceLExtractor(hardwareMap);
-        turretAlignment = new SimpleLL(hardwareMap, limelight);
+        turretAlignment = new SimpleLL(hardwareMap, limelight,    voltageGet);
         limelight.startReading();
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);

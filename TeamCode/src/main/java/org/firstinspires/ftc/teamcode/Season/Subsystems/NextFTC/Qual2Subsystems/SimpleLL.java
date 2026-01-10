@@ -5,11 +5,13 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
 
 public class SimpleLL {
     private CRServo turretServo;
     private RedExperimentalDistanceLExtractor limelight;
     private Telemetry telemetry;
+    private VoltageGet voltageGet;
 
     // Alignment parameters
     private final double ALIGNMENT_THRESHOLD = 3;   // tighter
@@ -17,15 +19,19 @@ public class SimpleLL {
     private final double MAX_POWER  = 1;   //1-0.8      // was 0.1
 
     // Proportional gains for different distances
-    private final double kP_CLOSE = 0.013;  // For close alignment
-    private final double kP_FAR = 0.006;   // For far alignment
+    private double kP_CLOSE = 0.008;//0.008  // For close alignmentc0.13
+    private final double kP_FAR = 0.007;   // For far alignment
 
     private boolean isAligning = false;
-
-    public SimpleLL(HardwareMap hardwareMap, RedExperimentalDistanceLExtractor limelight) {
+    double voltage;
+    public SimpleLL(HardwareMap hardwareMap, RedExperimentalDistanceLExtractor limelight, VoltageGet voltageGet) {
         this.turretServo = hardwareMap.get(CRServo.class, "turret");
         this.limelight = limelight;
+        this.voltageGet = voltageGet;
+        voltageGet.init(hardwareMap);
+
     }
+
 
     public void setTelemetry(Telemetry telemetry) {
         this.telemetry = telemetry;
@@ -50,6 +56,14 @@ public class SimpleLL {
      */
     private void alignWithKp(double kP) {
         Double tx = limelight.getTx();
+        voltage = voltageGet.getVoltage();
+        if (voltage<13){
+            kP_CLOSE=0.01;
+        }
+        if (voltage>13){
+            kP_CLOSE=0.006;
+        }
+
 
         // Check if we have valid target data
         if (tx == null) {
@@ -57,6 +71,7 @@ public class SimpleLL {
             stopTurret();
             return;
         }
+
 
         isAligning = true;
 

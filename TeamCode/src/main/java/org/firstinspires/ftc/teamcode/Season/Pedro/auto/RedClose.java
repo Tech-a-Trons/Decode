@@ -40,7 +40,7 @@ public class RedClose extends NextFTCOpMode {
                 BindingsComponent.INSTANCE
         );
     }
-
+    private VoltageGet voltageGet;
 
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
@@ -106,7 +106,7 @@ public class RedClose extends NextFTCOpMode {
                         new BezierCurve(
                                 new Pose(83.000, 83.000),
                                 new Pose(72.311, 33),
-                                new Pose(128.460, 30)
+                                new Pose(135, 30)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
@@ -116,7 +116,7 @@ public class RedClose extends NextFTCOpMode {
                         new BezierCurve(
                                 new Pose(96.000, 96.000),
                                 new Pose(75.41870503597121, 55.32086330935252),
-                                new Pose(128, 53)
+                                new Pose(133, 53)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
@@ -129,7 +129,7 @@ public class RedClose extends NextFTCOpMode {
                 .build();
         scorePickup2 = follower.pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(128, 53), new Pose(83.000, 83.000))
+                        new BezierLine(new Pose(133, 53), new Pose(83.000, 83.000))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -142,14 +142,14 @@ public class RedClose extends NextFTCOpMode {
 ////                .build();
         scorePickup3 = follower.pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(128.460, 30), new Pose(83, 83))
+                        new BezierLine(new Pose(135, 30), new Pose(83, 83))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
 //
         leave = follower.pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(83, 83), new Pose(120.587, 69.410))
+                        new BezierLine(new Pose(83, 83), new Pose(105, 69.410))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -171,14 +171,12 @@ public class RedClose extends NextFTCOpMode {
                 Hood.INSTANCE.midopen();
                 scheduleOuttake();
                 follower.followPath(scorePreload, true);
-                turretAlignment.closeAlign();
                 setPathState(1);
 
                 break;
 
             case 1:
                 if (!follower.isBusy()) {
-                    turretAlignment.closeAlign();
                     // SHOOT after preload
                     shootThreeBalls();
 
@@ -195,7 +193,6 @@ public class RedClose extends NextFTCOpMode {
 //                    CompliantIntake.INSTANCE.off();
 //                    TurretPID.INSTANCE.setFarShooterSpeed();
                     secondshotforyouuuuu();
-                    turretAlignment.closeAlign();
                     follower.followPath(scorePickup1, true);
                     setPathState(3);
                 }
@@ -203,7 +200,6 @@ public class RedClose extends NextFTCOpMode {
 
             case 3:
                 if (!follower.isBusy()) {
-                    turretAlignment.closeAlign();
                     shootThreeBalls();
                     Intake();
                     setPathState(4);
@@ -228,7 +224,6 @@ public class RedClose extends NextFTCOpMode {
 //
             case 6:
                 if (!follower.isBusy()) {
-                    turretAlignment.closeAlign();
                     shootThreeBalls();
                     Intake();
                     follower.followPath(grabPickup3);
@@ -246,7 +241,6 @@ public class RedClose extends NextFTCOpMode {
 //
             case 8:
                 if (!follower.isBusy()) {
-                   turretAlignment.closeAlign();
                    shootThreeBalls();
                    follower.followPath(leave);
                     setPathState(-1);
@@ -313,6 +307,7 @@ public class RedClose extends NextFTCOpMode {
 
     @Override
     public void onUpdate() {
+        turretAlignment.closeAlign();
         follower.update();
         autonomousPathUpdate();
         telemetry.addData("Path State", pathState);
@@ -329,7 +324,7 @@ public class RedClose extends NextFTCOpMode {
         opmodeTimer.resetTimer();
         volt.init(hardwareMap);
         limelight = new RedExperimentalDistanceLExtractor(hardwareMap);
-        turretAlignment = new SimpleLL(hardwareMap, limelight);
+        turretAlignment = new SimpleLL(hardwareMap, limelight,voltageGet);
         limelight.startReading();
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);

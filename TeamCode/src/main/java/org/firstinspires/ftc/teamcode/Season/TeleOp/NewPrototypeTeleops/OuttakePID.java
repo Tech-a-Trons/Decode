@@ -19,6 +19,7 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 import dev.nextftc.hardware.driving.MecanumDriverControlled;
 import dev.nextftc.hardware.impl.MotorEx;
 
+@Disabled
 @TeleOp(name = "OuttakePID")
 
 public class OuttakePID extends NextFTCOpMode {

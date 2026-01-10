@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.Outtake;
@@ -11,6 +12,7 @@ import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
+@Disabled
 @TeleOp(name = "NindroidPid")
 
 public class NindroidPid extends NextFTCOpMode {

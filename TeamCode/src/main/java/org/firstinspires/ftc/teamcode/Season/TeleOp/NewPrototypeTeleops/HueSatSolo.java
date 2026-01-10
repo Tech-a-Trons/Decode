@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
 
 import static java.lang.Math.clamp;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -12,6 +13,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.ColorHueFix;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
 
+@Disabled
 @TeleOp(name = "SatHueSolo")
 public class HueSatSolo extends LinearOpMode {
 

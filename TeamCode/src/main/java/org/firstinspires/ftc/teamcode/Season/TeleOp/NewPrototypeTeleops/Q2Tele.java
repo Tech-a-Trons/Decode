@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
 
 import static java.lang.Math.clamp;
 
@@ -14,24 +14,12 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
-import org.firstinspires.ftc.teamcode.Season.SensorStuff.LimelightTester;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.ColorHueFix;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.ExperimentalArtifacts;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.LLHood;
 
 import dev.nextftc.core.subsystems.Subsystem;
-import dev.nextftc.core.units.Distance;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcontroller.external.samples.SensorGoBildaPinpoint;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 @TeleOp(name = "ColorSensingTele")
 public class Q2Tele extends LinearOpMode implements Subsystem {
     ColorHueFix colorparser;

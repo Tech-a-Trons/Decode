@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.Season.Pedro.auto;
 
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.Outtake.outtake;
 
+
+
 import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.Intake;
@@ -25,6 +27,8 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+
+import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
@@ -48,7 +52,7 @@ public class RedClose extends NextFTCOpMode {
 
     private final Pose startPose = new Pose(122.6, 122.5, Math.toRadians(310));
     //    private final Pose scorePose = new Pose(90, 90, Math.toRadians(215));
-    private final Pose scorePose = new Pose(96, 96, Math.toRadians(0));
+    private final Pose scorePose = new Pose(90, 104, Math.toRadians(0));
 
     private final Pose preprePickup1 = new Pose(12, 12, Math.toRadians(180));
     private final Pose prePickup1 = new Pose(17.581, 10.0470, Math.toRadians(180));
@@ -116,7 +120,7 @@ public class RedClose extends NextFTCOpMode {
                         new BezierCurve(
                                 new Pose(96.000, 96.000),
                                 new Pose(75.41870503597121, 55.32086330935252),
-                                new Pose(133, 53)
+                                new Pose(131, 53)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
@@ -129,7 +133,7 @@ public class RedClose extends NextFTCOpMode {
                 .build();
         scorePickup2 = follower.pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(133, 53), new Pose(83.000, 83.000))
+                        new BezierLine(new Pose(131, 53), new Pose(83.000, 83.000))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -284,10 +288,11 @@ public class RedClose extends NextFTCOpMode {
         );
         TurretPID.INSTANCE.setShooterFromDistance(distance).schedule();
     }
+
     private void GateIntake() {
         CompliantIntake.INSTANCE.on();
         Transfer.INSTANCE.advance();
-        sleep(1500);
+        new Delay(3);
         Transfer.INSTANCE.off();
 
     }
@@ -295,7 +300,7 @@ public class RedClose extends NextFTCOpMode {
     private void shootThreeBalls() {
         CompliantIntake.INSTANCE.on();
         Transfer.INSTANCE.on();
-        sleep(1300);
+        new Delay(1.3);
         CompliantIntake.INSTANCE.off();
         Transfer.INSTANCE.off();
     }
@@ -307,7 +312,32 @@ public class RedClose extends NextFTCOpMode {
 
     @Override
     public void onUpdate() {
-        turretAlignment.closeAlign();
+        if(pathState==0){
+            turretAlignment.closeAlign();
+        }
+        if(pathState<2){
+            turretAlignment.closeAlign();
+        }
+        if (pathState==3){
+            turretAlignment.closeAlign();
+        }
+        if (pathState == 4){
+            turretAlignment.closeAlign();
+        }
+        if (pathState == 5){
+            turretAlignment.closeAlign();
+        }
+        if (pathState == 6){
+            turretAlignment.closeAlign();
+        }
+        if (pathState == 7){
+            turretAlignment.closeAlign();
+        }
+        if (pathState == 8){
+            turretAlignment.closeAlign();
+        }
+
+
         follower.update();
         autonomousPathUpdate();
         telemetry.addData("Path State", pathState);

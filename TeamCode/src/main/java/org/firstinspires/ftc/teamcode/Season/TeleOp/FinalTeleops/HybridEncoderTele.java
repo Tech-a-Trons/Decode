@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.FinalTeleops;
 
 
 import static dev.nextftc.bindings.Bindings.button;
@@ -19,12 +19,10 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedE
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.ColorSensor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Hood;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.HybridTurretAlignmentEncoder;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Transfer;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Turret;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.TurretPID;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.SimpleLL;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
-
 import java.util.function.Supplier;
 
 import dev.nextftc.bindings.BindingManager;
@@ -38,15 +36,15 @@ import dev.nextftc.hardware.driving.MecanumDriverControlled;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.extensions.pedro.PedroComponent;
 
-@TeleOp
-public class LimelightTrackTele extends NextFTCOpMode {
+@TeleOp(name = "Hybrid Encoder TeleOp")
+public class HybridEncoderTele extends NextFTCOpMode {
 
-    // Limelight and alignment controller
+    // Limelight and hybrid turret alignment WITH ENCODER
     private RedExperimentalDistanceLExtractor limelight;
-    private SimpleLL turretAlignment;
+    private HybridTurretAlignmentEncoder turretAlignment;
     private ColorSensor colorSensor;
 
-    public LimelightTrackTele() {
+    public HybridEncoderTele() {
         addComponents(
                 new SubsystemComponent(
                         TurretPID.INSTANCE,
@@ -65,7 +63,7 @@ public class LimelightTrackTele extends NextFTCOpMode {
     private final MotorEx frontRightMotor = new MotorEx("fr");
     private final MotorEx backLeftMotor = new MotorEx("bl").reversed();
     private final MotorEx backRightMotor = new MotorEx("br");
-    private boolean turretLimelightEnabled = false;
+    private boolean turretAutoAlign = false;
 
     private boolean automatedDrive;
     private Supplier<PathChain> farscore;
@@ -76,39 +74,39 @@ public class LimelightTrackTele extends NextFTCOpMode {
     private double slowModeMultiplier = 0.5;
 
     // Target position for turret (adjust to your field coordinates)
-    private static final double TARGET_X = 121;  // Example: center of field
-    private static final double TARGET_Y = 121;  // Example: center of field
+    private static final double TARGET_X = 121;
+    private static final double TARGET_Y = 121;
 
-    // Distance threshold for switching between close and far align (tune this value)
-    private static final double DISTANCE_THRESHOLD = 90.0; // Adjust based on testing
+    // Distance threshold for switching between close and far align
+    private static final double DISTANCE_THRESHOLD = 90.0;
 
     private Pose targetPose = new Pose(TARGET_X, TARGET_Y);
     private Pose Middle = new Pose(72,35,180);
     private Pose Park = new Pose(38.74532374100719,33.358273381294964,90);
     private boolean intakeToggle = false;
     private long intakeStartTime = 0;
-    private VoltageGet voltageGet;
 
     @Override
     public void onStartButtonPressed() {
-        // Initialize Limelight and turret alignment
+        // Initialize Limelight and Hybrid Turret Alignment (WITH ENCODER)
         limelight = new RedExperimentalDistanceLExtractor(hardwareMap);
-        turretAlignment = new SimpleLL(hardwareMap, limelight,voltageGet);
+        turretAlignment = new HybridTurretAlignmentEncoder(hardwareMap, limelight);
         colorSensor = new ColorSensor(hardwareMap);
 
         limelight.startReading();
         turretAlignment.setTelemetry(telemetry);
+        turretAlignment.setTarget(TARGET_X, TARGET_Y);
 
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
-        farscore = () -> PedroComponent.follower().pathBuilder() //Lazy Curve Generation
+        farscore = () -> PedroComponent.follower().pathBuilder()
                 .addPath(new Path(new BezierLine(PedroComponent.follower()::getPose, new Pose(83.17241379310344, 12.620689655172416))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(PedroComponent.follower()::getHeading, Math.toRadians(90), 0.8))
                 .build();
-        closescore = () -> PedroComponent.follower().pathBuilder() //Lazy Curve Generation
+        closescore = () -> PedroComponent.follower().pathBuilder()
                 .addPath(new Path(new BezierLine(PedroComponent.follower()::getPose, new Pose(72, 72))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(PedroComponent.follower()::getHeading, Math.toRadians(90), 0.8))
                 .build();
-        Parkpath = () -> PedroComponent.follower().pathBuilder() //Lazy Curve Generation
+        Parkpath = () -> PedroComponent.follower().pathBuilder()
                 .addPath(new Path(new BezierLine(PedroComponent.follower()::getPose, new Pose(38.74532374100719,33.358273381294964,0))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(PedroComponent.follower()::getHeading, Math.toRadians(0), 0.8))
                 .build();
@@ -127,28 +125,36 @@ public class LimelightTrackTele extends NextFTCOpMode {
                 Gamepads.gamepad1().rightStickX()
         );
 
-        // ========== LIMELIGHT TURRET CONTROLS ==========
+        // ========== HYBRID TURRET CONTROLS ==========
 
-        // B Button: Toggle Limelight auto-alignment on/off
+        // B Button: Toggle hybrid auto-alignment on/off
         Gamepads.gamepad1().b()
                 .whenBecomesTrue(() -> {
-                    turretLimelightEnabled = !turretLimelightEnabled;
+                    turretAutoAlign = !turretAutoAlign;
 
-                    if (!turretLimelightEnabled) {
+                    if (!turretAutoAlign) {
                         turretAlignment.stopTurret();
-                        telemetryM.addData("Limelight Turret", "Auto-Align Disabled");
+                        telemetryM.addData("Hybrid Turret", "Auto-Align Disabled");
                     } else {
-                        telemetryM.addData("Limelight Turret", "Auto-Align Enabled");
+                        turretAlignment.resetPID();
+                        telemetryM.addData("Hybrid Turret", "Auto-Align Enabled (Odometry→Limelight)");
                     }
                 });
 
         // A Button: Stop turret and reset intake
         Gamepads.gamepad1().a()
                 .whenBecomesTrue(() -> {
-                    turretLimelightEnabled = false;
+                    turretAutoAlign = false;
                     turretAlignment.stopTurret();
                     CompliantIntake.INSTANCE.repel();
                     telemetryM.addData("Turret", "Stopped & Intake Reset");
+                });
+
+        // X Button: Calibrate encoder (set current position as 0°)
+        Gamepads.gamepad1().x()
+                .whenBecomesTrue(() -> {
+                    turretAlignment.calibrateEncoder();
+                    telemetryM.addData("Turret", "Encoder Calibrated");
                 });
 
         // ========== EXISTING CONTROLS ==========
@@ -159,24 +165,16 @@ public class LimelightTrackTele extends NextFTCOpMode {
                     intakeToggle = !intakeToggle;
 
                     if (intakeToggle) {
-                        // Starting intake
                         intakeStartTime = System.currentTimeMillis();
                         CompliantIntake.INSTANCE.on();
                         Transfer.INSTANCE.slight();
-
-                        // Reset ball counter when starting intake
                         colorSensor.artifactcounter = 0;
-
                         telemetryM.addData("Intake", "ON - Counting Balls");
                     } else {
-                        // Manually stopping intake
                         intakeStartTime = 0;
                         CompliantIntake.INSTANCE.off();
                         Transfer.INSTANCE.off();
-
-                        // Reset ball counter
                         colorSensor.artifactcounter = 0;
-
                         telemetryM.addData("Intake", "OFF - Manual Stop");
                     }
                 });
@@ -195,7 +193,7 @@ public class LimelightTrackTele extends NextFTCOpMode {
                     TurretPID.hasShot = false;
                 });
 
-        // D-pad Down: Reset position to corner
+        // D-pad Down: Reset position to middle
         Gamepads.gamepad1().dpadDown()
                 .whenBecomesTrue(() -> {
                     PedroComponent.follower().setPose(Middle);
@@ -229,9 +227,6 @@ public class LimelightTrackTele extends NextFTCOpMode {
     @Override
     public void onUpdate() {
         if (!automatedDrive) {
-            //Make the last parameter false for field-centric
-            //In case the drivers want to use a "slowMode" you can scale the vectors
-            //This is the normal version to use in the TeleOp
             PedroComponent.follower().setTeleOpDrive(
                     -gamepad1.left_stick_y * slowModeMultiplier,
                     -gamepad1.left_stick_x * slowModeMultiplier,
@@ -241,67 +236,76 @@ public class LimelightTrackTele extends NextFTCOpMode {
         }
 
         PedroComponent.follower().update();
-        double targetVel = TurretPID.activeTargetVelocity;
-        double actualVel = TurretPID.turret.getVelocity();
+
+        // Calculate distance to target for hood control and alignment mode selection
         Pose robotPose = PedroComponent.follower().getPose();
         double distanceToTarget = Math.hypot(TARGET_X - robotPose.getX(), TARGET_Y - robotPose.getY());
 
-        // Distance threshold for close hood mode (in inches, tune this value)
+        // Distance threshold for close hood mode
         final double CLOSE_HOOD_DISTANCE = 20.0;
 
+        // Hood control based on distance
+        double targetVel = TurretPID.activeTargetVelocity;
+        double actualVel = TurretPID.turret.getVelocity();
 
         if (distanceToTarget <= CLOSE_HOOD_DISTANCE) {
-            // Close to goal: Use close hood mode, NO velocity correction
             Hood.INSTANCE.close();
         } else {
-            // Far from goal: Use velocity correction if shooter is spinning
             if (targetVel > 500) {
                 Hood.INSTANCE.compensateFromVelocity(targetVel, actualVel);
             }
         }
 
-        // Calculate distance to target for alignment mode selection
-
-        // Update Limelight turret alignment when enabled with automatic mode selection
-        if (turretLimelightEnabled) {
+        // Update Hybrid turret alignment when enabled
+        if (turretAutoAlign) {
             // Automatically choose alignment mode based on distance
             if (distanceToTarget > DISTANCE_THRESHOLD) {
-                turretAlignment.farAlign();  // Use far alignment (kP = 0.004)
+                turretAlignment.farAlign();
             } else {
-                turretAlignment.closeAlign(); // Use close alignment (kP = 0.01)
+                turretAlignment.closeAlign();
             }
         }
 
         // ========== COLOR SENSOR BALL COUNTING ==========
-        // Only count balls when intake is active
         if (intakeToggle) {
             colorSensor.IncountBalls();
             if (colorSensor.artifactcounter >= 2) {
                 Transfer.INSTANCE.advance();
-                // Reset toggle state
             }
-            // Auto-stop when 3 balls are collected
             if (colorSensor.artifactcounter >= 3) {
-                // Turn off intake and transfer
                 CompliantIntake.INSTANCE.off();
                 Transfer.INSTANCE.off();
-
-                // Reset toggle state
                 intakeToggle = false;
                 intakeStartTime = 0;
-
-                // Optional: Rumble controller to alert driver
                 gamepad1.rumble(500);
-
-                // Reset ball counter
                 colorSensor.artifactcounter = 0;
             }
         }
 
         limelight.update();
-
+        telemetryM.update();
 
         // ========== TELEMETRY ==========
+        telemetryM.debug("position", robotPose);
+        telemetryM.debug("velocity", PedroComponent.follower().getVelocity());
+        telemetryM.debug("automatedDrive", automatedDrive);
 
+        // Hybrid Turret telemetry
+        telemetryM.debug("turret_auto_align", turretAutoAlign);
+        telemetryM.debug("turret_mode", turretAlignment.getTelemetry());
+        telemetryM.debug("LL_target_visible", limelight.isTargetVisible());
+        telemetryM.debug("LL_tx", limelight.getTx() != null ? String.format("%.2f°", limelight.getTx()) : "N/A");
+        telemetryM.debug("turret_current_angle", String.format("%.2f°", turretAlignment.getCurrentAngle()));
+        telemetryM.debug("turret_aligned", turretAlignment.isAligned());
+
+        // Distance and mode info
+        telemetryM.debug("distance_to_target", String.format("%.2f", distanceToTarget));
+        telemetryM.debug("alignment_mode", distanceToTarget > DISTANCE_THRESHOLD ? "FAR" : "CLOSE");
+        telemetryM.debug("hood_mode", distanceToTarget <= CLOSE_HOOD_DISTANCE ? "CLOSE" : "FAR");
+
+        // Color sensor telemetry
+        telemetryM.debug("intake_active", intakeToggle);
+        telemetryM.debug("ball_count", colorSensor.artifactcounter);
+        telemetryM.debug("color_detected", colorSensor.getColor() != null ? colorSensor.getColor() : "None");
     }
 }

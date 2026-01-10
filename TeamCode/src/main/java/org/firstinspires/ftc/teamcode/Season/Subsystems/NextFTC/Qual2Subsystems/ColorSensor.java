@@ -65,7 +65,7 @@ public class ColorSensor implements Subsystem {
         colorsensor = hardwareMap.get(RevColorSensorV3.class, "ColorSensor");
         //colorsensor2 = hardwareMap.get(RevColorSensorV3.class, "ColorSensor2");
     }
-    Servo rgbindicator = hardwareMap.get(Servo.class, "rgbled");
+//    Servo rgbindicator = hardwareMap.get(Servo.class, "rgbled");
 
 
     public String Getcolor() {
@@ -178,7 +178,7 @@ public class ColorSensor implements Subsystem {
             if (current_sat > 0.5) {
                 artifactcounter += 1;
                 asc += 5;
-                light();
+//                light();
 //                AssignColors();
 //                activeslot += 1;
                 IncountTimer.reset();
@@ -186,8 +186,8 @@ public class ColorSensor implements Subsystem {
             } else if (current_hue > 167) {
                 artifactcounter += 1;
 //                asc += 1;
-
-                light();
+//
+//                light();
 //                AssignColors();
 
 //                activeslot += 1;
@@ -202,19 +202,19 @@ public class ColorSensor implements Subsystem {
 //        green = (slots[0] + slots[1] + slots[2]) / 5;
 //        purple = (slots[0] + slots[1] + slots[2]) % 5;
     }
-    public void light() {
-        if (artifactcounter == 0) {
-            rgbindicator.setPosition(0);
-        } else if (artifactcounter == 1) {
-            rgbindicator.setPosition(0.3);
-        } else if (artifactcounter == 2) {
-            rgbindicator.setPosition(0.375);
-        } else if (artifactcounter == 3) {
-            rgbindicator.setPosition(0.5);
-        } else if (artifactcounter > 3) {
-            rgbindicator.setPosition(0.6);
-        }
-    }
+//    public void light() {
+//        if (artifactcounter == 0) {
+//            rgbindicator.setPosition(0);
+//        } else if (artifactcounter == 1) {
+//            rgbindicator.setPosition(0.3);
+//        } else if (artifactcounter == 2) {
+//            rgbindicator.setPosition(0.375);
+//        } else if (artifactcounter == 3) {
+//            rgbindicator.setPosition(0.5);
+//        } else if (artifactcounter > 3) {
+//            rgbindicator.setPosition(0.6);
+//        }
+//    }
 
 //    public void AssignColors() {
 //        slots[activeslot] = asc;

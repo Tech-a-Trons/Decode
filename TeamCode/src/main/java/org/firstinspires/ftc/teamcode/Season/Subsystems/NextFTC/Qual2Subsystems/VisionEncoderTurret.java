@@ -25,23 +25,29 @@ public class VisionEncoderTurret {
 
     // Angle limits (in degrees)
     public static double MIN_ANGLE = -180.0;
-    public static double MAX_ANGLE =180.0;
+    public static double MAX_ANGLE = 180.0;
 
-    // PID coefficients - Much higher than open-loop! Tune these via FTC Dashboard
-    public static double kP = 0.03;      // Start here, can go even higher
-    public static double kI = 0.0005;    // Eliminates steady-state error
-    public static double kD = 0.008;     // Reduces overshoot
+    // PID coefficients - Tuned for smooth, non-overshooting control
+    public static double kP = 0.013;     // Reduced from 0.03 - prevents aggressive overshooting
+    public static double kI = 0.0001;    // Very low to prevent integral windup
+    public static double kD = 0.002;     // Adds damping to reduce overshoot
     public static double kF = 0.0;       // Feedforward if needed
 
     // Vision-to-angle conversion
     public static double VISION_TX_TO_ANGLE_SCALE = 1.0; // Degrees of turret per degree of tx
 
-    // Control parameters
-    public static double POSITION_TOLERANCE = 2.0; // degrees
-    public static double MAX_SERVO_POWER = 0.8;
-    public static double MIN_SERVO_POWER = 0.08;
-    public static double MAX_VELOCITY = 200.0; // degrees/second limit
-    public static double MAX_ACCELERATION = 400.0; // degrees/second^2 limit
+    // Control parameters with error-based scaling
+    public static double POSITION_TOLERANCE = 2.0; // degrees - stop when within this range
+    public static double SLOW_DOWN_THRESHOLD = 20; // degrees - start slowing down here
+
+    // Power scaling based on error
+    public static double MAX_SERVO_POWER = 1;      // Reduced from 0.8 - prevents wild swings
+    public static double MIN_SERVO_POWER = 0.03;     // Minimum power to overcome friction
+    public static double SLOW_POWER_MULTIPLIER = 0.3; // Power multiplier when close to target
+
+    // Velocity limits
+    public static double MAX_VELOCITY = 120.0; // degrees/second - reduced for smoother motion
+    public static double MAX_ACCELERATION = 200.0; // degrees/second^2
 
     // PID variables
     private double integralSum = 0;
@@ -124,7 +130,31 @@ public class VisionEncoderTurret {
     }
 
     /**
-     * PID controller with velocity and acceleration limiting
+     * Scale power based on error magnitude (slow down when close)
+     */
+    private double scalePowerByError(double error, double basePower) {
+        double absError = Math.abs(error);
+
+        // If very close, use slow power
+        if (absError <= POSITION_TOLERANCE) {
+            return 0; // Stop
+        }
+
+        // Linear scaling between POSITION_TOLERANCE and SLOW_DOWN_THRESHOLD
+        if (absError <= SLOW_DOWN_THRESHOLD) {
+            double scale = (absError - POSITION_TOLERANCE) / (SLOW_DOWN_THRESHOLD - POSITION_TOLERANCE);
+            scale = Range.clip(scale, 0, 1);
+            // Scale between MIN and SLOW power
+            double slowPower = MIN_SERVO_POWER + (MAX_SERVO_POWER * SLOW_POWER_MULTIPLIER - MIN_SERVO_POWER) * scale;
+            return Math.signum(basePower) * slowPower;
+        }
+
+        // Far from target - use full power but clamped
+        return basePower;
+    }
+
+    /**
+     * PID controller with velocity limiting and error-based power scaling
      */
     private double calculatePID(double error) {
         long currentTime = System.nanoTime();
@@ -136,12 +166,16 @@ public class VisionEncoderTurret {
         // Proportional
         double p = kP * error;
 
-        // Integral with anti-windup
-        integralSum += error * deltaTime;
-        integralSum = Range.clip(integralSum, -100, 100);
+        // Integral with anti-windup (only accumulate when error is moderate)
+        if (Math.abs(error) < 20.0) {
+            integralSum += error * deltaTime;
+            integralSum = Range.clip(integralSum, -50, 50); // Tighter limit
+        } else {
+            integralSum *= 0.95; // Decay integral when error is large
+        }
         double i = kI * integralSum;
 
-        // Derivative
+        // Derivative with smoothing
         double derivative = (error - lastError) / deltaTime;
         double d = kD * derivative;
         lastError = error;
@@ -149,27 +183,18 @@ public class VisionEncoderTurret {
         // Feedforward
         double f = kF * Math.signum(error);
 
-        double output = p + i + d + f;
+        // Calculate base output
+        double baseOutput = p + i + d + f;
 
-        // Velocity limiting
-        double targetVelocity = output * MAX_VELOCITY;
-        targetVelocity = Range.clip(targetVelocity, -MAX_VELOCITY, MAX_VELOCITY);
-
-        // Acceleration limiting
-        double velocityChange = targetVelocity - lastVelocity;
-        double maxVelocityChange = MAX_ACCELERATION * deltaTime;
-        velocityChange = Range.clip(velocityChange, -maxVelocityChange, maxVelocityChange);
-        lastVelocity += velocityChange;
-
-        // Convert velocity to servo power (normalize by max velocity)
-        output = lastVelocity / MAX_VELOCITY;
+        // Apply error-based power scaling (slow down when close)
+        double scaledOutput = scalePowerByError(error, baseOutput);
 
         // Apply minimum power threshold
-        if (Math.abs(output) > 0.001 && Math.abs(output) < MIN_SERVO_POWER) {
-            output = Math.signum(output) * MIN_SERVO_POWER;
+        if (Math.abs(scaledOutput) > 0.001 && Math.abs(scaledOutput) < MIN_SERVO_POWER) {
+            scaledOutput = Math.signum(scaledOutput) * MIN_SERVO_POWER;
         }
 
-        return Range.clip(output, -MAX_SERVO_POWER, MAX_SERVO_POWER);
+        return Range.clip(scaledOutput, -MAX_SERVO_POWER, MAX_SERVO_POWER);
     }
 
     /**
@@ -199,7 +224,7 @@ public class VisionEncoderTurret {
             return;
         }
 
-        // Calculate PID output
+        // Calculate PID output with error-based scaling
         double power = calculatePID(error);
 
         // Set servo power
@@ -207,14 +232,24 @@ public class VisionEncoderTurret {
     }
 
     /**
-     * Close alignment mode - more aggressive PID
+     * Close alignment mode - more careful approach
      */
     public void closeAlign() {
-        // Temporarily increase kP for close range
+        // Temporarily adjust parameters for close range
         double originalKp = kP;
-        kP = 0.12; // Higher for close shots
+        double originalMaxPower = MAX_SERVO_POWER;
+        double originalSlowThreshold = SLOW_DOWN_THRESHOLD;
+
+        kP = 0.018; // Slightly higher for responsiveness
+        MAX_SERVO_POWER = 0.4; // Lower max power for precision
+        SLOW_DOWN_THRESHOLD = 8.0; // Start slowing down earlier
+
         align();
+
+        // Restore original values
         kP = originalKp;
+        MAX_SERVO_POWER = originalMaxPower;
+        SLOW_DOWN_THRESHOLD = originalSlowThreshold;
     }
 
     /**
@@ -231,6 +266,7 @@ public class VisionEncoderTurret {
         turretServo.setPower(0);
         isAligning = false;
         lastVelocity = 0;
+        integralSum = 0; // Reset integral when stopping
     }
 
     /**
@@ -272,16 +308,18 @@ public class VisionEncoderTurret {
     public void updateTelemetry() {
         if (telemetry != null) {
             Double tx = limelight.getTx();
+            double error = targetAngle - currentAngle;
             telemetry.addData("--- Vision+Encoder Turret ---", "");
             telemetry.addData("Target Visible", limelight.isTargetVisible());
             telemetry.addData("Vision TX", tx != null ? String.format("%.2f°", tx) : "N/A");
             telemetry.addData("Current Angle", String.format("%.2f°", currentAngle));
             telemetry.addData("Target Angle", String.format("%.2f°", targetAngle));
-            telemetry.addData("Error", String.format("%.2f°", targetAngle - currentAngle));
+            telemetry.addData("Error", String.format("%.2f°", error));
+            telemetry.addData("Error Zone", Math.abs(error) <= POSITION_TOLERANCE ? "ALIGNED" :
+                    Math.abs(error) <= SLOW_DOWN_THRESHOLD ? "SLOWING" : "FULL SPEED");
             telemetry.addData("Is Aligned", isAligned());
             telemetry.addData("Is Aligning", isAligning);
             telemetry.addData("Encoder Voltage", String.format("%.3fV", turretEncoder.getVoltage()));
-            telemetry.addData("Velocity", String.format("%.1f°/s", lastVelocity));
         }
     }
 
@@ -290,6 +328,7 @@ public class VisionEncoderTurret {
      */
     public String getTelemetry() {
         Double tx = limelight.getTx();
+        double error = targetAngle - currentAngle;
         return String.format(
                 "Vision+Encoder Turret:\n" +
                         "  Current: %.2f°\n" +
@@ -297,13 +336,14 @@ public class VisionEncoderTurret {
                         "  Error: %.2f°\n" +
                         "  Vision TX: %s\n" +
                         "  Aligned: %b\n" +
-                        "  Velocity: %.1f°/s",
+                        "  Zone: %s",
                 currentAngle,
                 targetAngle,
-                targetAngle - currentAngle,
+                error,
                 tx != null ? String.format("%.2f°", tx) : "N/A",
                 isAligned(),
-                lastVelocity
+                Math.abs(error) <= POSITION_TOLERANCE ? "ALIGNED" :
+                        Math.abs(error) <= SLOW_DOWN_THRESHOLD ? "SLOWING" : "FULL"
         );
     }
 }

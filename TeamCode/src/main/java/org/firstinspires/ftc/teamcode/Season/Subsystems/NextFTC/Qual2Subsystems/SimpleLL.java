@@ -14,13 +14,13 @@ public class SimpleLL {
     private VoltageGet voltageGet;
 
     // Alignment parameters
-    private final double ALIGNMENT_THRESHOLD = 3;   // tighter
+    private final double ALIGNMENT_THRESHOLD = 1;  //3 // tighter
     private final double BASE_POWER = 0.03;         // was 0.03
-    private final double MAX_POWER  = 1;   //1-0.8      // was 0.1
+    private final double MAX_POWER  = 0.8;   //1-0.8      // was 0.1
 
     // Proportional gains for different distances
-    private double kP_CLOSE = 0.008;//0.008  // For close alignmentc0.13
-    private final double kP_FAR = 0.007;   // For far alignment
+    private double kP_CLOSE = 0.012;//0.008  // For close alignmentc0.13
+    private final double kP_FAR = 0.006;   // For far alignment
 
     private boolean isAligning = false;
     double voltage;
@@ -57,12 +57,12 @@ public class SimpleLL {
     private void alignWithKp(double kP) {
         Double tx = limelight.getTx();
         voltage = voltageGet.getVoltage();
-        if (voltage<13){
-            kP_CLOSE=0.01;
-        }
-        if (voltage>13){
-            kP_CLOSE=0.006;
-        }
+//        if (voltage<13){
+//            kP_CLOSE=0.01;
+//        }
+//        if (voltage>13){
+//            kP_CLOSE=0.006;
+//        }
 
 
         // Check if we have valid target data

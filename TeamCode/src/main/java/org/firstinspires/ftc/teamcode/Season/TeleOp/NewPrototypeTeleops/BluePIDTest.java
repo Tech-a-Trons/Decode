@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
 
 //import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.BlueTurretPID.turret;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -16,6 +17,7 @@ import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
+@Disabled
 @TeleOp
 public class BluePIDTest extends LinearOpMode {
     //BlueExperimentalDistanceLExtractor ll = new BlueExperimentalDistanceLExtractor(hardwareMap);

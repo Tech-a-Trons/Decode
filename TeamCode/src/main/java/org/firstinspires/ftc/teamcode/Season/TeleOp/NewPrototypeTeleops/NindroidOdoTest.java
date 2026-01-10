@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
 import static java.lang.Math.atan2;
 
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -12,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
+@Disabled
 @TeleOp(name="NindroidOdoTest")
 public class NindroidOdoTest extends LinearOpMode {
 

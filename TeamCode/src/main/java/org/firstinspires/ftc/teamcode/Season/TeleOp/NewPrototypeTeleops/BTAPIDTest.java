@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
 
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.TurretPID.turret;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
@@ -22,6 +23,7 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 import dev.nextftc.hardware.driving.MecanumDriverControlled;
 import dev.nextftc.hardware.impl.MotorEx;
 
+@Disabled
 @TeleOp
 public class BTAPIDTest extends NextFTCOpMode {
     @Override

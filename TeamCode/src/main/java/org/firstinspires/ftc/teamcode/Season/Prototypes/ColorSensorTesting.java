@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.Season.Prototypes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.ExperimentalArtifacts;
 
+@Disabled
 @TeleOp
 public class ColorSensorTesting extends LinearOpMode {
 

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Season.Prototypes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.ColorSensor;
@@ -9,6 +10,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 
+@Disabled
 @TeleOp(name = "ColorSub")
 public class ColorSubTele extends NextFTCOpMode {
 

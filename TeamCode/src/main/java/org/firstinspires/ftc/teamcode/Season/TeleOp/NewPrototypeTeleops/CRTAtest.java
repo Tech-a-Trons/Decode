@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -10,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedT
 
 import dev.nextftc.ftc.NextFTCOpMode;
 
+@Disabled
 @TeleOp
 public class CRTAtest extends OpMode {
 

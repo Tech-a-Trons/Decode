@@ -19,7 +19,7 @@ public class SimpleLL {
     private final double MAX_POWER  = 0.8;   //1-0.8      // was 0.1
 
     // Proportional gains for different distances
-    private double kP_CLOSE = 0.012;//0.008  // For close alignmentc0.13
+    private double kP_CLOSE = 0.008;//0.008  // For close alignmentc0.13
     private final double kP_FAR = 0.006;   // For far alignment
 
     private boolean isAligning = false;

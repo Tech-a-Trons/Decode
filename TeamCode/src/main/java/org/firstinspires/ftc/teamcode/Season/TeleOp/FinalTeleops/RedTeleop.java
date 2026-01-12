@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.FinalTeleops;
 
 
+import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RobotContext.lastPose;
 import static dev.nextftc.bindings.Bindings.button;
 
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -38,14 +39,14 @@ import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.extensions.pedro.PedroComponent;
 
 @TeleOp
-public class LimelightTrackTele extends NextFTCOpMode {
+public class RedTeleop extends NextFTCOpMode {
 
     // Limelight and alignment controller
     private RedExperimentalDistanceLExtractor limelight;
     private SimpleLL turretAlignment;
     private ColorSensor colorSensor;
 
-    public LimelightTrackTele() {
+    public RedTeleop() {
         addComponents(
                 new SubsystemComponent(
                         TurretPID.INSTANCE,
@@ -112,7 +113,7 @@ public class LimelightTrackTele extends NextFTCOpMode {
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(PedroComponent.follower()::getHeading, Math.toRadians(0), 0.8))
                 .build();
 
-        PedroComponent.follower().setPose(new Pose(120.587, 69.410, Math.toRadians(0)));
+        PedroComponent.follower().setPose(lastPose);
         PedroComponent.follower().startTeleopDrive();
 
         // Setup driving

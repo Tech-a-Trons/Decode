@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.M
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual1Subsystem.Outtake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Hood;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RobotContext;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.SimpleLL;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Transfer;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Turret;
@@ -307,7 +308,9 @@ public class RedFar extends NextFTCOpMode {
                 if (!follower.isBusy()) {
                     shootThreeBalls();
                     follower.followPath(leave);
+                    savePose();
                     setPathState(-1);
+
                 }
                 break;
 //
@@ -329,7 +332,9 @@ public class RedFar extends NextFTCOpMode {
 //                break;
         }
     }
-
+    private void savePose() { // runs when auto finishes
+        RobotContext.lastPose = follower.getPose();
+    }
     private void scheduleOuttake() {
         TurretPID.INSTANCE.setFarShooterSpeed().schedule();
     }

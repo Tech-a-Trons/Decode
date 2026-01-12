@@ -1,13 +1,9 @@
 package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems;
 
-import com.acmerobotics.dashboard.config.Config;
-
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.impl.ServoEx;
 
-@Config
-public class Hood implements Subsystem {
-
+public class RGBled implements Subsystem {
     public static final Hood INSTANCE = new Hood();
 
     public static double closePos = 0.8;
@@ -18,20 +14,19 @@ public class Hood implements Subsystem {
     public static double VEL_THRESHOLD = 75;
     public static double HOOD_GAIN = 0.0003;
     public static double MAX_UP_ADJUST = 0.05;
-    private final ServoEx hood;
+    private final ServoEx RGB;
     private boolean isOpen = false;
 
 
-    public Hood() {
-        hood = new ServoEx("hood");
+    public RGBled() {
+        RGB = new ServoEx("rgbled");
 
-        hood.setPosition(midopenPos);
     }
 
     // ===== BASIC CONTROL =====
 
     private void set(double pos) {
-        hood.setPosition(clamp(pos));
+        RGB.setPosition(clamp(pos));
     }
 
     public void open() {
@@ -61,22 +56,7 @@ public class Hood implements Subsystem {
 
     // ===== VELOCITY COMPENSATION (FIXED) =====
 
-    public void compensateFromVelocity(double targetVel, double actualVel) {
 
-        double error = targetVel - actualVel;
-
-        if (Math.abs(error) < VEL_THRESHOLD) {
-            set(BASE_POS);
-            return;
-        }
-
-        double adjust = error * HOOD_GAIN;
-
-        adjust = Math.max(0, Math.min(MAX_UP_ADJUST, adjust));
-
-
-        set(BASE_POS + adjust);
-    }
 
     // ===== SAFETY CLAMP =====
 
@@ -89,3 +69,4 @@ public class Hood implements Subsystem {
         // No periodic behavior required
     }
 }
+

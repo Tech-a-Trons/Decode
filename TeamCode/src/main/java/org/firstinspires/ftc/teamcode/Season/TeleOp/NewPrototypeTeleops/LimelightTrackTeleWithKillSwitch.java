@@ -193,7 +193,7 @@ public class LimelightTrackTeleWithKillSwitch extends NextFTCOpMode {
                     TurretPID.INSTANCE.newshooterdistance(d).schedule();
                     TurretPID.shootRequested = true;
                     TurretPID.hasShot = false;
-                    colorSensor.artifactcounter = Math.max(0, colorSensor.artifactcounter -= 1);
+                    colorSensor.artifactcounter = 0;
                     colorSensor.light();
                 });
 

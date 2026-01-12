@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedE
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.ColorSensor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Hood;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RGBled;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Transfer;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Turret;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.TurretPID;
@@ -274,12 +275,17 @@ public class LimelightTrackTele extends NextFTCOpMode {
         // Only count balls when intake is active
         if (intakeToggle) {
             colorSensor.IncountBalls();
+            if (colorSensor.artifactcounter>0){
+//                RGBled.INSTANCE.open();
+            }
             if (colorSensor.artifactcounter >= 2) {
                 Transfer.INSTANCE.advance();
+//                RGBled.INSTANCE.midopen();
                 // Reset toggle state
             }
             // Auto-stop when 3 balls are collected
             if (colorSensor.artifactcounter >= 3) {
+//                RGBled.INSTANCE.close();
                 // Turn off intake and transfer
                 CompliantIntake.INSTANCE.off();
                 Transfer.INSTANCE.off();

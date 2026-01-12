@@ -19,42 +19,45 @@ public class SimpleLL {
     private final double MAX_POWER  = 0.8;   //1-0.8      // was 0.1
 
     // Proportional gains for different distances
-    private double kP_CLOSE = 0.008;//0.008  // For close alignmentc0.13
-    private final double kP_FAR = 0.006;   // For far alignment
+    private double kP_CLOSE = 0.011;//0.008  // For close alignmentc0.13
+    private final double kP_FAR = 0.009;   // For far alignment
+
+    // Offset for far alignment
+    private final double FAR_OFFSET = 4.0;  // degrees offset for far shots
+    private final double CLOSE_OFFSET = 3; // no offset for close shots
 
     private boolean isAligning = false;
     double voltage;
+
     public SimpleLL(HardwareMap hardwareMap, RedExperimentalDistanceLExtractor limelight, VoltageGet voltageGet) {
         this.turretServo = hardwareMap.get(CRServo.class, "turret");
         this.limelight = limelight;
         this.voltageGet = voltageGet;
         voltageGet.init(hardwareMap);
-
     }
-
 
     public void setTelemetry(Telemetry telemetry) {
         this.telemetry = telemetry;
     }
 
     /**
-     * Aligns the turret for CLOSE distances (kP = 0.01)
+     * Aligns the turret for CLOSE distances (kP = 0.008, NO offset)
      */
     public void closeAlign() {
-        alignWithKp(kP_CLOSE);
+        alignWithKpAndOffset(kP_CLOSE, CLOSE_OFFSET);
     }
 
     /**
-     * Aligns the turret for FAR distances (kP = 0.004)
+     * Aligns the turret for FAR distances (kP = 0.006, WITH 5° offset)
      */
     public void farAlign() {
-        alignWithKp(kP_FAR);
+        alignWithKpAndOffset(kP_FAR, FAR_OFFSET);
     }
 
     /**
-     * Internal alignment method with configurable kP
+     * Internal alignment method with configurable kP and offset
      */
-    private void alignWithKp(double kP) {
+    private void alignWithKpAndOffset(double kP, double offset) {
         Double tx = limelight.getTx();
         voltage = voltageGet.getVoltage();
 //        if (voltage<13){
@@ -64,7 +67,6 @@ public class SimpleLL {
 //            kP_CLOSE=0.006;
 //        }
 
-
         // Check if we have valid target data
         if (tx == null) {
             tx = 0.0;
@@ -72,29 +74,31 @@ public class SimpleLL {
             return;
         }
 
-
         isAligning = true;
 
+        // Apply offset to tx error
+        double adjustedTx = tx + offset;
+
         // If we're within the alignment threshold, stop
-        if (Math.abs(tx) <= ALIGNMENT_THRESHOLD) {
+        if (Math.abs(adjustedTx) <= ALIGNMENT_THRESHOLD) {
             stopTurret();
             return;
         }
 
         // Determine power based on error magnitude
-        double power = BASE_POWER + (kP * Math.abs(tx));
+        double power = BASE_POWER + (kP * Math.abs(adjustedTx));
 
         // Clamp to max power
         if (power > MAX_POWER) {
             power = MAX_POWER;
         }
 
-        // Determine direction based on tx value
+        // Determine direction based on adjusted tx value
         // If tx > 1 (target is to the RIGHT in the image), turn LEFT so the camera points right
         // If tx < -1 (target is to the LEFT in the image), turn RIGHT so the camera points left
-        if (tx > ALIGNMENT_THRESHOLD) {
+        if (adjustedTx > ALIGNMENT_THRESHOLD) {
             turretServo.setPower(-power);  // Turn LEFT
-        } else if (tx < -ALIGNMENT_THRESHOLD) {
+        } else if (adjustedTx < -ALIGNMENT_THRESHOLD) {
             turretServo.setPower(power);   // Turn RIGHT
         } else {
             stopTurret();
@@ -102,7 +106,7 @@ public class SimpleLL {
     }
 
     /**
-     * Legacy align() method - defaults to far alignment
+     * Legacy align() method - defaults to far alignment (WITH offset)
      */
     public void align() {
         farAlign();

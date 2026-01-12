@@ -50,8 +50,8 @@ public class TurretPID implements Subsystem {
             .basicFF(0.0001, 0, 0.044) // Basic feedforward with kV=0.0001, kA=0.0, kS=0.01
             .build();
 
-    // Set the goal velocity to 500 units per second
 
+    // Set the goal velocity to 500 units per second
 
 
     public Command setCloseShooterSpeed(){
@@ -59,7 +59,7 @@ public class TurretPID implements Subsystem {
         //hood.INSTANCE.close();
         return new RunToVelocity(
                 controller,
-                1500, // distance*3.03 1500 close
+                1400, // distance*3.03 1500 close
                 5
         ).requires(this);
     }
@@ -95,7 +95,7 @@ public class TurretPID implements Subsystem {
         //hood.INSTANCE.open();
         return new RunToVelocity(
                 controller,
-                1800, //1800 for far
+                1600, //1800 for far
                 5
         ).requires(this);
     }
@@ -104,7 +104,7 @@ public class TurretPID implements Subsystem {
         //hood.INSTANCE.open();
         return new RunToVelocity(
                 controller,
-                1375, //1800 for far
+                1300, //1800 for far
                 5
         ).requires(this);
     }
@@ -124,7 +124,7 @@ public class TurretPID implements Subsystem {
         //hood.INSTANCE.midopen();
         return new RunToVelocity(
                 controller,
-                1600, // 700
+                1550, // 700
                 5
         ).requires(this);
     }
@@ -152,7 +152,8 @@ public class TurretPID implements Subsystem {
         turret.setPower(
                 controller.calculate(
                         turret.getState()
-                )
-        );
+                ));
+
+
     }
 }

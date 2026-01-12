@@ -196,7 +196,7 @@ public class RedClose extends NextFTCOpMode {
                     Transfer.INSTANCE.off();
 //                    CompliantIntake.INSTANCE.off();
 //                    TurretPID.INSTANCE.setFarShooterSpeed();
-                    secondshotforyouuuuu();
+                    scheduleOuttake();
                     follower.followPath(scorePickup1, true);
                     setPathState(3);
                 }
@@ -221,7 +221,7 @@ public class RedClose extends NextFTCOpMode {
             case 5:
                 if (!follower.isBusy()) {
                     follower.followPath(scorePickup2);
-                    secondshotforyouuuuu();
+                    scheduleOuttake();
                     setPathState(6);
                 }
                 break;
@@ -274,7 +274,7 @@ public class RedClose extends NextFTCOpMode {
         TurretPID.INSTANCE.setMidCloseShooterSpeed().schedule();
     }
     private void secondshotforyouuuuu() {
-        TurretPID.INSTANCE.setMidCloseShooterSpeed().schedule();
+        TurretPID.INSTANCE.shotforyou().schedule();
     }
     private void Intake() {
         CompliantIntake.INSTANCE.on();
@@ -292,15 +292,16 @@ public class RedClose extends NextFTCOpMode {
     private void GateIntake() {
         CompliantIntake.INSTANCE.on();
         Transfer.INSTANCE.advance();
-        new Delay(3);
+        sleep(1000);
         Transfer.INSTANCE.off();
 
     }
 
     private void shootThreeBalls() {
+        sleep(500);
         CompliantIntake.INSTANCE.on();
         Transfer.INSTANCE.on();
-        new Delay(1.3);
+        sleep(1500);
         CompliantIntake.INSTANCE.off();
         Transfer.INSTANCE.off();
     }

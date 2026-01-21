@@ -20,8 +20,7 @@ import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
 @TeleOp
-public class TurretOdoTele implements NextFTCOpMode {
-
+public class TurretOdoTele extends NextFTCOpMode {
 
     public TurretOdoTele() {
         addComponents(
@@ -38,6 +37,7 @@ public class TurretOdoTele implements NextFTCOpMode {
     public void onStartButtonPressed() {
         telemetry.addData("X", TurretOdo.INSTANCE.getx());
         telemetry.addData("Y", TurretOdo.INSTANCE.gety());
+        telemetry.addData("TAngle", TurretOdo.INSTANCE.getTAngle());
         telemetry.addData("Heading", TurretOdo.INSTANCE.getheading());
         telemetry.update();
     }

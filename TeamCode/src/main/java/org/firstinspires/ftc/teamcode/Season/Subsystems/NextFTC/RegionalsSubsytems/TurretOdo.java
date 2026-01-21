@@ -43,26 +43,27 @@ public class TurretOdo implements Subsystem {
             Math.atan2(yr - yb, xr - xb)
     );
 
-
     public void TurretAngleCalc() {
         TurretAngle = yxangleDeg - heading;
         if (TurretAngle < 0) {
             TurretAngle += 360;
-
         }
 
         // Servo Rotation
+
     };
 
     public double getx() {
         return x;
     }
-
     public double gety() {
         return y;
     }
     public double getheading() {
         return heading;
+    }
+    public double getTAngle() {
+        return TurretAngle;
     }
 
 }

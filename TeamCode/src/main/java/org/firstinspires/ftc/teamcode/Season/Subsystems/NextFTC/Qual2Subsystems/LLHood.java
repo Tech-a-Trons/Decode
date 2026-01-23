@@ -1,12 +1,12 @@
 package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems;
 
 import dev.nextftc.core.subsystems.Subsystem;
-import dev.nextftc.hardware.impl.CRServoEx;
 import dev.nextftc.hardware.impl.ServoEx;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Hood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
 
 @Config

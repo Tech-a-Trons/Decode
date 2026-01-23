@@ -1,11 +1,11 @@
 package org.firstinspires.ftc.teamcode.Season.Pedro.auto;
 
 import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.AutoOuttake;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.BlueLL;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Hood;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.RedLL;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RobotContext;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Transfer;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Turret;
@@ -26,10 +26,10 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "RedFar", group = "Examples")
-public class RedFar extends NextFTCOpMode {
+@Autonomous(name = "BlueFar", group = "Examples")
+public class BlueFar extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
-    public RedFar() {
+    public BlueFar() {
         addComponents(
                 new SubsystemComponent(AutoOuttake.INSTANCE, Hood.INSTANCE, CompliantIntake.INSTANCE,Transfer.INSTANCE, Turret.INSTANCE),
                 BulkReadComponent.INSTANCE,
@@ -42,7 +42,7 @@ public class RedFar extends NextFTCOpMode {
     private Timer pathTimer, opmodeTimer;
     private int pathState;
 
-    private final Pose startPose = new Pose(87.3137137494973, 8.174520756065958, Math.toRadians(0));
+    private final Pose startPose = new Pose(87.3137137494973, 8.174520756065958, Math.toRadians(180));
     //    private final Pose scorePose = new Pose(90, 90, Math.toRadians(215));
     private final Pose scorePose = new Pose(132.8115107913669, 12.846043165467632, Math.toRadians(0));
 
@@ -56,8 +56,8 @@ public class RedFar extends NextFTCOpMode {
     private final Pose pickup3Pose = new Pose(12, 84, Math.toRadians(0));
 
     private Path scorePreload;
-    private RedExperimentalDistanceLExtractor limelight;
-    private RedLL turretAlignment;
+    private BlueExperimentalDistanceLExtractor limelight;
+    private BlueLL turretAlignment;
 
 
     private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
@@ -78,20 +78,20 @@ public class RedFar extends NextFTCOpMode {
 //                )
                 .addPath(
                         new BezierCurve(
-                                new Pose(87.314, 9),
-                                new Pose(89.715, 9),
-                                new Pose(130, 9)
+                                new Pose(87.314, 9).mirror(),
+                                new Pose(89.715, 9).mirror(),
+                                new Pose(132, 9).mirror()
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
 
                 .addPath(
                         new BezierLine(
-                                new Pose(130, 9 ),
+                                new Pose(132, 9).mirror(),
 
-                                new Pose(130, 12.846)
+                                new Pose(132, 12.846).mirror()
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
 
 
@@ -100,31 +100,31 @@ public class RedFar extends NextFTCOpMode {
         grabPrePickup2 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
-                                new Pose(83.706, 11.810),
-                                new Pose(88.886, 37.502),
-                                new Pose(125, 36.259)
+                                new Pose(83.706, 11.810).mirror(),
+                                new Pose(88.886, 37.502).mirror(),
+                                new Pose(132, 36.259).mirror()
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
                 .build();
         scorePickup1 = follower.pathBuilder()
                 .addPath(
                         new BezierLine(
-                                new Pose(130, 12.846),
+                                new Pose(132, 12.846).mirror(),
 
-                                new Pose(83.706, 11.810)
+                                new Pose(83.706, 11.810).mirror()
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
                 .build();
         scorePickup2 = follower.pathBuilder()
                 .addPath(
                         new BezierLine(
-                                new Pose(125, 36.259),
+                                new Pose(132, 36.259).mirror(),
 
-                                new Pose(83.292, 11.810)
+                                new Pose(83.292, 11.810).mirror()
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
                 .build();
 //        grabPickup2 = follower.pathBuilder()
@@ -138,77 +138,77 @@ public class RedFar extends NextFTCOpMode {
         leave = follower.pathBuilder()
                 .addPath(
                         new BezierLine(
-                                new Pose(83.292, 12.017),
+                                new Pose(83.292, 12.017).mirror(),
 
-                                new Pose(98.632, 23.219)
+                                new Pose(98.632, 23.219).mirror()
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
                 .build();
 
         grabPickup3 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
-                                new Pose(87.314, 8.175),
-                                new Pose(89.715, 8.288),
-                                new Pose(125, 7.666)
+                                new Pose(87.314, 9).mirror(),
+                                new Pose(89.715, 9).mirror(),
+                                new Pose(132, 9).mirror()
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
 
                 .addPath(
                         new BezierLine(
-                                new Pose(125, 7.666),
+                                new Pose(132, 9).mirror(),
 
-                                new Pose(125, 12.846)
+                                new Pose(132, 12.846).mirror()
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
 
         scorePickup3 = follower.pathBuilder()
                 .addPath(
                         new BezierLine(
-                                new Pose(125, 12.846),
+                                new Pose(132, 12.846).mirror(),
 
-                                new Pose(83.292, 12.017)
+                                new Pose(83.292, 12.017).mirror()
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
         grabPickup4 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
-                                new Pose(83.292, 12.017),
-                                new Pose(89.715, 8.288),
-                                new Pose(125, 7.666)
+                                new Pose(83.292, 12.017).mirror(),
+                                new Pose(89.715, 9).mirror(),
+                                new Pose(132, 9).mirror()
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
 
                 .addPath(
                         new BezierLine(
-                                new Pose(125, 7.666),
+                                new Pose(132, 9).mirror(),
 
-                                new Pose(125, 12.846)
+                                new Pose(132, 12.846).mirror()
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
         scorePickup4 = follower.pathBuilder()
                 .addPath(
                         new BezierLine(
-                                new Pose(125, 12.846),
+                                new Pose(132, 12.846).mirror(),
 
-                                new Pose(83.292, 12.017)
+                                new Pose(83.292, 12.017).mirror()
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
     }
 
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-               scheduleOuttake();
-                Hood.INSTANCE.midclose();
-                turretAlignment.farAuto();
+                firstshot();
+                Hood.INSTANCE.midopen();
+                turretAlignment.farAlign();
                 setPathState(1);
 
                 break;
@@ -231,7 +231,7 @@ public class RedFar extends NextFTCOpMode {
                     Transfer.INSTANCE.off();
 //                    CompliantIntake.INSTANCE.off();
 //                    TurretPID.INSTANCE.setFarShooterSpeed();
-                    scheduleOuttake();
+                    secondshotforyouuuuu();
                     follower.followPath(scorePickup1, true);
                     setPathState(3);
                 }
@@ -240,7 +240,7 @@ public class RedFar extends NextFTCOpMode {
             case 3:
                 if (!follower.isBusy()) {
                     turretAlignment.align();
-                    letmotorspeed();
+                    shootThreeBalls();
                     Intake();
                     setPathState(4);
                 }
@@ -248,12 +248,16 @@ public class RedFar extends NextFTCOpMode {
 
             case 4:
                 if (!follower.isBusy()) {
+                    follower.followPath(grabPrePickup2);
+                    Intake();
                     setPathState(5);
                 }
                 break;
 
             case 5:
                 if (!follower.isBusy()) {
+                    follower.followPath(scorePickup2);
+                    secondshotforyouuuuu();
                     setPathState(6);
                 }
                 break;
@@ -261,9 +265,9 @@ public class RedFar extends NextFTCOpMode {
             case 6:
                 if (!follower.isBusy()) {
                     turretAlignment.align();
-                    letmotorspeed();
+                    shootThreeBalls();
                     Intake();
-                    follower.followPath(grabPickup4);
+                    follower.followPath(grabPickup3);
                     setPathState(7);
                 }
                 break;
@@ -271,20 +275,22 @@ public class RedFar extends NextFTCOpMode {
             case 7:
                 if (!follower.isBusy()) {
                     secondshotforyouuuuu();
-                    follower.followPath(scorePickup4);
+                    follower.followPath(scorePickup3);
                     setPathState(8);
                 }
                 break;
             case 8:
                 if (!follower.isBusy()) {
-                    letmotorspeed();
-                    follower.followPath(leave);
-                  //intake again
-                    setPathState(-1);
+                    shootThreeBalls();
+                    Intake();
+                    follower.followPath(grabPickup4);
+                    //intake again
+                    setPathState(9);
                 }
                 break;
             case 9:
                 if (!follower.isBusy()) {
+                    follower.followPath(scorePickup4);
                     //shoot the 15th
                     setPathState(10);
                 }
@@ -321,11 +327,11 @@ public class RedFar extends NextFTCOpMode {
     private void savePose() { // runs when auto finishes
         RobotContext.lastPose = follower.getPose();
     }
-    private void scheduleOuttake() {
+    private void firstshot() {
         AutoOuttake.INSTANCE.setShooterSpeed(1550).schedule();
     }
     private void secondshotforyouuuuu() {
-        AutoOuttake.INSTANCE.setShooterSpeed(1550).schedule();
+        AutoOuttake.INSTANCE.setShooterSpeed(1500).schedule();
     }
     private void Intake() {
         CompliantIntake.INSTANCE.on();
@@ -339,20 +345,19 @@ public class RedFar extends NextFTCOpMode {
         );
         TurretPID.INSTANCE.newshooterdistance(distance).schedule();
     }
+    private void GateIntake() {
+        CompliantIntake.INSTANCE.on();
+        Transfer.INSTANCE.advance();
+        sleep(1500);
+        Transfer.INSTANCE.off();
 
+    }
     private void letmotorspeed() {
         sleep(1300);
+
         CompliantIntake.INSTANCE.on();
         Transfer.INSTANCE.on();
-        sleep(700);
-        AutoOuttake.INSTANCE.setShooterSpeed(1520);
-        CompliantIntake.INSTANCE.off();
-        Transfer.INSTANCE.off();
-        sleep(700);
-        CompliantIntake.INSTANCE.on();
-        Transfer.INSTANCE.on();
-        AutoOuttake.INSTANCE.setShooterSpeed(1515);
-        sleep(700);
+        sleep(1300);
         CompliantIntake.INSTANCE.off();
         Transfer.INSTANCE.off();
     }
@@ -436,8 +441,8 @@ public class RedFar extends NextFTCOpMode {
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
         volt.init(hardwareMap);
-        limelight = new RedExperimentalDistanceLExtractor(hardwareMap);
-        turretAlignment = new RedLL(hardwareMap, limelight,    voltageGet);
+        limelight = new BlueExperimentalDistanceLExtractor(hardwareMap);
+        turretAlignment = new BlueLL(hardwareMap, limelight,    voltageGet);
         limelight.startReading();
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
@@ -452,7 +457,7 @@ public class RedFar extends NextFTCOpMode {
     }
 
     @Override public void onStop() {
-        AutoOuttake.INSTANCE.resetShooter().schedule();
+        TurretPID.INSTANCE.resetShooter().schedule();
 
     }
 

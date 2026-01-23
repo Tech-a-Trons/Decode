@@ -8,9 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.ExperimentalRedTurretPID;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Hood;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.ExperimentalBlueTurretPID;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.ExperimentalRedTurretPID;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Hood;
 
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;

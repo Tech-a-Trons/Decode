@@ -1,10 +1,11 @@
 package org.firstinspires.ftc.teamcode.Personal.Niranjan;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.CRServo;
-
+@Disabled
 @TeleOp(name="TurretOdoTest")
 public class TurretOdoTest extends LinearOpMode {
 

@@ -6,16 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Hood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.ExperimentalBlueTurretPID;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
-
-import dev.nextftc.core.components.BindingsComponent;
-import dev.nextftc.core.components.SubsystemComponent;
-import dev.nextftc.ftc.Gamepads;
-import dev.nextftc.ftc.NextFTCOpMode;
-import dev.nextftc.ftc.components.BulkReadComponent;
 
 @Disabled
 @TeleOp

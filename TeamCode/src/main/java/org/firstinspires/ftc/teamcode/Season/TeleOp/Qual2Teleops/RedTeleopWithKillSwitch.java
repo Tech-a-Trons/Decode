@@ -1,6 +1,7 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.Qual2Teleops;
 
 
+import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RobotContext.lastPose;
 import static dev.nextftc.bindings.Bindings.button;
 
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -10,7 +11,6 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
@@ -22,7 +22,8 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsyte
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Transfer;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Turret;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.VisionEncoderTurret;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.SimpleLL;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
 
 import java.util.function.Supplier;
 
@@ -35,16 +36,16 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 import dev.nextftc.hardware.driving.MecanumDriverControlled;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.extensions.pedro.PedroComponent;
-@Disabled
-@TeleOp(name = "VisionEncoderTele")
-public class VisionEncoderTele extends NextFTCOpMode {
 
-    // Limelight and alignment controller with encoder feedback
+@TeleOp
+public class RedTeleopWithKillSwitch extends NextFTCOpMode {
+
+    // Limelight and alignment controller
     private RedExperimentalDistanceLExtractor limelight;
-    private VisionEncoderTurret turretAlignment;
+    private SimpleLL turretAlignment;
     private ColorSensor colorSensor;
 
-    public VisionEncoderTele() {
+    public RedTeleopWithKillSwitch() {
         addComponents(
                 new SubsystemComponent(
                         TurretPID.INSTANCE,
@@ -63,7 +64,7 @@ public class VisionEncoderTele extends NextFTCOpMode {
     private final MotorEx frontRightMotor = new MotorEx("fr");
     private final MotorEx backLeftMotor = new MotorEx("bl").reversed();
     private final MotorEx backRightMotor = new MotorEx("br");
-    private boolean turretLimelightEnabled = false;
+    private boolean turretLimelightEnabled = true;
 
     private boolean automatedDrive;
     private Supplier<PathChain> farscore;
@@ -74,8 +75,8 @@ public class VisionEncoderTele extends NextFTCOpMode {
     private double slowModeMultiplier = 0.5;
 
     // Target position for turret (adjust to your field coordinates)
-    private static final double TARGET_X = 121;
-    private static final double TARGET_Y = 121;
+    private static final double TARGET_X = 121;  // Example: center of field
+    private static final double TARGET_Y = 121;  // Example: center of field
 
     // Distance threshold for switching between close and far align (tune this value)
     private static final double DISTANCE_THRESHOLD = 90.0; // Adjust based on testing
@@ -85,12 +86,13 @@ public class VisionEncoderTele extends NextFTCOpMode {
     private Pose Park = new Pose(38.74532374100719,33.358273381294964,90);
     private boolean intakeToggle = false;
     private long intakeStartTime = 0;
+    private VoltageGet voltageGet;
 
     @Override
     public void onStartButtonPressed() {
-        // Initialize Limelight and Vision+Encoder turret alignment
+        // Initialize Limelight and turret alignment
         limelight = new RedExperimentalDistanceLExtractor(hardwareMap);
-        turretAlignment = new VisionEncoderTurret(hardwareMap, limelight);
+        turretAlignment = new SimpleLL(hardwareMap, limelight,voltageGet);
         colorSensor = new ColorSensor(hardwareMap);
 
         limelight.startReading();
@@ -110,7 +112,7 @@ public class VisionEncoderTele extends NextFTCOpMode {
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(PedroComponent.follower()::getHeading, Math.toRadians(0), 0.8))
                 .build();
 
-        PedroComponent.follower().setPose(new Pose(120.587, 69.410, Math.toRadians(0)));
+        PedroComponent.follower().setPose(lastPose);
         PedroComponent.follower().startTeleopDrive();
 
         // Setup driving
@@ -124,19 +126,18 @@ public class VisionEncoderTele extends NextFTCOpMode {
                 Gamepads.gamepad1().rightStickX()
         );
 
-        // ========== VISION+ENCODER TURRET CONTROLS ==========
+        // ========== LIMELIGHT TURRET CONTROLS ==========
 
-        // B Button: Toggle Vision+Encoder auto-alignment on/off
+        // B Button: Toggle Limelight auto-alignment on/off
         Gamepads.gamepad1().b()
                 .whenBecomesTrue(() -> {
                     turretLimelightEnabled = !turretLimelightEnabled;
 
                     if (!turretLimelightEnabled) {
                         turretAlignment.stopTurret();
-                        telemetryM.addData("Vision+Encoder Turret", "Auto-Align Disabled");
+                        telemetryM.addData("Limelight Turret", "Auto-Align Disabled");
                     } else {
-                        turretAlignment.resetPID();
-                        telemetryM.addData("Vision+Encoder Turret", "Auto-Align Enabled");
+                        telemetryM.addData("Limelight Turret", "Auto-Align Enabled");
                     }
                 });
 
@@ -147,13 +148,6 @@ public class VisionEncoderTele extends NextFTCOpMode {
                     turretAlignment.stopTurret();
                     CompliantIntake.INSTANCE.repel();
                     telemetryM.addData("Turret", "Stopped & Intake Reset");
-                });
-
-        // X Button: Calibrate encoder (set current position as 0°)
-        Gamepads.gamepad1().x()
-                .whenBecomesTrue(() -> {
-                    turretAlignment.calibrateEncoder();
-                    telemetryM.addData("Turret", "Encoder Calibrated");
                 });
 
         // ========== EXISTING CONTROLS ==========
@@ -200,7 +194,7 @@ public class VisionEncoderTele extends NextFTCOpMode {
                     TurretPID.hasShot = false;
                 });
 
-        // D-pad Down: Reset position to middle
+        // D-pad Down: Reset position to corner
         Gamepads.gamepad1().dpadDown()
                 .whenBecomesTrue(() -> {
                     PedroComponent.follower().setPose(Middle);
@@ -233,7 +227,7 @@ public class VisionEncoderTele extends NextFTCOpMode {
 
     @Override
     public void onUpdate() {
-        if (!automatedDrive) {
+        if (!automatedDrive && !gamepad2.y) {
             //Make the last parameter false for field-centric
             //In case the drivers want to use a "slowMode" you can scale the vectors
             //This is the normal version to use in the TeleOp
@@ -246,17 +240,14 @@ public class VisionEncoderTele extends NextFTCOpMode {
         }
 
         PedroComponent.follower().update();
-
-        // Calculate distance to target for hood control and alignment mode selection
+        double targetVel = TurretPID.activeTargetVelocity;
+        double actualVel = TurretPID.turret.getVelocity();
         Pose robotPose = PedroComponent.follower().getPose();
         double distanceToTarget = Math.hypot(TARGET_X - robotPose.getX(), TARGET_Y - robotPose.getY());
 
         // Distance threshold for close hood mode (in inches, tune this value)
         final double CLOSE_HOOD_DISTANCE = 20.0;
 
-        // Hood control based on distance
-        double targetVel = TurretPID.activeTargetVelocity;
-        double actualVel = TurretPID.turret.getVelocity();
 
         if (distanceToTarget <= CLOSE_HOOD_DISTANCE) {
             // Close to goal: Use close hood mode, NO velocity correction
@@ -268,13 +259,15 @@ public class VisionEncoderTele extends NextFTCOpMode {
             }
         }
 
-        // Update Vision+Encoder turret alignment when enabled with automatic mode selection
+        // Calculate distance to target for alignment mode selection
+
+        // Update Limelight turret alignment when enabled with automatic mode selection
         if (turretLimelightEnabled) {
             // Automatically choose alignment mode based on distance
             if (distanceToTarget > DISTANCE_THRESHOLD) {
-                turretAlignment.farAlign();  // Standard PID (kP = 0.08)
+                turretAlignment.farAlign();  // Use far alignment (kP = 0.004)
             } else {
-                turretAlignment.closeAlign(); // More aggressive (kP = 0.12)
+                turretAlignment.closeAlign(); // Use close alignment (kP = 0.01)
             }
         }
 
@@ -282,11 +275,17 @@ public class VisionEncoderTele extends NextFTCOpMode {
         // Only count balls when intake is active
         if (intakeToggle) {
             colorSensor.IncountBalls();
+            if (colorSensor.artifactcounter>0){
+//                RGBled.INSTANCE.open();
+            }
             if (colorSensor.artifactcounter >= 2) {
                 Transfer.INSTANCE.advance();
+//                RGBled.INSTANCE.midopen();
+                // Reset toggle state
             }
             // Auto-stop when 3 balls are collected
             if (colorSensor.artifactcounter >= 3) {
+//                RGBled.INSTANCE.close();
                 // Turn off intake and transfer
                 CompliantIntake.INSTANCE.off();
                 Transfer.INSTANCE.off();
@@ -302,32 +301,61 @@ public class VisionEncoderTele extends NextFTCOpMode {
                 colorSensor.artifactcounter = 0;
             }
         }
+        Gamepads.gamepad2().b()
+                .whenTrue(() -> {
+                    turretLimelightEnabled = false;
+                    turretAlignment.stopTurret();
+                    CompliantIntake.INSTANCE.repel();
+                    telemetryM.addData("Turret", "Stopped & Intake Reset");
+                });
+
+        Gamepads.gamepad2().y()
+                .whenTrue(() -> {
+                    frontLeftMotor.setPower(0);
+                    frontRightMotor.setPower(0);
+                    backLeftMotor.setPower(0);
+                    backRightMotor.setPower(0);
+                });
+        limelight.update();
+
+        Gamepads.gamepad2().leftBumper()
+                .whenBecomesTrue(() -> {
+                    colorSensor.artifactcounter -= 1;
+                });
+        Gamepads.gamepad2().rightBumper()
+                .whenBecomesTrue(() -> {
+                    colorSensor.artifactcounter += 1;
+                });  Gamepads.gamepad2().b()
+                .whenTrue(() -> {
+                    turretLimelightEnabled = false;
+                    turretAlignment.stopTurret();
+                    CompliantIntake.INSTANCE.repel();
+                    telemetryM.addData("Turret", "Stopped & Intake Reset");
+                });
+
+        Gamepads.gamepad2().y()
+                .whenTrue(() -> {
+                    frontLeftMotor.setPower(0);
+                    frontRightMotor.setPower(0);
+                    backLeftMotor.setPower(0);
+                    backRightMotor.setPower(0);
+                });
+        limelight.update();
+
+        Gamepads.gamepad2().leftBumper()
+                .whenBecomesTrue(() -> {
+                    colorSensor.artifactcounter -= 1;
+                });
+        Gamepads.gamepad2().rightBumper()
+                .whenBecomesTrue(() -> {
+                    colorSensor.artifactcounter += 1;
+                });
+
 
         limelight.update();
 
-        telemetryM.update();
 
         // ========== TELEMETRY ==========
-        telemetryM.debug("position", robotPose);
-        telemetryM.debug("velocity", PedroComponent.follower().getVelocity());
-        telemetryM.debug("automatedDrive", automatedDrive);
 
-        // Vision+Encoder Turret telemetry
-        telemetryM.debug("turret_enabled", turretLimelightEnabled);
-        telemetryM.debug("LL_target_visible", limelight.isTargetVisible());
-        telemetryM.debug("LL_tx", limelight.getTx() != null ? String.format("%.2f°", limelight.getTx()) : "N/A");
-        telemetryM.debug("turret_current_angle", String.format("%.2f°", turretAlignment.getCurrentAngle()));
-        telemetryM.debug("turret_aligned", turretAlignment.isAligned());
-        telemetryM.debug("encoder_voltage", String.format("%.3fV", hardwareMap.get(com.qualcomm.robotcore.hardware.AnalogInput.class, "turret_encoder").getVoltage()));
-
-        // Show distance to target and which modes are active
-        telemetryM.debug("distance_to_target", String.format("%.2f", distanceToTarget));
-        telemetryM.debug("alignment_mode", distanceToTarget > DISTANCE_THRESHOLD ? "FAR (kP=0.08)" : "CLOSE (kP=0.12)");
-        telemetryM.debug("hood_mode", distanceToTarget <= CLOSE_HOOD_DISTANCE ? "CLOSE (No Correction)" : "FAR (Velocity Correction)");
-
-        // Color sensor telemetry
-        telemetryM.debug("intake_active", intakeToggle);
-        telemetryM.debug("ball_count", colorSensor.artifactcounter);
-        telemetryM.debug("color_detected", colorSensor.getColor() != null ? colorSensor.getColor() : "None");
     }
 }

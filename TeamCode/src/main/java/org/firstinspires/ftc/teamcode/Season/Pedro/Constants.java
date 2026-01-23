@@ -29,7 +29,7 @@ public class Constants {
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.012, 0, 0, 0.6 ,0));
 
     public static MecanumConstants driveConstants = new MecanumConstants()
-            .leftFrontMotorName("fl")
+            .leftFrontMotorName("fl").useBrakeModeInTeleOp(true)
             .leftRearMotorName("bl")
             .rightFrontMotorName("fr")
             .rightRearMotorName("br")

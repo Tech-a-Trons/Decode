@@ -29,11 +29,11 @@ public class TurretOdo implements Subsystem {
          y = currentPose.getY();
          heading = currentPose.getHeading();
     }
-    // Black dot (origin of angle)
+    // robot (origin of angle)
     double xb = x;
     double yb = y;
 
-    // Red dot (target)
+    // Red goal (target)
     double xr = 121;
     double yr = 121;
 

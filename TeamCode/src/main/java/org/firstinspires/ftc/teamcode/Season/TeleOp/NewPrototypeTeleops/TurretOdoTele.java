@@ -37,8 +37,9 @@ public class TurretOdoTele extends NextFTCOpMode {
     public void onStartButtonPressed() {
         telemetry.addData("X", TurretOdo.INSTANCE.getx());
         telemetry.addData("Y", TurretOdo.INSTANCE.gety());
-        telemetry.addData("TAngle", TurretOdo.INSTANCE.getTAngle());
         telemetry.addData("Heading", TurretOdo.INSTANCE.getheading());
+        telemetry.addData("TAngle", TurretOdo.INSTANCE.getTAngle());
+
         telemetry.update();
     }
 }

@@ -25,7 +25,7 @@ public class TurretOdoTele extends NextFTCOpMode {
     public TurretOdoTele() {
         addComponents(
                 new SubsystemComponent(
-                       TurretOdo.INSTANCE
+                       TurretOdoAi.INSTANCE
                 ),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE,

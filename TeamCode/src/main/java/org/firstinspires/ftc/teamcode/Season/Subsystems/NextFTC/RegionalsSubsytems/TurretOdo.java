@@ -28,6 +28,15 @@ public class TurretOdo implements Subsystem {
          x = currentPose.getX();
          y = currentPose.getY();
          heading = currentPose.getHeading();
+
+        double yxangleDeg = Math.toDegrees(
+                Math.atan2(yr - yb, xr - xb)
+        );
+
+         TurretAngle = yxangleDeg - heading;
+        if (TurretAngle < 0) {
+            TurretAngle += 360;
+        }
     }
     // robot (origin of angle)
     double xb = x;
@@ -38,21 +47,8 @@ public class TurretOdo implements Subsystem {
     double yr = 121;
 
     double TurretAngle = 0;
+
     //Math Functions
-    double yxangleDeg = Math.toDegrees(
-            Math.atan2(yr - yb, xr - xb)
-    );
-
-    public void TurretAngleCalc() {
-        TurretAngle = yxangleDeg - heading;
-        if (TurretAngle < 0) {
-            TurretAngle += 360;
-        }
-
-        // Servo Rotation
-
-    };
-
     public double getx() {
         return x;
     }
@@ -65,6 +61,8 @@ public class TurretOdo implements Subsystem {
     public double getTAngle() {
         return TurretAngle;
     }
+    //Servo Moving Code After
+
 
 }
 

@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Turret;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.TurretPID;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdo;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdoAi;
 
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
@@ -24,9 +25,7 @@ public class TurretOdoTele extends NextFTCOpMode {
 
     public TurretOdoTele() {
         addComponents(
-                new SubsystemComponent(
-                       TurretOdoAi.INSTANCE
-                ),
+                new SubsystemComponent(TurretOdoAi.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE,
                 new PedroComponent(Constants::createFollower)
@@ -35,11 +34,22 @@ public class TurretOdoTele extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-        telemetry.addData("X", TurretOdo.INSTANCE.getx());
-        telemetry.addData("Y", TurretOdo.INSTANCE.gety());
-        telemetry.addData("Heading", TurretOdo.INSTANCE.getheading());
-        telemetry.addData("TAngle", TurretOdo.INSTANCE.getTAngle());
+        // initialize hardware first
+        TurretOdoAi.INSTANCE.init(hardwareMap);
 
-        telemetry.update();
+        waitForStart(); // wait for match start
+
+        while (opModeIsActive()) {
+            TurretOdoAi.INSTANCE.periodic();
+
+            telemetry.addData("X", TurretOdoAi.INSTANCE.getX());
+            telemetry.addData("Y", TurretOdoAi.INSTANCE.getY());
+            telemetry.addData("Heading", TurretOdoAi.INSTANCE.getHeading());
+            telemetry.addData("TurretAngleTarget", TurretOdoAi.INSTANCE.getTurretAngleDeg());
+            telemetry.addData("TurretAngleEncoder", TurretOdoAi.INSTANCE.getTurretEncoderAngleDeg());
+            telemetry.update();
+
+
+        }
     }
 }

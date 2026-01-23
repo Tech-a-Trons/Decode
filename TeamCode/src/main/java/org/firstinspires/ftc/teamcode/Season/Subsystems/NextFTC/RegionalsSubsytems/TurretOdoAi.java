@@ -1,13 +1,10 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
+package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.AnalogInput;
-
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdo;
 
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -117,4 +114,5 @@ public class TurretOdoAi implements Subsystem {
     public double getHeading() { return heading; }
     public double getTurretAngleDeg() { return turretAngleDeg; }
     public double getTurretEncoderAngleDeg() { return turretEncoderAngleDeg; }
+
 }

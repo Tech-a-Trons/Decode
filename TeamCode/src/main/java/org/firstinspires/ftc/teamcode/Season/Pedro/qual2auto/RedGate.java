@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.Pedro.auto;
+package org.firstinspires.ftc.teamcode.Season.Pedro.qual2auto;
 
 
 import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
@@ -27,11 +27,11 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "RedSolo", group = "Examples")
-public class RedClose extends NextFTCOpMode {
+@Autonomous(name = "RedGate", group = "Examples")
+public class RedGate extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
-
-    public RedClose() {
+// FIX THE INTAKE POS TO NOT BREAK BOT
+    public RedGate() {
         addComponents(
                 new SubsystemComponent(AutoOuttake.INSTANCE, Hood.INSTANCE, CompliantIntake.INSTANCE,Transfer.INSTANCE),
                 BulkReadComponent.INSTANCE,
@@ -87,14 +87,14 @@ public class RedClose extends NextFTCOpMode {
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
-//                .addPath(
-//                        new BezierCurve(
-//                                new Pose(120, 84.53525179856116),
-//                                new Pose(118.515, 73),
-//                                new Pose(123, 70)
-//                        )
-//                )
-//                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                .addPath(
+                        new BezierCurve(
+                                new Pose(123, 84.53525179856116),
+                                new Pose(118.515, 73),
+                                new Pose(123, 70)
+                        )
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
 
 
@@ -104,7 +104,7 @@ public class RedClose extends NextFTCOpMode {
                         new BezierCurve(
                                 new Pose(85, 85),
                                 new Pose(72.311, 33),
-                                new Pose(130, 30)
+                                new Pose(135, 30)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
@@ -121,7 +121,7 @@ public class RedClose extends NextFTCOpMode {
                 .build();
         scorePickup1 = follower.pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(123, 84.53525179856116), new Pose(83.000, 83.000))
+                        new BezierLine(new Pose(120, 70), new Pose(83.000, 83.000))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -140,7 +140,7 @@ public class RedClose extends NextFTCOpMode {
 ////                .build();
         scorePickup3 = follower.pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(130, 30), new Pose(83, 83))
+                        new BezierLine(new Pose(135, 30), new Pose(83, 83))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -166,7 +166,7 @@ public class RedClose extends NextFTCOpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                Hood.INSTANCE.auto();
+                Hood.INSTANCE.midopen();
 
                 secondshotforyouuuuu();
                 follower.followPath(scorePreload, true);
@@ -190,7 +190,7 @@ public class RedClose extends NextFTCOpMode {
                     Transfer.INSTANCE.off();
 //                    CompliantIntake.INSTANCE.off();
 //                    TurretPID.INSTANCE.setFarShooterSpeed();
-                 scheduleOuttake();
+                    scheduleOuttake();
                     follower.followPath(scorePickup1, true);
                     setPathState(3);
                 }
@@ -239,9 +239,9 @@ public class RedClose extends NextFTCOpMode {
 //
             case 8:
                 if (!follower.isBusy()) {
-                   shootThreeBalls();
-                   follower.followPath(leave);
-                   savePose();
+                    shootThreeBalls();
+                    follower.followPath(leave);
+                    savePose();
                     setPathState(-1);
                 }
                 break;
@@ -266,13 +266,13 @@ public class RedClose extends NextFTCOpMode {
     }
     private void savePose() { // runs when auto finishes
         RobotContext.lastPose = follower.getPose();
-    }
-    private void scheduleOuttake() {
+    }private void scheduleOuttake() {
         AutoOuttake.INSTANCE.setMidCloseShooterSpeed().schedule();
     }
-     private void secondshotforyouuuuu() {
+    private void secondshotforyouuuuu() {
         AutoOuttake.INSTANCE.shotforyou().schedule();
     }
+
     private void Intake() {
         CompliantIntake.INSTANCE.on();
         Transfer.INSTANCE.advance();
@@ -311,13 +311,12 @@ public class RedClose extends NextFTCOpMode {
     @Override
     public void onUpdate() {
         if(pathState>=1){
-           turretAlignment.firstAlign();
+            turretAlignment.firstAlign();
         }
         if (pathState>1){
             turretAlignment.stopTurret();
             turretAlignment.cycleAlign();
         }
-
 
 
         follower.update();
@@ -351,7 +350,7 @@ public class RedClose extends NextFTCOpMode {
     }
 
     @Override public void onStop() {
-       TurretPID.INSTANCE.resetShooter().schedule();
+        TurretPID.INSTANCE.resetShooter().schedule();
 
     }
 

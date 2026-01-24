@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.preQ2PrototypeTeleops;
 
 import static java.lang.Math.atan2;
 
@@ -6,7 +6,6 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;

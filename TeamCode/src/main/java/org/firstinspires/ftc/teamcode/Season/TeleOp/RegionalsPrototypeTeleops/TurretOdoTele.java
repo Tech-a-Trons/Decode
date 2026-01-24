@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.Prototypes.RegionalsPrototypes;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.RegionalsPrototypeTeleops;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -39,8 +39,6 @@ public class TurretOdoTele extends NextFTCOpMode {
             telemetry.addData("TurretAngleTarget", TurretOdoAi.INSTANCE.getTurretAngleDeg());
             telemetry.addData("TurretAngleEncoder", TurretOdoAi.INSTANCE.getTurretEncoderAngleDeg());
             telemetry.update();
-
-
         }
     }
 }

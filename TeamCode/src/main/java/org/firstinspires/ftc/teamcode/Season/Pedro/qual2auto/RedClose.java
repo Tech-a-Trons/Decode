@@ -1,16 +1,14 @@
-package org.firstinspires.ftc.teamcode.Season.Pedro.auto;
+package org.firstinspires.ftc.teamcode.Season.Pedro.qual2auto;
 
 
 import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.BlueExperimentalDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.AutoOuttake;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.BlueLL;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Hood;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.RedLL;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RobotContext;
-
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Transfer;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Turret;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
 
@@ -29,12 +27,13 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "BlueClose", group = "Examples")
-public class BlueClose extends NextFTCOpMode {
+@Autonomous(name = "RedSolo", group = "Examples")
+public class RedClose extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
-    public BlueClose() {
+
+    public RedClose() {
         addComponents(
-                new SubsystemComponent(AutoOuttake.INSTANCE, Hood.INSTANCE, CompliantIntake.INSTANCE,Transfer.INSTANCE, Turret.INSTANCE),
+                new SubsystemComponent(AutoOuttake.INSTANCE, Hood.INSTANCE, CompliantIntake.INSTANCE,Transfer.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE
         );
@@ -45,9 +44,9 @@ public class BlueClose extends NextFTCOpMode {
     private Timer pathTimer, opmodeTimer;
     private int pathState;
 
-    private final Pose startPose = new Pose(122.6, 122.5, Math.toRadians(310)).mirror();
+    private final Pose startPose = new Pose(122.6, 122.5, Math.toRadians(310));
     //    private final Pose scorePose = new Pose(90, 90, Math.toRadians(215));
-    private final Pose scorePose = new Pose(90, 104, Math.toRadians(0)).mirror();
+    private final Pose scorePose = new Pose(90, 104, Math.toRadians(0));
 
     private final Pose preprePickup1 = new Pose(12, 12, Math.toRadians(180));
     private final Pose prePickup1 = new Pose(17.581, 10.0470, Math.toRadians(180));
@@ -59,8 +58,8 @@ public class BlueClose extends NextFTCOpMode {
     private final Pose pickup3Pose = new Pose(12, 84, Math.toRadians(180));
 
     private Path scorePreload;
-    private BlueExperimentalDistanceLExtractor limelight;
-    private BlueLL turretAlignment;
+    private RedExperimentalDistanceLExtractor limelight;
+    private RedLL turretAlignment;
 
 
     private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
@@ -82,12 +81,12 @@ public class BlueClose extends NextFTCOpMode {
 //                )
                 .addPath(
                         new BezierCurve(
-                                new Pose(96, 96).mirror(),
-                                new Pose(79.56258992805755, 78.11223021582734).mirror(),
-                                new Pose(123, 84.53525179856116).mirror()
+                                new Pose(96, 96),
+                                new Pose(79.56258992805755, 78.11223021582734),
+                                new Pose(123, 84.53525179856116)
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 //                .addPath(
 //                        new BezierCurve(
 //                                new Pose(120, 84.53525179856116),
@@ -103,34 +102,34 @@ public class BlueClose extends NextFTCOpMode {
         grabPickup3 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
-                                new Pose(85, 85).mirror(),
-                                new Pose(72.311, 33).mirror(),
-                                new Pose(130, 30).mirror()
+                                new Pose(85, 85),
+                                new Pose(72.311, 33),
+                                new Pose(130, 30)
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
         grabPrePickup2 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
-                                new Pose(96.000, 96.000).mirror(),
-                                new Pose(75.41870503597121, 55.32086330935252).mirror(),
-                                new Pose(131, 53).mirror()
+                                new Pose(96.000, 96.000),
+                                new Pose(75.41870503597121, 55.32086330935252),
+                                new Pose(131, 53)
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
         scorePickup1 = follower.pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(123, 84.53525179856116).mirror(), new Pose(83.000, 83.000).mirror())
+                        new BezierLine(new Pose(123, 84.53525179856116), new Pose(83.000, 83.000))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
         scorePickup2 = follower.pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(131, 53).mirror(), new Pose(83, 83).mirror())
+                        new BezierLine(new Pose(131, 53), new Pose(83, 83))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
 //        grabPickup2 = follower.pathBuilder()
 //
@@ -141,16 +140,16 @@ public class BlueClose extends NextFTCOpMode {
 ////                .build();
         scorePickup3 = follower.pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(130, 30).mirror(), new Pose(83, 83).mirror())
+                        new BezierLine(new Pose(130, 30), new Pose(83, 83))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
 //
         leave = follower.pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(83, 83).mirror(), new Pose(105, 69.410).mirror())
+                        new BezierLine(new Pose(83, 83), new Pose(105, 69.410))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
 //
 //        grabPickup3 = follower.pathBuilder()
@@ -169,7 +168,7 @@ public class BlueClose extends NextFTCOpMode {
             case 0:
                 Hood.INSTANCE.auto();
 
-                firstshot();
+                secondshotforyouuuuu();
                 follower.followPath(scorePreload, true);
                 setPathState(1);
                 break;
@@ -191,7 +190,7 @@ public class BlueClose extends NextFTCOpMode {
                     Transfer.INSTANCE.off();
 //                    CompliantIntake.INSTANCE.off();
 //                    TurretPID.INSTANCE.setFarShooterSpeed();
-                    secondshot();
+                 scheduleOuttake();
                     follower.followPath(scorePickup1, true);
                     setPathState(3);
                 }
@@ -216,7 +215,7 @@ public class BlueClose extends NextFTCOpMode {
             case 5:
                 if (!follower.isBusy()) {
                     follower.followPath(scorePickup2);
-                    thirdshot();
+                    scheduleOuttake();
                     setPathState(6);
                 }
                 break;
@@ -232,7 +231,7 @@ public class BlueClose extends NextFTCOpMode {
 
             case 7:
                 if (!follower.isBusy()) {
-                    fourthshot();
+                    scheduleOuttake();
                     follower.followPath(scorePickup3);
                     setPathState(8);
                 }
@@ -240,9 +239,9 @@ public class BlueClose extends NextFTCOpMode {
 //
             case 8:
                 if (!follower.isBusy()) {
-                    shootThreeBalls();
-                    follower.followPath(leave);
-                    savePose();
+                   shootThreeBalls();
+                   follower.followPath(leave);
+                   savePose();
                     setPathState(-1);
                 }
                 break;
@@ -271,20 +270,8 @@ public class BlueClose extends NextFTCOpMode {
     private void scheduleOuttake() {
         AutoOuttake.INSTANCE.setMidCloseShooterSpeed().schedule();
     }
-    private void secondshotforyouuuuu() {
+     private void secondshotforyouuuuu() {
         AutoOuttake.INSTANCE.shotforyou().schedule();
-    }
-    private void firstshot() {
-        AutoOuttake.INSTANCE.setShooterSpeed(1200).schedule();
-    }
-    private void secondshot() {
-        AutoOuttake.INSTANCE.setShooterSpeed(1220).schedule();
-    }
-    private void thirdshot() {
-        AutoOuttake.INSTANCE.setShooterSpeed(1190).schedule();
-    }
-    private void fourthshot() {
-        AutoOuttake.INSTANCE.setShooterSpeed(1210).schedule();
     }
     private void Intake() {
         CompliantIntake.INSTANCE.on();
@@ -324,7 +311,7 @@ public class BlueClose extends NextFTCOpMode {
     @Override
     public void onUpdate() {
         if(pathState>=1){
-            turretAlignment.firstAlign();
+           turretAlignment.firstAlign();
         }
         if (pathState>1){
             turretAlignment.stopTurret();
@@ -348,8 +335,8 @@ public class BlueClose extends NextFTCOpMode {
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
         volt.init(hardwareMap);
-        limelight = new BlueExperimentalDistanceLExtractor(hardwareMap);
-        turretAlignment = new BlueLL(hardwareMap, limelight,voltageGet);
+        limelight = new RedExperimentalDistanceLExtractor(hardwareMap);
+        turretAlignment = new RedLL(hardwareMap, limelight,voltageGet);
         limelight.startReading();
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
@@ -364,7 +351,7 @@ public class BlueClose extends NextFTCOpMode {
     }
 
     @Override public void onStop() {
-        TurretPID.INSTANCE.resetShooter().schedule();
+       TurretPID.INSTANCE.resetShooter().schedule();
 
     }
 

@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems;
 
-import com.acmerobotics.dashboard.config.Config;
+//import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.extensions.pedro.PedroComponent;
 
-@Config
+//@Config
 public class TurretOdoAi implements Subsystem {
 
     public static final TurretOdoAi INSTANCE = new TurretOdoAi();
@@ -24,8 +24,8 @@ public class TurretOdoAi implements Subsystem {
     private double heading = 0;
 
     // ------------------ Target (Red Goal) ------------------
-    public static double xr = 121;
-    public static double yr = 121;
+    public static double xt = 121;
+    public static double yt = 121;
 
     // ------------------ Turret ------------------
     private double turretAngleDeg = 0;      // target angle
@@ -57,7 +57,7 @@ public class TurretOdoAi implements Subsystem {
 
         // 2️⃣ Compute field-centric angle to goal
         double fieldAngleDeg = Math.toDegrees(
-                Math.atan2(yr - y, xr - x)
+                Math.atan2(yt - y, xt - x)
         );
 
         // 3️⃣ Convert to robot-centric turret angle

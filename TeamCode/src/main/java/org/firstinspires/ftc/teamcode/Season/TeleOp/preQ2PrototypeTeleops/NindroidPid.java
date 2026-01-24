@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Season.TeleOp.NewPrototypeTeleops;
+package org.firstinspires.ftc.teamcode.Season.TeleOp.preQ2PrototypeTeleops;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;

@@ -65,7 +65,6 @@ public class ColorSensor implements Subsystem {
         colorsensor = hardwareMap.get(RevColorSensorV3.class, "ColorSensor");
         //colorsensor2 = hardwareMap.get(RevColorSensorV3.class, "ColorSensor2");
     }
-
 //    Servo rgbindicator = hardwareMap.get(Servo.class, "rgbled");
 
 

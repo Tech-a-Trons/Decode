@@ -16,7 +16,7 @@ public class TurretOdoAi implements Subsystem {
 
     // ------------------ Hardware ------------------
     private Servo turretServo;
-    private AnalogInput turretAbsoluteEncoder; // absolute encoder
+    private AnalogInput turretAbsoluteEncoder;
 
     // ------------------ Robot Pose ------------------
     private double x = 0;
@@ -29,13 +29,20 @@ public class TurretOdoAi implements Subsystem {
 
     // ------------------ Turret ------------------
     private double turretAngleDeg = 0;      // target angle
-    private double turretEncoderAngleDeg = 0; // read from encoder
+    private double turretEncoderAngleDeg = 0; // actual turret angle from encoder
 
     // Servo safety
     public static double SERVO_MIN = 0.0;
     public static double SERVO_MAX = 1.0;
 
-    private TurretOdoAi() {}
+    // PID constants (tune these)
+    public static double kP = 0.01; // proportional gain
+
+    // Encoder offset (tune this)
+    public static double TURRET_ZERO_OFFSET_DEG = 0.0;
+
+    private TurretOdoAi() {
+    }
 
     // ------------------ Initialization ------------------
     public void init(HardwareMap hardwareMap) {
@@ -64,55 +71,66 @@ public class TurretOdoAi implements Subsystem {
         turretAngleDeg = fieldAngleDeg - heading;
         turretAngleDeg = normalizeDegrees(turretAngleDeg);
 
-        // 4️⃣ Convert angle to servo position
-        double servoPos = angleToServo(turretAngleDeg);
-        turretServo.setPosition(servoPos);
-
-        // 5️⃣ Read absolute encoder angle
+        // 4️⃣ Read absolute encoder
         turretEncoderAngleDeg = readEncoderDegrees();
+
+        // 5️⃣ PID calculation (P-only)
+        double error = turretAngleDeg - turretEncoderAngleDeg;
+        error = normalizeDegrees(error); // make sure error is 0-360
+        if (error > 180) error -= 360;  // choose shortest rotation direction
+
+        double correction = kP * error;
+
+        // 6️⃣ Convert target + correction to servo position
+        double servoPos = angleToServo(turretAngleDeg) + correction;
+        servoPos = clamp(servoPos, SERVO_MIN, SERVO_MAX);
+
+        turretServo.setPosition(servoPos);
     }
 
     // ------------------ Helper Functions ------------------
 
-    /**
-     * Convert degrees to servo position (0.0 -> 1.0)
-     */
     private double angleToServo(double angleDeg) {
         double pos = angleDeg / 360.0;
         return clamp(pos, SERVO_MIN, SERVO_MAX);
     }
 
-    /**
-     * Normalize any angle to [0, 360)
-     */
     private double normalizeDegrees(double angle) {
         angle %= 360;
         if (angle < 0) angle += 360;
         return angle;
     }
 
-    /**
-     * Clamp a value to min/max
-     */
     private double clamp(double val, double min, double max) {
         return Math.max(min, Math.min(max, val));
     }
 
-    /**
-     * Read absolute encoder (0V -> 3.3V) and convert to 0-360°
-     * Assumes encoder is 0V at 0°, 3.3V at 360°
-     */
     private double readEncoderDegrees() {
         double voltage = turretAbsoluteEncoder.getVoltage();
         double maxVoltage = turretAbsoluteEncoder.getMaxVoltage(); // usually 3.3V
-        return (voltage / maxVoltage) * 360.0;
+        double angle = (voltage / maxVoltage) * 360.0;
+        angle -= TURRET_ZERO_OFFSET_DEG; // apply mechanical zero
+        return normalizeDegrees(angle);
     }
 
     // ------------------ Getters ------------------
-    public double getX() { return x; }
-    public double getY() { return y; }
-    public double getHeading() { return heading; }
-    public double getTurretAngleDeg() { return turretAngleDeg; }
-    public double getTurretEncoderAngleDeg() { return turretEncoderAngleDeg; }
+    public double getX() {
+        return x;
+    }
 
+    public double getY() {
+        return y;
+    }
+
+    public double getHeading() {
+        return heading;
+    }
+
+    public double getTurretAngleDeg() {
+        return turretAngleDeg;
+    }
+
+    public double getTurretEncoderAngleDeg() {
+        return turretEncoderAngleDeg;
+    }
 }

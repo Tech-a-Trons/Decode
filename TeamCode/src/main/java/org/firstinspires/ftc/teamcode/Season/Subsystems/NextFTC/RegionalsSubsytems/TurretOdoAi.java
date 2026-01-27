@@ -1,5 +1,5 @@
 package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems;
-
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 //import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -15,7 +15,7 @@ public class TurretOdoAi implements Subsystem {
     public static final TurretOdoAi INSTANCE = new TurretOdoAi();
 
     // ------------------ Hardware ------------------
-    private Servo turretServo;
+//    private Servo turretServo;
     private AnalogInput turretAbsoluteEncoder;
 
     // ------------------ Robot Pose ------------------
@@ -46,21 +46,23 @@ public class TurretOdoAi implements Subsystem {
 
     // ------------------ Initialization ------------------
     public void init(HardwareMap hardwareMap) {
-        turretServo = hardwareMap.get(Servo.class, "turretServo");
-        turretServo.setPosition(0.0);
+//        turretServo = hardwareMap.get(Servo.class, "turretServo");
+//        turretServo.setPosition(0.0);
 
-        turretAbsoluteEncoder = hardwareMap.get(AnalogInput.class, "turretEncoder");
+//        turretAbsoluteEncoder = hardwareMap.get(AnalogInput.class, "turretEncoder");
     }
 
     // ------------------ Loop ------------------
     @Override
+
     public void periodic() {
 
+        PedroComponent.follower().update(); // manually update odometry
         // 1️⃣ Update robot pose
         Pose currentPose = PedroComponent.follower().getPose();
         x = currentPose.getX();
         y = currentPose.getY();
-        heading = currentPose.getHeading();
+        heading = (Math.toDegrees(currentPose.getHeading()));
 
         // 2️⃣ Compute field-centric angle to goal
         double fieldAngleDeg = Math.toDegrees(
@@ -72,20 +74,20 @@ public class TurretOdoAi implements Subsystem {
         turretAngleDeg = normalizeDegrees(turretAngleDeg);
 
         // 4️⃣ Read absolute encoder
-        turretEncoderAngleDeg = readEncoderDegrees();
+//        turretEncoderAngleDeg = readEncoderDegrees();
 
         // 5️⃣ PID calculation (P-only)
-        double error = turretAngleDeg - turretEncoderAngleDeg;
-        error = normalizeDegrees(error); // make sure error is 0-360
-        if (error > 180) error -= 360;  // choose shortest rotation direction
-
-        double correction = kP * error;
+//        double error = turretAngleDeg - turretEncoderAngleDeg;
+//        error = normalizeDegrees(error); // make sure error is 0-360
+//        if (error > 180) error -= 360;  // choose shortest rotation direction
+//
+//        double correction = kP * error;
 
         // 6️⃣ Convert target + correction to servo position
-        double servoPos = angleToServo(turretAngleDeg) + correction;
-        servoPos = clamp(servoPos, SERVO_MIN, SERVO_MAX);
+//        double servoPos = angleToServo(turretAngleDeg) + correction;
+//        servoPos = clamp(servoPos, SERVO_MIN, SERVO_MAX);
 
-        turretServo.setPosition(servoPos);
+//        turretServo.setPosition(servoPos);
     }
 
     // ------------------ Helper Functions ------------------
@@ -105,13 +107,13 @@ public class TurretOdoAi implements Subsystem {
         return Math.max(min, Math.min(max, val));
     }
 
-    private double readEncoderDegrees() {
-        double voltage = turretAbsoluteEncoder.getVoltage();
-        double maxVoltage = turretAbsoluteEncoder.getMaxVoltage(); // usually 3.3V
-        double angle = (voltage / maxVoltage) * 360.0;
-        angle -= TURRET_ZERO_OFFSET_DEG; // apply mechanical zero
-        return normalizeDegrees(angle);
-    }
+//    private double readEncoderDegrees() {
+//        double voltage = turretAbsoluteEncoder.getVoltage();
+//        double maxVoltage = turretAbsoluteEncoder.getMaxVoltage(); // usually 3.3V
+//        double angle = (voltage / maxVoltage) * 360.0;
+//        angle -= TURRET_ZERO_OFFSET_DEG; // apply mechanical zero
+//        return normalizeDegrees(angle);
+//    }
 
     // ------------------ Getters ------------------
     public double getX() {
@@ -130,7 +132,7 @@ public class TurretOdoAi implements Subsystem {
         return turretAngleDeg;
     }
 
-    public double getTurretEncoderAngleDeg() {
-        return turretEncoderAngleDeg;
-    }
+//    public double getTurretEncoderAngleDeg() {
+//        return turretEncoderAngleDeg;
+//    }
 }

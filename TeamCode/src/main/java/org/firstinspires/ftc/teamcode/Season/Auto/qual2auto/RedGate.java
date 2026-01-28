@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.Season.Auto.qual2auto;
 
 
-import org.firstinspires.ftc.teamcode.Season.Pedro.Constants;
+import org.firstinspires.ftc.teamcode.Season.Auto.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.AutoOuttake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;

@@ -1,103 +1,462 @@
+//package org.firstinspires.ftc.teamcode.Season.TeleOp.RegionalsPrototypeTeleops;
+//
+//import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+//
+//import com.pedropathing.geometry.Pose;
+//import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+//
+//import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdoAi;
+//
+//import dev.nextftc.extensions.pedro.PedroComponent;
+//
+//@TeleOp(name = "Turret Odo Tele (Manual)")
+//public class TurretOdoTele extends NextFTCOpMode {
+//
+//    private boolean robotCentric = false; // Start with field-centric
+//    private boolean togglePressed = false; // Debounce for toggle button
+//
+//    public TurretOdoTele() {
+//        addComponents(
+//                BulkReadComponent.INSTANCE,
+//                BindingsComponent.INSTANCE,
+//                new PedroComponent(Constants::createFollower)
+//        );
+//    }
+//
+//    @Override
+//    public void onStartButtonPressed() {
+//        // Initialize turret subsystem hardware
+//        TurretOdoAi.INSTANCE.init(hardwareMap);
+//
+//        // Reset robot pose
+//        if (lastPose != null){
+//            PedroComponent.follower().setPose(lastPose);
+//        }
+//        else {
+//            PedroComponent.follower().setPose(new Pose(0,0,0));
+//        }
+//        telemetry.addData("Status", "Manual Turret TeleOp Started");
+//        telemetry.update();
+//
+//        MotorEx frontLeftMotor = new MotorEx("fl").reversed();
+//        MotorEx frontRightMotor = new MotorEx("fr");
+//        MotorEx backLeftMotor = new MotorEx("bl").reversed();
+//        MotorEx backRightMotor = new MotorEx("br");
+//    }
+//
+//    @Override
+//    public void onUpdate() {
+//        // Toggle drive mode with 'A' button (with debounce)
+//        if (gamepad1.a && !togglePressed) {
+//            robotCentric = !robotCentric;
+//            togglePressed = true;
+//        } else if (!gamepad1.a) {
+//            togglePressed = false;
+//        }
+//
+//        // Let subsystem handle odometry update
+//        TurretOdoAi.INSTANCE.periodic();
+//
+//        // Get pose
+//        Pose pose = PedroComponent.follower().getPose();
+//
+//        // Null check to prevent crash
+//        if (pose == null) {
+//            telemetry.addData("ERROR", "Pose is null - follower not initialized");
+//            telemetry.update();
+//            return;
+//        }
+//
+//        // Update telemetry
+//        telemetry.addData("Drive Mode", robotCentric ? "Robot Centric" : "Field Centric");
+//        telemetry.addData("X", pose.getX());
+//        telemetry.addData("Y", pose.getY());
+//        telemetry.addData("Heading (deg)", Math.toDegrees(pose.getHeading()));
+//        telemetry.addData("Turret Angle (deg)", TurretOdoAi.INSTANCE.getTurretAngleDeg());
+//        telemetry.addData("Target", "(" + TurretOdoAi.xt + ", " + TurretOdoAi.yt + ")");
+//        telemetry.update();
+//
+//        // Set drive with toggleable mode
+////        PedroComponent.follower().setTeleOpDrive(
+////                -gamepad1.left_stick_y,
+////                -gamepad1.left_stick_x,
+////                -gamepad1.right_stick_x,
+////                robotCentric
+////        );
+//    }
+//}
+
 package org.firstinspires.ftc.teamcode.Season.TeleOp.RegionalsPrototypeTeleops;
 
+
+import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RobotContext.lastPose;
+import static dev.nextftc.bindings.Bindings.button;
+
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.HeadingInterpolator;
+import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Season.Auto.Constants;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdoAi;
 
+import org.firstinspires.ftc.teamcode.Season.Auto.Constants;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.ColorSensor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Hood;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.RGBled;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.RedLL;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Transfer;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Turret;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdoAi;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
+
+import java.util.function.Supplier;
+
+import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.components.BindingsComponent;
-import dev.nextftc.extensions.pedro.PedroComponent;
+import dev.nextftc.core.components.SubsystemComponent;
+import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
+import dev.nextftc.hardware.driving.MecanumDriverControlled;
+import dev.nextftc.hardware.driving.RobotCentric;
+import dev.nextftc.hardware.impl.MotorEx;
+import dev.nextftc.extensions.pedro.PedroComponent;
 
-@TeleOp(name = "Turret Odo Tele (Manual)")
+
+
+@TeleOp
 public class TurretOdoTele extends NextFTCOpMode {
 
-    private boolean robotCentric = false;
-    private boolean togglePressed = false;
+    // Limelight and alignment controller
+    private RedExperimentalDistanceLExtractor limelight;
+    private RedLL turretAlignment;
+    private ColorSensor colorSensor;
+    private RGBled rgBled;
 
     public TurretOdoTele() {
         addComponents(
+                new SubsystemComponent(
+                        TurretOdoAi.INSTANCE,
+                        TurretPID.INSTANCE,
+                        Hood.INSTANCE,
+                        Turret.INSTANCE,
+                        CompliantIntake.INSTANCE,
+                        Transfer.INSTANCE, rgBled.INSTANCE
+                ),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE,
                 new PedroComponent(Constants::createFollower)
         );
     }
 
+    private final MotorEx frontLeftMotor = new MotorEx("fl").reversed();
+    private final MotorEx frontRightMotor = new MotorEx("fr");
+    private final MotorEx backLeftMotor = new MotorEx("bl").reversed();
+    private final MotorEx backRightMotor = new MotorEx("br");
+    private boolean turretLimelightEnabled = true;
+
+    private boolean automatedDrive;
+    private Supplier<PathChain> farscore;
+    private Supplier<PathChain> closescore;
+    private Supplier<PathChain> Parkpath;
+    private TelemetryManager telemetryM;
+    private boolean slowMode = false;
+    private double slowModeMultiplier = 0.5;
+
+    // Target position for turret (adjust to your field coordinates)
+    private static final double TARGET_X = 121;  // Example: center of field
+    private static final double TARGET_Y = 121;  // Example: center of field
+
+    // Distance threshold for switching between close and far align (tune this value)
+    private static final double DISTANCE_THRESHOLD = 90.0; // Adjust based on testing
+
+    private Pose targetPose = new Pose(TARGET_X, TARGET_Y);
+    private Pose Middle = new Pose(72,35,180);
+    private Pose Park = new Pose(38.74532374100719,33.358273381294964,90);
+    private boolean intakeToggle = false;
+    private long intakeStartTime = 0;
+    private VoltageGet voltageGet;
+
     @Override
     public void onStartButtonPressed() {
-        TurretOdoAi.INSTANCE.init(hardwareMap);
+        // Initialize Limelight and turret alignment
+        limelight = new RedExperimentalDistanceLExtractor(hardwareMap);
+        turretAlignment = new RedLL(hardwareMap, limelight,voltageGet);
+        colorSensor = new ColorSensor(hardwareMap);
+        rgBled = new RGBled();
 
-        // Wait for follower to be ready
-        int waitCount = 0;
-        while (PedroComponent.follower() == null && waitCount < 100) {
-            telemetry.addData("Status", "Waiting for follower...");
-            telemetry.update();
-            waitCount++;
-            try { Thread.sleep(10); } catch (InterruptedException e) {}
+        limelight.startReading();
+        turretAlignment.setTelemetry(telemetry);
+
+        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
+        farscore = () -> PedroComponent.follower().pathBuilder() //Lazy Curve Generation
+                .addPath(new Path(new BezierLine(PedroComponent.follower()::getPose, new Pose(83.17241379310344, 12.620689655172416))))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(PedroComponent.follower()::getHeading, Math.toRadians(90), 0.8))
+                .build();
+        closescore = () -> PedroComponent.follower().pathBuilder() //Lazy Curve Generation
+                .addPath(new Path(new BezierLine(PedroComponent.follower()::getPose, new Pose(72, 72))))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(PedroComponent.follower()::getHeading, Math.toRadians(90), 0.8))
+                .build();
+        Parkpath = () -> PedroComponent.follower().pathBuilder() //Lazy Curve Generation
+                .addPath(new Path(new BezierLine(PedroComponent.follower()::getPose, new Pose(38.74532374100719,33.358273381294964,0))))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(PedroComponent.follower()::getHeading, Math.toRadians(0), 0.8))
+                .build();
+        if (lastPose != null){
+            PedroComponent.follower().setPose(lastPose);
+        }
+        else {
+            PedroComponent.follower().setPose(new Pose(0,0,0));
         }
 
-        if (PedroComponent.follower() != null) {
-            PedroComponent.follower().setPose(new Pose(0, 0, 0));
-            telemetry.addData("Status", "Manual Turret TeleOp Started");
-        } else {
-            telemetry.addData("ERROR", "Follower failed to initialize");
-        }
-        telemetry.update();
+        PedroComponent.follower().startTeleopDrive();
+
+        // Setup driving
+        Command driverControlled = new MecanumDriverControlled(
+                frontLeftMotor,
+                frontRightMotor,
+                backLeftMotor,
+                backRightMotor,
+                Gamepads.gamepad1().leftStickY().negate(),
+                Gamepads.gamepad1().leftStickX(),
+                Gamepads.gamepad1().rightStickX()
+        );
+
+        // ========== LIMELIGHT TURRET CONTROLS ==========
+
+        // B Button: Toggle Limelight auto-alignment on/off
+        Gamepads.gamepad1().b()
+                .whenBecomesTrue(() -> {
+                    turretLimelightEnabled = !turretLimelightEnabled;
+
+                    if (!turretLimelightEnabled) {
+                        turretAlignment.stopTurret();
+                        telemetryM.addData("Limelight Turret", "Auto-Align Disabled");
+                    } else {
+                        telemetryM.addData("Limelight Turret", "Auto-Align Enabled");
+                    }
+                });
+        Gamepads.gamepad1().dpadLeft()
+                .whenTrue(() -> {
+                    turretLimelightEnabled = false; // manual override
+                    turretAlignment.turretLeft();
+                })
+                .whenBecomesFalse(() -> {
+                    turretLimelightEnabled = true;  // re-enable auto align
+                    turretAlignment.stopAndEnableAlign();
+                });
+
+// DPAD RIGHT — hold to rotate right
+        Gamepads.gamepad1().dpadRight()
+                .whenTrue(() -> {
+                    turretLimelightEnabled = false; // manual override
+                    turretAlignment.turretRight();
+                })
+                .whenBecomesFalse(() -> {
+                    turretLimelightEnabled = true;  // re-enable auto align
+                    turretAlignment.stopAndEnableAlign();
+                });
+        // A Button: Stop turret and reset intake
+        Gamepads.gamepad1().a()
+                .whenBecomesTrue(() -> {
+                    turretLimelightEnabled = false;
+                    turretAlignment.stopTurret();
+                    CompliantIntake.INSTANCE.repel();
+                    telemetryM.addData("Turret", "Stopped & Intake Reset");
+                });
+
+        // ========== EXISTING CONTROLS ==========
+
+        // Right Bumper: Toggle intake with color sensor ball counting
+        Gamepads.gamepad1().rightBumper()
+                .whenBecomesTrue(() -> {
+                    intakeToggle = !intakeToggle;
+
+                    if (intakeToggle) {
+                        // Starting intake
+                        intakeStartTime = System.currentTimeMillis();
+                        CompliantIntake.INSTANCE.on();
+                        Transfer.INSTANCE.slight();
+
+                        // Reset ball counter when starting intake
+                        colorSensor.artifactcounter = 0;
+
+                        telemetryM.addData("Intake", "ON - Counting Balls");
+                    } else {
+                        // Manually stopping intake
+                        intakeStartTime = 0;
+                        CompliantIntake.INSTANCE.off();
+                        Transfer.INSTANCE.off();
+
+                        // Reset ball counter
+                        colorSensor.artifactcounter = 0;
+
+                        telemetryM.addData("Intake", "OFF - Manual Stop");
+                    }
+                });
+
+        // Right Trigger: Shoot
+        button(() -> gamepad1.right_trigger > 0.05)
+                .whenTrue(() -> {
+                    Pose pose = PedroComponent.follower().getPose();
+                    double d = Math.hypot(
+                            TARGET_X - pose.getX(),
+                            TARGET_Y - pose.getY()
+                    );
+
+                    TurretPID.INSTANCE.newshooterdistance(d).schedule();
+                    TurretPID.shootRequested = true;
+                    TurretPID.hasShot = false;
+                });
+
+        // D-pad Down: Reset position to corner
+        Gamepads.gamepad1().dpadDown()
+                .whenBecomesTrue(() -> {
+                    PedroComponent.follower().setPose(Middle);
+                });
+
+        // Left Trigger: Run intake and transfer
+        Gamepads.gamepad1().leftTrigger()
+                .greaterThan(0.05)
+                .whenBecomesTrue(() -> {
+                    Transfer.INSTANCE.on();
+                    CompliantIntake.INSTANCE.on();
+                });
+
+        // Left Bumper: Reset shooter
+        Gamepads.gamepad1().leftBumper()
+                .whenBecomesTrue(() -> {
+                    TurretPID.INSTANCE.resetShooter().schedule();
+                    Hood.INSTANCE.midopen();
+                    CompliantIntake.INSTANCE.off();
+                    Transfer.INSTANCE.off();
+                });
+
+        // Y Button: Automated park path
+        Gamepads.gamepad1().y()
+                .whenBecomesTrue(() -> {
+                    PedroComponent.follower().followPath(Parkpath.get());
+                    automatedDrive = true;
+                });
     }
+    boolean robotCentric = false; // Start with field-centric
+    boolean togglePressed = false; // Debounce for toggle button
 
     @Override
     public void onUpdate() {
-        // Toggle drive mode
-        if (gamepad1.a && !togglePressed) {
+
+        if (gamepad1.dpad_down && !togglePressed) {
             robotCentric = !robotCentric;
             togglePressed = true;
         } else if (!gamepad1.a) {
             togglePressed = false;
         }
 
-        // Check if follower is ready
-        if (PedroComponent.follower() == null) {
-            telemetry.addData("ERROR", "Follower not initialized");
-            telemetry.update();
-            return;
-        }
-
-        // Update follower and get pose
-        PedroComponent.follower().update();
-        Pose pose = PedroComponent.follower().getPose();
-
-        if (pose == null) {
-            telemetry.addData("ERROR", "Pose is null");
-            telemetry.update();
-            return;
-        }
-
-        // IMMEDIATELY extract values from pose to avoid null issues
-        double x = pose.getX();
-        double y = pose.getY();
-        double headingRad = pose.getHeading();
-        double headingDeg = Math.toDegrees(headingRad);
-
-        // Now call periodic() - it will update again internally but that's okay
+        // Let subsystem handle odometry update
         TurretOdoAi.INSTANCE.periodic();
 
-        // Telemetry using stored values
+        // Get pose
+        Pose pose = PedroComponent.follower().getPose();
+
+        // Null check to prevent crash
+        if (pose == null) {
+            telemetry.addData("ERROR", "Pose is null - follower not initialized");
+            telemetry.update();
+            return;
+        }
+
+        // Update telemetry
         telemetry.addData("Drive Mode", robotCentric ? "Robot Centric" : "Field Centric");
-        telemetry.addData("X", x);
-        telemetry.addData("Y", y);
-        telemetry.addData("Heading (deg)", headingDeg);
+        telemetry.addData("X", pose.getX());
+        telemetry.addData("Y", pose.getY());
+        telemetry.addData("Heading (deg)",(TurretOdoAi.INSTANCE.getHeading()));
         telemetry.addData("Turret Angle (deg)", TurretOdoAi.INSTANCE.getTurretAngleDeg());
         telemetry.addData("Target", "(" + TurretOdoAi.xt + ", " + TurretOdoAi.yt + ")");
         telemetry.update();
+        if (!automatedDrive) {
+            //Make the last parameter false for field-centric
+            //In case the drivers want to use a "slowMode" you can scale the vectors
+            //This is the normal version to use in the TeleOp
+            PedroComponent.follower().setTeleOpDrive(
+                    -gamepad1.left_stick_y * slowModeMultiplier,
+                    -gamepad1.left_stick_x * slowModeMultiplier,
+                    -gamepad1.right_stick_x * slowModeMultiplier,
+                    robotCentric // Robot Centric
+            );
+        }
 
-        // Drive
-        PedroComponent.follower().setTeleOpDrive(
-                -gamepad1.left_stick_y,
-                -gamepad1.left_stick_x,
-                -gamepad1.right_stick_x,
-                robotCentric
-        );
+        PedroComponent.follower().update();
+        double targetVel = TurretPID.activeTargetVelocity;
+        double actualVel = TurretPID.turret.getVelocity();
+        Pose robotPose = PedroComponent.follower().getPose();
+        double distanceToTarget = Math.hypot(TARGET_X - robotPose.getX(), TARGET_Y - robotPose.getY());
+
+        // Distance threshold for close hood mode (in inches, tune this value)
+        final double CLOSE_HOOD_DISTANCE = 20.0;
+
+
+        if (distanceToTarget <= CLOSE_HOOD_DISTANCE) {
+            // Close to goal: Use close hood mode, NO velocity correction
+            Hood.INSTANCE.close();
+        } else {
+            // Far from goal: Use velocity correction if shooter is spinning
+            if (targetVel > 500) {
+                Hood.INSTANCE.compensateFromVelocity(targetVel, actualVel);
+            }
+        }
+
+        // Calculate distance to target for alignment mode selection
+
+        // Update Limelight turret alignment when enabled with automatic mode selection
+        if (turretLimelightEnabled) {
+            // Automatically choose alignment mode based on distance
+            if (distanceToTarget > DISTANCE_THRESHOLD) {
+                turretAlignment.farAlign();  // Use far alignment (kP = 0.004)
+            } else {
+                turretAlignment.closeAlign(); // Use close alignment (kP = 0.01)
+            }
+        }
+
+        // ========== COLOR SENSOR BALL COUNTING ==========
+        // Only count balls when intake is active
+        if (intakeToggle) {
+            colorSensor.IncountBalls();
+            if (colorSensor.artifactcounter>0){
+                RGBled.INSTANCE.open();
+            }
+            if (colorSensor.artifactcounter >= 2) {
+                Transfer.INSTANCE.advance();
+                RGBled.INSTANCE.midopen();
+                // Reset toggle state
+            }
+            // Auto-stop when 3 balls are collected
+            if (colorSensor.artifactcounter >= 3) {
+                RGBled.INSTANCE.close();
+                // Turn off intake and transfer
+                CompliantIntake.INSTANCE.off();
+                Transfer.INSTANCE.off();
+
+                // Reset toggle state
+                intakeToggle = false;
+                intakeStartTime = 0;
+
+                // Optional: Rumble controller to alert driver
+                gamepad1.rumble(500);
+
+                // Reset ball counter
+                colorSensor.artifactcounter = 0;
+            }
+        }
+
+        limelight.update();
+
+
+        // ========== TELEMETRY ==========
+
     }
 }

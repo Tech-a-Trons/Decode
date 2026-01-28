@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-//import com.acmerobotics.dashboard.config.Config;
+
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -9,14 +8,13 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.extensions.pedro.PedroComponent;
 
-//@Config
 public class TurretOdoAi implements Subsystem {
 
     public static final TurretOdoAi INSTANCE = new TurretOdoAi();
 
     // ------------------ Hardware ------------------
 //    private Servo turretServo;
-    private AnalogInput turretAbsoluteEncoder;
+//    private AnalogInput turretAbsoluteEncoder;
 
     // ------------------ Robot Pose ------------------
     private double x = 0;
@@ -48,21 +46,30 @@ public class TurretOdoAi implements Subsystem {
     public void init(HardwareMap hardwareMap) {
 //        turretServo = hardwareMap.get(Servo.class, "turretServo");
 //        turretServo.setPosition(0.0);
-
 //        turretAbsoluteEncoder = hardwareMap.get(AnalogInput.class, "turretEncoder");
     }
 
     // ------------------ Loop ------------------
     @Override
-
     public void periodic() {
+        // Safety check: ensure follower is initialized
+        if (PedroComponent.follower() == null) {
+            return;
+        }
 
         PedroComponent.follower().update(); // manually update odometry
+
         // 1️⃣ Update robot pose
         Pose currentPose = PedroComponent.follower().getPose();
+
+        // Safety check: ensure pose is not null
+        if (currentPose == null) {
+            return;
+        }
+
         x = currentPose.getX();
         y = currentPose.getY();
-        heading = (Math.toDegrees(currentPose.getHeading()));
+        heading = Math.toDegrees(currentPose.getHeading());
 
         // 2️⃣ Compute field-centric angle to goal
         double fieldAngleDeg = Math.toDegrees(
@@ -78,15 +85,14 @@ public class TurretOdoAi implements Subsystem {
 
         // 5️⃣ PID calculation (P-only)
 //        double error = turretAngleDeg - turretEncoderAngleDeg;
-//        error = normalizeDegrees(error); // make sure error is 0-360
-//        if (error > 180) error -= 360;  // choose shortest rotation direction
+//        error = normalizeDegrees(error);
+//        if (error > 180) error -= 360;
 //
 //        double correction = kP * error;
 
         // 6️⃣ Convert target + correction to servo position
 //        double servoPos = angleToServo(turretAngleDeg) + correction;
 //        servoPos = clamp(servoPos, SERVO_MIN, SERVO_MAX);
-
 //        turretServo.setPosition(servoPos);
     }
 
@@ -109,9 +115,9 @@ public class TurretOdoAi implements Subsystem {
 
 //    private double readEncoderDegrees() {
 //        double voltage = turretAbsoluteEncoder.getVoltage();
-//        double maxVoltage = turretAbsoluteEncoder.getMaxVoltage(); // usually 3.3V
+//        double maxVoltage = turretAbsoluteEncoder.getMaxVoltage();
 //        double angle = (voltage / maxVoltage) * 360.0;
-//        angle -= TURRET_ZERO_OFFSET_DEG; // apply mechanical zero
+//        angle -= TURRET_ZERO_OFFSET_DEG;
 //        return normalizeDegrees(angle);
 //    }
 

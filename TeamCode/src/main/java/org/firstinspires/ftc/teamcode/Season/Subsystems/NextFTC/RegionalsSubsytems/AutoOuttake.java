@@ -112,7 +112,7 @@ public class AutoOuttake implements Subsystem {
         //hood.INSTANCE.midclose();
         return new RunToVelocity(
                 controller,
-                1220, // 500
+                1230, // 500
                 5
         ).requires(this);
     }

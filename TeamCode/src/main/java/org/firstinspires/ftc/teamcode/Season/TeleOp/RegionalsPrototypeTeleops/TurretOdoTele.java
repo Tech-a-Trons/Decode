@@ -344,21 +344,13 @@ public class TurretOdoTele extends NextFTCOpMode {
                     automatedDrive = true;
                 });
     }
-    boolean robotCentric = false; // Start with field-centric
-    boolean togglePressed = false; // Debounce for toggle button
 
     @Override
     public void onUpdate() {
 
-        if (gamepad1.dpad_down && !togglePressed) {
-            robotCentric = !robotCentric;
-            togglePressed = true;
-        } else if (!gamepad1.a) {
-            togglePressed = false;
-        }
+
 
         // Let subsystem handle odometry update
-        TurretOdoAi.INSTANCE.periodic();
 
         // Get pose
         Pose pose = PedroComponent.follower().getPose();
@@ -371,7 +363,7 @@ public class TurretOdoTele extends NextFTCOpMode {
         }
 
         // Update telemetry
-        telemetry.addData("Drive Mode", robotCentric ? "Robot Centric" : "Field Centric");
+
         telemetry.addData("X", pose.getX());
         telemetry.addData("Y", pose.getY());
         telemetry.addData("Heading (deg)",(TurretOdoAi.INSTANCE.getHeading()));
@@ -383,10 +375,10 @@ public class TurretOdoTele extends NextFTCOpMode {
             //In case the drivers want to use a "slowMode" you can scale the vectors
             //This is the normal version to use in the TeleOp
             PedroComponent.follower().setTeleOpDrive(
-                    -gamepad1.left_stick_y * slowModeMultiplier,
-                    -gamepad1.left_stick_x * slowModeMultiplier,
-                    -gamepad1.right_stick_x * slowModeMultiplier,
-                    robotCentric // Robot Centric
+                    -gamepad1.left_stick_y,
+                    -gamepad1.left_stick_x ,
+                    -gamepad1.right_stick_x ,
+                    true // Robot Centric
             );
         }
 

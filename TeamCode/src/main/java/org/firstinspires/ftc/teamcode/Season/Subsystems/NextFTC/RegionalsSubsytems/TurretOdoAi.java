@@ -22,8 +22,8 @@ public class TurretOdoAi implements Subsystem {
     private double heading = 0;
 
     // ------------------ Target (Red Goal) ------------------
-    public static double xt = 121;
-    public static double yt = 121;
+    public static final int xt = 60;
+    public static final int yt = 60;
 
     // ------------------ Turret ------------------
     private double turretAngleDeg = 0;      // target angle
@@ -66,17 +66,20 @@ public class TurretOdoAi implements Subsystem {
         if (currentPose == null) {
             return;
         }
-
         x = currentPose.getX();
         y = currentPose.getY();
-        heading = Math.toDegrees(currentPose.getHeading());
 
+        double headingRad = currentPose.getHeading();
+        heading = Math.toDegrees(headingRad);  // Convert to degrees FIRST
+        heading = (heading + 360) % 360;
         // 2️⃣ Compute field-centric angle to goal
         double fieldAngleDeg = Math.toDegrees(
                 Math.atan2(yt - y, xt - x)
         );
+        fieldAngleDeg = (fieldAngleDeg + 360) % 360; // Normalize to 0-360
 
         // 3️⃣ Convert to robot-centric turret angle
+
         turretAngleDeg = fieldAngleDeg - heading;
         turretAngleDeg = normalizeDegrees(turretAngleDeg);
 
@@ -104,8 +107,7 @@ public class TurretOdoAi implements Subsystem {
     }
 
     private double normalizeDegrees(double angle) {
-        angle %= 360;
-        if (angle < 0) angle += 360;
+        angle = (angle + 360) % 360;  // Simpler normalization
         return angle;
     }
 
@@ -137,6 +139,8 @@ public class TurretOdoAi implements Subsystem {
     public double getTurretAngleDeg() {
         return turretAngleDeg;
     }
+
+
 
 //    public double getTurretEncoderAngleDeg() {
 //        return turretEncoderAngleDeg;

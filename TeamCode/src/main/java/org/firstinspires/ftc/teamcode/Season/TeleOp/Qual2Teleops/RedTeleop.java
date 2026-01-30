@@ -12,6 +12,7 @@ import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 import org.firstinspires.ftc.teamcode.Season.Auto.Constants;
@@ -42,6 +43,7 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 public class RedTeleop extends NextFTCOpMode {
 
     // Limelight and alignment controller
+    private ElapsedTime elapsedtime;
     private RedExperimentalDistanceLExtractor limelight;
     private RedLL turretAlignment;
     private ColorSensor colorSensor;
@@ -89,7 +91,6 @@ public class RedTeleop extends NextFTCOpMode {
     private boolean intakeToggle = false;
     private long intakeStartTime = 0;
     private VoltageGet voltageGet;
-
     @Override
     public void onStartButtonPressed() {
         // Initialize Limelight and turret alignment
@@ -250,6 +251,7 @@ else {
                     PedroComponent.follower().followPath(Parkpath.get());
                     automatedDrive = true;
                 });
+
     }
 
     @Override

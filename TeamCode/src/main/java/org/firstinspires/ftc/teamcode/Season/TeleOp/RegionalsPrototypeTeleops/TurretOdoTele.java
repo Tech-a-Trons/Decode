@@ -72,14 +72,11 @@ public class TurretOdoTele extends NextFTCOpMode {
     private Supplier<PathChain> closescore;
     private Supplier<PathChain> Parkpath;
     private TelemetryManager telemetryM;
-    private double slowModeMultiplier = 1;
+    private double slowModeMultiplier = 0.5;
 
-    private static final double TARGET_X = 60;
-    private static final double TARGET_Y = 60;
     private static final double DISTANCE_THRESHOLD = 90.0;
     private static final double CLOSE_HOOD_DISTANCE = 20.0;
 
-    private Pose targetPose = new Pose(TARGET_X, TARGET_Y);
     private Pose Middle = new Pose(72, 35, 180);
     private Pose Park = new Pose(38.74532374100719, 33.358273381294964, 90);
     private boolean intakeToggle = false;
@@ -201,8 +198,7 @@ public class TurretOdoTele extends NextFTCOpMode {
 
         button(() -> gamepad1.right_trigger > 0.05)
                 .whenTrue(() -> {
-                    Pose pose = PedroComponent.follower().getPose();
-                    double d = Math.hypot(TARGET_X - pose.getX(), TARGET_Y - pose.getY());
+                    double d = TurretOdoAi.INSTANCE.getDistanceToTarget();
                     TurretPID.INSTANCE.newshooterdistance(d).schedule();
                     TurretPID.shootRequested = true;
                     TurretPID.hasShot = false;
@@ -237,7 +233,7 @@ public class TurretOdoTele extends NextFTCOpMode {
 
     @Override
     public void onUpdate() {
-        // Drive mode toggle - FIXED: check dpad_up for release
+        // Drive mode toggle
         if (gamepad1.dpad_up && !togglePressed) {
             robotCentric = !robotCentric;
             togglePressed = true;
@@ -246,6 +242,7 @@ public class TurretOdoTele extends NextFTCOpMode {
         }
 
         // Let subsystem handle odometry update
+        TurretOdoAi.INSTANCE.periodic();
 
         // Get pose ONCE and cache it
         Pose pose = PedroComponent.follower().getPose();
@@ -256,24 +253,21 @@ public class TurretOdoTele extends NextFTCOpMode {
             return;
         }
 
-        // Cache all frequently-used values at the start
-        double x = pose.getX();
-        double y = pose.getY();
+        // Cache all values from subsystem
+        double x = TurretOdoAi.INSTANCE.getX();
+        double y = TurretOdoAi.INSTANCE.getY();
         double heading = TurretOdoAi.INSTANCE.getHeading();
         double turretAngle = TurretOdoAi.INSTANCE.getTurretAngleDeg();
-        double distanceToTarget = Math.hypot(TurretOdoAi.xt - x, TurretOdoAi.yt - y);
+        double distanceToTarget = TurretOdoAi.INSTANCE.getDistanceToTarget();
 
-        // DETAILED DEBUG TELEMETRY
+        // ========== ALL TELEMETRY DATA ==========
         telemetry.addData("Drive Mode", robotCentric ? "Robot Centric" : "Field Centric");
-        telemetry.addData("Robot X", x);
-        telemetry.addData("Robot Y", y);
-        telemetry.addData("Robot Heading", heading);
-        telemetry.addData("Target X", TurretOdoAi.xt);
-        telemetry.addData("Target Y", TurretOdoAi.yt);
-        telemetry.addData("Delta X", TurretOdoAi.xt - x);
-        telemetry.addData("Delta Y", TurretOdoAi.yt - y);
-        telemetry.addData("Turret Angle", turretAngle);
-        telemetry.addData("Distance", distanceToTarget);
+        telemetry.addData("X", String.format("%.1f", x));
+        telemetry.addData("Y", String.format("%.1f", y));
+        telemetry.addData("Heading (deg)", String.format("%.1f", heading));
+        telemetry.addData("Turret Angle (deg)", String.format("%.1f", turretAngle));
+        telemetry.addData("Target", "(" + TurretOdoAi.xt + ", " + TurretOdoAi.yt + ")");
+        telemetry.addData("Distance", String.format("%.1f", distanceToTarget));
         telemetry.update();
 
         // ========== DRIVE CONTROL ==========
@@ -315,7 +309,6 @@ public class TurretOdoTele extends NextFTCOpMode {
         if (intakeToggle) {
             colorSensor.IncountBalls();
 
-            // Cache ball count
             int ballCount = colorSensor.artifactcounter;
 
             if (ballCount > 0) {
@@ -336,7 +329,6 @@ public class TurretOdoTele extends NextFTCOpMode {
             }
         }
 
-        // Single limelight update
         limelight.update();
     }
 }

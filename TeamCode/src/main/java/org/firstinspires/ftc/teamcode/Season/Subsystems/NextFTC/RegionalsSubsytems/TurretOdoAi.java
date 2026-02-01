@@ -22,12 +22,13 @@ public class TurretOdoAi implements Subsystem {
     private double heading = 0;
 
     // ------------------ Target (Red Goal) ------------------
-    public static final int xt = 60;
-    public static final int yt = 60;
+    public static double xt = 60;
+    public static double yt = 60;
 
     // ------------------ Turret ------------------
     private double turretAngleDeg = 0;      // target angle
     private double turretEncoderAngleDeg = 0; // actual turret angle from encoder
+    private double distanceToTarget = 0;     // distance to target
 
     // Servo safety
     public static double SERVO_MIN = 0.0;
@@ -66,34 +67,36 @@ public class TurretOdoAi implements Subsystem {
         if (currentPose == null) {
             return;
         }
+
         x = currentPose.getX();
         y = currentPose.getY();
 
         double headingRad = currentPose.getHeading();
         heading = Math.toDegrees(headingRad);  // Convert to degrees FIRST
-        heading = (heading + 360) % 360;
+        heading = (heading + 360) % 360;       // Normalize to 0-360
+
         // 2️⃣ Compute field-centric angle to goal
-        double fieldAngleDeg = Math.toDegrees(
-                Math.atan2(yt - y, xt - x)
-        );
+        double fieldAngleDeg = Math.toDegrees(Math.atan2(yt - y, xt - x));
         fieldAngleDeg = (fieldAngleDeg + 360) % 360; // Normalize to 0-360
 
-        // 3️⃣ Convert to robot-centric turret angle
+        // 3️⃣ Calculate distance to target
+        distanceToTarget = Math.hypot(xt - x, yt - y);
 
+        // 4️⃣ Convert to robot-centric turret angle
         turretAngleDeg = fieldAngleDeg - heading;
         turretAngleDeg = normalizeDegrees(turretAngleDeg);
 
-        // 4️⃣ Read absolute encoder
+        // 5️⃣ Read absolute encoder
 //        turretEncoderAngleDeg = readEncoderDegrees();
 
-        // 5️⃣ PID calculation (P-only)
+        // 6️⃣ PID calculation (P-only)
 //        double error = turretAngleDeg - turretEncoderAngleDeg;
 //        error = normalizeDegrees(error);
 //        if (error > 180) error -= 360;
 //
 //        double correction = kP * error;
 
-        // 6️⃣ Convert target + correction to servo position
+        // 7️⃣ Convert target + correction to servo position
 //        double servoPos = angleToServo(turretAngleDeg) + correction;
 //        servoPos = clamp(servoPos, SERVO_MIN, SERVO_MAX);
 //        turretServo.setPosition(servoPos);
@@ -107,7 +110,7 @@ public class TurretOdoAi implements Subsystem {
     }
 
     private double normalizeDegrees(double angle) {
-        angle = (angle + 360) % 360;  // Simpler normalization
+        angle = (angle + 360) % 360;
         return angle;
     }
 
@@ -140,7 +143,9 @@ public class TurretOdoAi implements Subsystem {
         return turretAngleDeg;
     }
 
-
+    public double getDistanceToTarget() {
+        return distanceToTarget;
+    }
 
 //    public double getTurretEncoderAngleDeg() {
 //        return turretEncoderAngleDeg;

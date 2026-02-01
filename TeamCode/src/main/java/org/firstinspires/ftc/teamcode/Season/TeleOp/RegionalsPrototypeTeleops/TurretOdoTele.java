@@ -259,19 +259,21 @@ public class TurretOdoTele extends NextFTCOpMode {
         // Cache all frequently-used values at the start
         double x = pose.getX();
         double y = pose.getY();
-        double headingRad = pose.getHeading();
-        double heading = Math.toDegrees(headingRad);  // Convert to degrees FIRST
-        heading = (heading + 360) % 360;
+        double heading = TurretOdoAi.INSTANCE.getHeading();
         double turretAngle = TurretOdoAi.INSTANCE.getTurretAngleDeg();
-        double distanceToTarget = Math.hypot(TARGET_X - x, TARGET_Y - y);
+        double distanceToTarget = Math.hypot(TurretOdoAi.xt - x, TurretOdoAi.yt - y);
 
-        // ========== ALL TELEMETRY DATA (optimized with cached values) ==========
+        // DETAILED DEBUG TELEMETRY
         telemetry.addData("Drive Mode", robotCentric ? "Robot Centric" : "Field Centric");
-        telemetry.addData("X", x);
-        telemetry.addData("Y", y);
-        telemetry.addData("Heading (deg)", heading);
-        telemetry.addData("Turret Angle (deg)", turretAngle);
-        telemetry.addData("Target", "(" + TurretOdoAi.xt + ", " + TurretOdoAi.yt + ")");
+        telemetry.addData("Robot X", x);
+        telemetry.addData("Robot Y", y);
+        telemetry.addData("Robot Heading", heading);
+        telemetry.addData("Target X", TurretOdoAi.xt);
+        telemetry.addData("Target Y", TurretOdoAi.yt);
+        telemetry.addData("Delta X", TurretOdoAi.xt - x);
+        telemetry.addData("Delta Y", TurretOdoAi.yt - y);
+        telemetry.addData("Turret Angle", turretAngle);
+        telemetry.addData("Distance", distanceToTarget);
         telemetry.update();
 
         // ========== DRIVE CONTROL ==========

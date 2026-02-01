@@ -76,7 +76,7 @@ public class RedTeleop extends NextFTCOpMode {
     private Supplier<PathChain> Parkpath;
     private TelemetryManager telemetryM;
     private boolean slowMode = false;
-    private double slowModeMultiplier = 0.5;
+    private double slowModeMultiplier = 1;
 
     // Target position for turret (adjust to your field coordinates)
     private static final double TARGET_X = 121;  // Example: center of field

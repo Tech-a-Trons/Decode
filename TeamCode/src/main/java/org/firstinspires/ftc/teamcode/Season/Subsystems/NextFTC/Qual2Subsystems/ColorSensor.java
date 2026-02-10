@@ -1,14 +1,10 @@
 package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 
 import android.graphics.Color;
 
 import com.qualcomm.hardware.rev.RevColorSensorV3;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import dev.nextftc.core.subsystems.Subsystem;
@@ -17,6 +13,7 @@ import dev.nextftc.core.subsystems.Subsystem;
 //For color sensor
 
 public class ColorSensor implements Subsystem {
+    public static final ColorSensor INSTANCE = new ColorSensor();
     float chue;
     float csat;
     float cval;
@@ -61,7 +58,7 @@ public class ColorSensor implements Subsystem {
     RevColorSensorV3 colorsensor;
     RevColorSensorV3 colorsensor2;
 
-    public ColorSensor(HardwareMap hardwareMap) {
+    public ColorSensor() {
         colorsensor = hardwareMap.get(RevColorSensorV3.class, "ColorSensor");
         //colorsensor2 = hardwareMap.get(RevColorSensorV3.class, "ColorSensor2");
     }

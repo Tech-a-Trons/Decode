@@ -91,7 +91,7 @@ public class VisionEncoderTele extends NextFTCOpMode {
         // Initialize Limelight and Vision+Encoder turret alignment
         limelight = new RedExperimentalDistanceLExtractor(hardwareMap);
         turretAlignment = new VisionEncoderTurret(hardwareMap, limelight);
-        colorSensor = new ColorSensor(hardwareMap);
+        colorSensor = new ColorSensor();
 
         limelight.startReading();
         turretAlignment.setTelemetry(telemetry);

@@ -54,6 +54,7 @@ public class TurretOdoTele extends NextFTCOpMode {
                         Turret.INSTANCE,
                         CompliantIntake.INSTANCE,
                         Transfer.INSTANCE,
+                        ColorSensor.INSTANCE,
                         rgBled.INSTANCE
                 ),
                 BulkReadComponent.INSTANCE,
@@ -90,7 +91,7 @@ public class TurretOdoTele extends NextFTCOpMode {
     public void onStartButtonPressed() {
         limelight = new RedExperimentalDistanceLExtractor(hardwareMap);
         turretAlignment = new RedLL(hardwareMap, limelight, voltageGet);
-        colorSensor = new ColorSensor(hardwareMap);
+        colorSensor = new ColorSensor();
         rgBled = new RGBled();
 
         limelight.startReading();
@@ -206,7 +207,7 @@ public class TurretOdoTele extends NextFTCOpMode {
 
         Gamepads.gamepad1().dpadDown()
                 .whenBecomesTrue(() -> {
-                    PedroComponent.follower().setPose(Middle);
+                    PedroComponent.follower().setPose(new Pose(0, 0, 0));
                 });
 
         Gamepads.gamepad1().leftTrigger()
@@ -257,17 +258,24 @@ public class TurretOdoTele extends NextFTCOpMode {
         double x = TurretOdoAi.INSTANCE.getX();
         double y = TurretOdoAi.INSTANCE.getY();
         double heading = TurretOdoAi.INSTANCE.getHeading();
-        double turretAngle = TurretOdoAi.INSTANCE.getTurretAngleDeg();
+        double targetTurretAngle = TurretOdoAi.INSTANCE.getTargetAngleDeg();
         double distanceToTarget = TurretOdoAi.INSTANCE.getDistanceToTarget();
+        double turretAngle1 = TurretOdoAi.INSTANCE.getTurretAngleDeg();
+        double Lasterror = TurretOdoAi.INSTANCE.getLastError();
+
+
 
         // ========== ALL TELEMETRY DATA ==========
         telemetry.addData("Drive Mode", robotCentric ? "Robot Centric" : "Field Centric");
         telemetry.addData("X", String.format("%.1f", x));
         telemetry.addData("Y", String.format("%.1f", y));
         telemetry.addData("Heading (deg)", String.format("%.1f", heading));
-        telemetry.addData("Turret Angle (deg)", String.format("%.1f", turretAngle));
+        telemetry.addData("Target Turret Angle (deg)", String.format("%.1f", targetTurretAngle));
         telemetry.addData("Target", "(" + TurretOdoAi.xt + ", " + TurretOdoAi.yt + ")");
         telemetry.addData("Distance", String.format("%.1f", distanceToTarget));
+        telemetry.addData("Turret Angle", String.format("%.1f", turretAngle1));
+        telemetry.addData("Error", "%.1f°", TurretOdoAi.INSTANCE.getLastError());
+        telemetry.update();
         telemetry.update();
 
         // ========== DRIVE CONTROL ==========

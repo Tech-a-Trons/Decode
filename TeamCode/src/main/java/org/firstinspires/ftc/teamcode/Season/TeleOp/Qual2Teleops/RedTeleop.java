@@ -96,7 +96,7 @@ public class RedTeleop extends NextFTCOpMode {
         // Initialize Limelight and turret alignment
         limelight = new RedExperimentalDistanceLExtractor(hardwareMap);
         turretAlignment = new RedLL(hardwareMap, limelight,voltageGet);
-        colorSensor = new ColorSensor(hardwareMap);
+        colorSensor = new ColorSensor();
         rgBled = new RGBled();
 
         limelight.startReading();

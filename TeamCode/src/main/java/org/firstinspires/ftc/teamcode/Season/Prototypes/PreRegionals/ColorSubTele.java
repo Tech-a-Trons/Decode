@@ -31,7 +31,7 @@ public class ColorSubTele extends NextFTCOpMode {
     @Override
     public void onStartButtonPressed() {
         // ✅ Initialize hardware here
-        colorSensor = new ColorSensor(hardwareMap);
+        colorSensor = new ColorSensor();
         compliantIntake = CompliantIntake.INSTANCE;
         transfer = transfer.INSTANCE;
 

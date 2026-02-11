@@ -320,14 +320,14 @@ public class TurretOdoTele extends NextFTCOpMode {
             int ballCount = colorSensor.artifactcounter;
 
             if (ballCount > 0) {
-                RGBled.INSTANCE.open();
+//                RGBled.INSTANCE.open();
             }
             if (ballCount >= 2) {
                 Transfer.INSTANCE.advance();
-                RGBled.INSTANCE.midopen();
+//                RGBled.INSTANCE.midopen();
             }
             if (ballCount >= 3) {
-                RGBled.INSTANCE.close();
+//                RGBled.INSTANCE.close();
                 CompliantIntake.INSTANCE.off();
                 Transfer.INSTANCE.off();
                 intakeToggle = false;

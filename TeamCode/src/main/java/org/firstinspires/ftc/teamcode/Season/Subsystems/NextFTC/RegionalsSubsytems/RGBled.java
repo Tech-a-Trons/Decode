@@ -6,11 +6,11 @@ import dev.nextftc.hardware.impl.ServoEx;
 public class RGBled implements Subsystem {
     public static final RGBled INSTANCE = new RGBled();
 
-    public static double closePos = 0.8;
-    public static double midclosePos = 0.5;
-    public static double midopenPos = 0.6;
-    public static double openPos = 0.1;
-    public static double BASE_POS = midopenPos;
+    public static double violet = 0.7222;
+    public static double red = 0.277;
+    public static double yellow = 0.388;
+    public static double green = 0.5;
+    public static double BASE_POS = violet;
     public static double VEL_THRESHOLD = 75;
     public static double HOOD_GAIN = 0.0003;
     public static double MAX_UP_ADJUST = 0.05;
@@ -29,30 +29,27 @@ public class RGBled implements Subsystem {
         RGB.setPosition(clamp(pos));
     }
 
-    public void open() {
-        set(openPos);
+    public void setViolet() {
+        set(violet);
         isOpen = true;
     }
 
-    public void close() {
-        set(closePos);
+    public void setRed() {
+        set(red);
         isOpen = false;
     }
 
-    public void midopen() {
-        set(midopenPos);
+    public void setYellow() {
+        set(yellow);
         isOpen = true;
     }
 
-    public void midclose() {
-        set(midclosePos);
+    public void setGreen() {
+        set(green);
         isOpen = false;
     }
 
-    public void toggle() {
-        if (isOpen) close();
-        else open();
-    }
+
 
     // ===== VELOCITY COMPENSATION (FIXED) =====
 

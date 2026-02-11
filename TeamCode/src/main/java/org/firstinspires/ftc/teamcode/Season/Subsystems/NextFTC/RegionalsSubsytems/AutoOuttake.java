@@ -35,7 +35,7 @@ public class AutoOuttake implements Subsystem {
     );
 
     ControlSystem controller = ControlSystem.builder()
-            .velPid(0.007, 0, 0) // Velocity PID with 0.003
+            .velPid(0.01, 0, 0) // Velocity PID with 0.007
             .basicFF(0.0001, 0, 0.044) // Basic feedforward with kV=0.0001, kA=0.0, kS=0.01
             .build();
 

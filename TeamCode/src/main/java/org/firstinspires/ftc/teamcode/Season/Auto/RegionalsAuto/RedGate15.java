@@ -304,6 +304,7 @@ public class RedGate15 extends NextFTCOpMode {
         sleep(1500);
         CompliantIntake.INSTANCE.off();
         Transfer.INSTANCE.off();
+        AutoOuttake.INSTANCE.resetShooter();
     }
 
     public void setPathState(int pState) {
@@ -313,7 +314,7 @@ public class RedGate15 extends NextFTCOpMode {
 
     @Override
     public void onUpdate() {
-        turretAlignment.setTurretPower(0.0009);
+        turretAlignment.setTurretPower(0.009);
 
 
 

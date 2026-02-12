@@ -88,6 +88,65 @@ public class TurretPID implements Subsystem {
                 5
         ).requires(this);
     }
+
+    public static double getMovingTurretAngle(
+            double robotX, double robotY,
+            double goalX, double goalY,
+            double robotHeading,
+            double robotVx, double robotVy,
+            double projectileSpeed) {
+
+        double dx = goalX - robotX;
+        double dy = goalY - robotY;
+
+        double distance = Math.hypot(dx, dy);
+
+        // Time projectile is in air
+        double time = distance / projectileSpeed;
+
+        // Lead the shot based on robot motion
+        double leadX = dx - robotVx * time;
+        double leadY = dy - robotVy * time;
+
+        double globalAngle = Math.atan2(leadY, leadX);
+
+        return angleWrap(globalAngle - robotHeading);
+    }
+
+    private static long lastShotTime = 0;
+
+    public static boolean canShootMoving(
+            double currentFlywheelVel,
+            double targetFlywheelVel,
+            double flywheelTolerance,
+            double robotTurnRateRadPerSec,
+            double maxTurnRateRadPerSec,
+            long recoveryTimeMs) {
+
+        long now = System.currentTimeMillis();
+
+        boolean flywheelReady =
+                Math.abs(currentFlywheelVel - targetFlywheelVel) < flywheelTolerance;
+
+        boolean turningTooFast =
+                Math.abs(robotTurnRateRadPerSec) > maxTurnRateRadPerSec;
+
+        boolean recovered = (now - lastShotTime) > recoveryTimeMs;
+
+        return flywheelReady && !turningTooFast && recovered;
+    }
+
+    public static void recordShotTime() {
+        lastShotTime = System.currentTimeMillis();
+    }
+
+    public static double angleWrap(double angle) {
+        while (angle > Math.PI) angle -= 2 * Math.PI;
+        while (angle < -Math.PI) angle += 2 * Math.PI;
+        return angle;
+    }
+
+
     public Command shotforyou(){
         //ll.update();
         //hood.INSTANCE.open();

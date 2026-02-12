@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.Season.Auto.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Hood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Transfer;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdoAiFixed;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID;
 
 import dev.nextftc.core.commands.Command;
@@ -20,26 +21,29 @@ import dev.nextftc.hardware.driving.MecanumDriverControlled;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "Regionals Teleop")
 public class TeleOpProgram extends NextFTCOpMode {
-
-    // Target position for turret (adjust to your field coordinates)
-    private static final double TARGET_X = 121;
-    private static final double TARGET_Y = 121;
 
     private boolean intakeToggle = false;
 
     public TeleOpProgram() {
         addComponents(
-                new SubsystemComponent(CompliantIntake.INSTANCE, Transfer.INSTANCE, TurretPID.INSTANCE, Hood.INSTANCE),
+                new SubsystemComponent(
+
+                        CompliantIntake.INSTANCE,
+                        Transfer.INSTANCE,
+                        TurretPID.INSTANCE,
+                        Hood.INSTANCE
+                ),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE,
-                new PedroComponent(Constants::createFollower)  // Add Pedro for localization only
+                new PedroComponent(Constants::createFollower)
         );
-    }
-
-    // change the names and directions to suit your robot
+    } private static final double TARGET_X = 121;  // Example: center of field
+    private static final double TARGET_Y = 121;
+    private Pose Middle = new Pose(72,35,180);
     private final MotorEx frontLeftMotor = new MotorEx("fl").reversed();
     private final MotorEx frontRightMotor = new MotorEx("fr");
     private final MotorEx backLeftMotor = new MotorEx("bl").reversed();
@@ -47,22 +51,29 @@ public class TeleOpProgram extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-        // Set initial pose if needed
-        PedroComponent.follower().setPose(new Pose(38, 22.5, 180));
 
-        // Use NextFTC's MecanumDriverControlled instead of Pedro's teleop drive
-        Command driverControlled = new MecanumDriverControlled(
-                frontLeftMotor,
-                frontRightMotor,
-                backLeftMotor,
-                backRightMotor,
-                Gamepads.gamepad1().leftStickY().negate(),
-                Gamepads.gamepad1().leftStickX(),
-                Gamepads.gamepad1().rightStickX()
-        );
-        driverControlled.schedule();
+        // Initialize turret safely
 
-        // Right Trigger: Shoot (uses Pedro's pose tracking)
+        // Set initial pose
+        PedroComponent.follower().setPose(new Pose(38, 22.5, Math.toRadians(180)));
+
+        PedroComponent.follower().startTeleopDrive();
+        Gamepads.gamepad1().dpadDown()
+                .whenBecomesTrue(() -> {
+                    PedroComponent.follower().setPose(Middle);
+                });
+//        Command driverControlled = new MecanumDriverControlled(
+//                frontLeftMotor,
+//                frontRightMotor,
+//                backLeftMotor,
+//                backRightMotor,
+//                Gamepads.gamepad1().leftStickY().negate(),
+//                Gamepads.gamepad1().leftStickX(),
+//                Gamepads.gamepad1().rightStickX()
+//        );
+//        driverControlled.schedule();
+
+        // Shoot
         button(() -> gamepad1.right_trigger > 0.05)
                 .whenTrue(() -> {
                     Pose pose = PedroComponent.follower().getPose();
@@ -70,27 +81,26 @@ public class TeleOpProgram extends NextFTCOpMode {
                             TARGET_X - pose.getX(),
                             TARGET_Y - pose.getY()
                     );
-
                     TurretPID.INSTANCE.newshooterdistance(d).schedule();
                     TurretPID.shootRequested = true;
                     TurretPID.hasShot = false;
                 });
 
-        // Right Bumper: Toggle intake and transfer
+        // Intake toggle
         Gamepads.gamepad1().rightBumper()
                 .whenBecomesTrue(() -> {
                     intakeToggle = !intakeToggle;
 
                     if (intakeToggle) {
                         CompliantIntake.INSTANCE.on();
-                        Transfer.INSTANCE.slight();
+                        Transfer.INSTANCE.off();
                     } else {
                         CompliantIntake.INSTANCE.off();
                         Transfer.INSTANCE.off();
                     }
                 });
 
-        // Left Trigger: Run intake and transfer
+        // Manual intake
         Gamepads.gamepad1().leftTrigger()
                 .greaterThan(0.05)
                 .whenBecomesTrue(() -> {
@@ -98,7 +108,7 @@ public class TeleOpProgram extends NextFTCOpMode {
                     CompliantIntake.INSTANCE.on();
                 });
 
-        // Left Bumper: Turn everything off
+        // Emergency stop
         Gamepads.gamepad1().leftBumper()
                 .whenBecomesTrue(() -> {
                     TurretPID.INSTANCE.resetShooter().schedule();
@@ -111,12 +121,17 @@ public class TeleOpProgram extends NextFTCOpMode {
 
     @Override
     public void onUpdate() {
-        // Update Pedro follower for localization/odometry tracking only
-        // This updates the pose estimate without controlling the motors
+        PedroComponent.follower().setTeleOpDrive(
+                -gamepad1.left_stick_y,
+                -gamepad1.left_stick_x ,
+                -gamepad1.right_stick_x ,
+                true // Robot Centric
+        );
         PedroComponent.follower().update();
 
-        // Optional: Add telemetry to see current pose
         Pose currentPose = PedroComponent.follower().getPose();
+        if (currentPose == null) return;
+
         telemetry.addData("X", currentPose.getX());
         telemetry.addData("Y", currentPose.getY());
         telemetry.addData("Heading", Math.toDegrees(currentPose.getHeading()));

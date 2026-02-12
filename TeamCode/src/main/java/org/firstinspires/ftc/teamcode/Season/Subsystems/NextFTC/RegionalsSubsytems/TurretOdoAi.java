@@ -34,7 +34,7 @@ public class TurretOdoAi implements Subsystem {
     public static double SERVO_MAX = 1.0;
 
     // ========== PID CONSTANTS (TUNE THESE!) ==========
-    public static double kP = 0.02;         // Proportional gain
+    public static double kP = 0.002;         // Proportional gain
     public static double kI = 0.0;          // Integral gain (start at 0)
     public static double kD = 0.003;        // Derivative gain
 

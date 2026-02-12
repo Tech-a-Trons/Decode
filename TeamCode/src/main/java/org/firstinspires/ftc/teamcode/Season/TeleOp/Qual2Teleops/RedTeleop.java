@@ -232,6 +232,7 @@ else {
         Gamepads.gamepad1().leftTrigger()
                 .greaterThan(0.05)
                 .whenBecomesTrue(() -> {
+                    PedroComponent.follower().holdPoint(PedroComponent.follower().getPose());
                     Transfer.INSTANCE.on();
                     CompliantIntake.INSTANCE.on();
                 });
@@ -239,6 +240,7 @@ else {
         // Left Bumper: Reset shooter
         Gamepads.gamepad1().leftBumper()
                 .whenBecomesTrue(() -> {
+                    PedroComponent.follower().startTeleopDrive();
                     TurretPID.INSTANCE.resetShooter().schedule();
                     Hood.INSTANCE.midopen();
                     CompliantIntake.INSTANCE.off();
@@ -304,17 +306,22 @@ else {
         // Only count balls when intake is active
         if (intakeToggle) {
             colorSensor.IncountBalls();
-            if (colorSensor.artifactcounter>0){
-                RGBled.INSTANCE.open();
+            if (colorSensor.artifactcounter==0){
+                RGBled.INSTANCE.setViolet();
             }
-            if (colorSensor.artifactcounter >= 2) {
+            if (colorSensor.artifactcounter == 1) {
                 Transfer.INSTANCE.advance();
-                RGBled.INSTANCE.midopen();
+                RGBled.INSTANCE.setRed();
+                // Reset toggle state
+            }
+            if (colorSensor.artifactcounter == 2) {
+                Transfer.INSTANCE.advance();
+                RGBled.INSTANCE.setYellow();
                 // Reset toggle state
             }
             // Auto-stop when 3 balls are collected
-            if (colorSensor.artifactcounter >= 3) {
-                RGBled.INSTANCE.close();
+            if (colorSensor.artifactcounter == 3) {
+                RGBled.INSTANCE.setGreen();
                 // Turn off intake and transfer
                 CompliantIntake.INSTANCE.off();
                 Transfer.INSTANCE.off();

@@ -34,12 +34,18 @@ public class TurretPID implements Subsystem {
             new MotorEx("outtakeright").reversed()
     );
 
-    ControlSystem controller = ControlSystem.builder()
+    public ControlSystem controller = ControlSystem.builder()
             .velPid(0.003, 0, 0) // Velocity PID with 0.003
             .basicFF(0.0001, 0, 0.044) // Basic feedforward with kV=0.0001, kA=0.0, kS=0.01
             .build();
 
-
+    public Command setShooterSpeed(double targetVelocity) {
+        return new RunToVelocity(
+                controller,
+                targetVelocity,
+                5
+        ).requires(this);
+    }
     // Set the goal velocity to 500 units per second
 
 

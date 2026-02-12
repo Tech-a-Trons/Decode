@@ -302,17 +302,22 @@ public class BlueTeleop extends NextFTCOpMode {
         // Only count balls when intake is active
         if (intakeToggle) {
             colorSensor.IncountBalls();
-            if (colorSensor.artifactcounter>0){
-                RGBled.INSTANCE.open();
+            if (colorSensor.artifactcounter==0){
+                RGBled.INSTANCE.setViolet();
             }
-            if (colorSensor.artifactcounter >= 2) {
+            if (colorSensor.artifactcounter == 1) {
                 Transfer.INSTANCE.advance();
-                RGBled.INSTANCE.midopen();
+                RGBled.INSTANCE.setRed();
+                // Reset toggle state
+            }
+            if (colorSensor.artifactcounter == 2) {
+                Transfer.INSTANCE.advance();
+                RGBled.INSTANCE.setYellow();
                 // Reset toggle state
             }
             // Auto-stop when 3 balls are collected
-            if (colorSensor.artifactcounter >= 3) {
-                RGBled.INSTANCE.close();
+            if (colorSensor.artifactcounter == 3) {
+                RGBled.INSTANCE.setGreen();
                 // Turn off intake and transfer
                 CompliantIntake.INSTANCE.off();
                 Transfer.INSTANCE.off();

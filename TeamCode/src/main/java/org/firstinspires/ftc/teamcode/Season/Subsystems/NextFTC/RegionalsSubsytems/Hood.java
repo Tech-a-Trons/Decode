@@ -30,7 +30,7 @@ public class Hood implements Subsystem {
 
     // ===== BASIC CONTROL =====
 
-    private void set(double pos) {
+    public void set(double pos) {
         hood.setPosition(clamp(pos));
     }
 

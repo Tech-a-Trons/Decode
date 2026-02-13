@@ -3,20 +3,25 @@ package org.firstinspires.ftc.teamcode.Season.TeleOp.Qual2Teleops;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "TestIntakeTransfer", group = "TeleOp")
 public class TestIntakeTransfer extends LinearOpMode {
 
     private DcMotor motor1;
     private DcMotor motor2;
+    private Servo turretServo1;
+    private Servo turretServo2;
+
 
     @Override
     public void runOpMode() {
 
         // Hardware map
         motor1 = hardwareMap.get(DcMotor.class, "transfer");
-        motor2 = hardwareMap.get(DcMotor.class, "activeintake");
-
+        motor2 = hardwareMap.get(DcMotor.class, "in");
+        turretServo1 = hardwareMap.get(Servo.class,"turretServo1");
+        turretServo2 = hardwareMap.get(Servo.class,"turretServo2");
         waitForStart();
 
         while (opModeIsActive()) {
@@ -26,7 +31,10 @@ public class TestIntakeTransfer extends LinearOpMode {
                 motor1.setPower(1.0);
                 motor2.setPower(-1.0);
             }
-
+            if(gamepad1.right_bumper){
+                turretServo1.setPosition(1);
+                turretServo2.setPosition(1);
+            }
             // If X is pressed → stop motors
             if (gamepad1.x) {
                 motor1.setPower(0.0);

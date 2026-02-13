@@ -36,6 +36,10 @@ public class TurretOdoAiFixed implements Subsystem {
     private double integral = 0;
     private double lastTime = 0;
 
+    // Manual mode
+    public boolean manualMode = false;
+    private double manualPosition = 0.4;  // Starting position
+
     private TurretOdoAiFixed() {}
 
     // ================= INIT =================
@@ -43,10 +47,14 @@ public class TurretOdoAiFixed implements Subsystem {
         turretServo1 = hardwareMap.get(Servo.class, "turretServo1");
         turretServo2 = hardwareMap.get(Servo.class, "turretServo2");
 
-        turretServo1.setPosition(0.0);
-        turretServo2.setPosition(0.0);
+        turretServo1.setPosition(0.4);
+        turretServo2.setPosition(0.4);
+        manualPosition = 0.4;
 
         System.out.println("TURRET INIT CALLED");
+
+        // Initialize lastTime to prevent dt issues on first run
+        lastTime = System.nanoTime() / 1e9;
 
         initialized = true;
     }
@@ -55,15 +63,25 @@ public class TurretOdoAiFixed implements Subsystem {
     @Override
     public void periodic() {
 
-        // Prevent crash if init not called
-        if (!initialized) return;
+        // Skip if in manual mode
+        if (manualMode) {
+            return;
+        }
 
-        if (turretServo1 == null || turretServo2 == null) return;
-        if (PedroComponent.follower() == null) return;
+        // Prevent crash if init not called
+        if (turretServo1 == null || turretServo2 == null) {
+            System.out.println("TURRET SERVOS NULL - SKIPPING");
+            return;
+        }
 
         PedroComponent.follower().update();
+        // This is already being called in TeleOp's onUpdate() method
+
         Pose pose = PedroComponent.follower().getPose();
-        if (pose == null) return;
+        if (pose == null) {
+            System.out.println("POSE NULL - SKIPPING");
+            return;
+        }
 
         // --- Update pose ---
         x = pose.getX();
@@ -107,6 +125,41 @@ public class TurretOdoAiFixed implements Subsystem {
 
         lastError = error;
         lastTime = currentTime;
+    }
+
+    // ================= MANUAL CONTROLS =================
+
+    public void incrementPosition(double delta) {
+        manualPosition = clamp(manualPosition + delta, 0.0, 1.0);
+        turretServo1.setPosition(manualPosition);
+        turretServo2.setPosition(manualPosition);
+    }
+
+    public void turnRight() {
+        incrementPosition(0.1);
+    }
+
+    public void turnLeft() {
+        incrementPosition(-0.1);
+    }
+
+    public void setManualMode(boolean enabled) {
+        manualMode = enabled;
+        if (enabled) {
+            // When entering manual mode, sync manual position with current servo position
+            manualPosition = turretServo1.getPosition();
+            System.out.println("MANUAL MODE ENABLED - Position: " + manualPosition);
+        } else {
+            // Reset PID state when returning to auto mode
+            integral = 0;
+            lastError = 0;
+            lastTime = System.nanoTime() / 1e9;
+            System.out.println("AUTO MODE ENABLED");
+        }
+    }
+
+    public double getManualPosition() {
+        return manualPosition;
     }
 
     // ================= Helpers =================

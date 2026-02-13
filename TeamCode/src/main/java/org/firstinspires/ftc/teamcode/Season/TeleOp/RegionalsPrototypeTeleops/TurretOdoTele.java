@@ -13,12 +13,10 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Season.Auto.Constants;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.ColorSensor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Hood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.RGBled;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.RedLL;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Transfer;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Turret;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdoAi;
@@ -37,11 +35,9 @@ import dev.nextftc.hardware.driving.MecanumDriverControlled;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.extensions.pedro.PedroComponent;
 
-@TeleOp
+@TeleOp(name = "TurretOdo3")
 public class TurretOdoTele extends NextFTCOpMode {
 
-    private RedExperimentalDistanceLExtractor limelight;
-    private RedLL turretAlignment;
     private ColorSensor colorSensor;
     private RGBled rgBled;
 
@@ -54,8 +50,7 @@ public class TurretOdoTele extends NextFTCOpMode {
                         Turret.INSTANCE,
                         CompliantIntake.INSTANCE,
                         Transfer.INSTANCE,
-                        ColorSensor.INSTANCE,
-                        rgBled.INSTANCE
+                        ColorSensor.INSTANCE
                 ),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE,
@@ -67,7 +62,7 @@ public class TurretOdoTele extends NextFTCOpMode {
     private final MotorEx frontRightMotor = new MotorEx("fr");
     private final MotorEx backLeftMotor = new MotorEx("bl").reversed();
     private final MotorEx backRightMotor = new MotorEx("br");
-    private boolean turretLimelightEnabled = true;
+    private boolean turretAutoAlignEnabled = true;
     private boolean automatedDrive;
     private Supplier<PathChain> farscore;
     private Supplier<PathChain> closescore;
@@ -82,20 +77,23 @@ public class TurretOdoTele extends NextFTCOpMode {
     private Pose Park = new Pose(38.74532374100719, 33.358273381294964, 90);
     private boolean intakeToggle = false;
     private long intakeStartTime = 0;
-    private VoltageGet voltageGet;
 
     private boolean robotCentric = false;
     private boolean togglePressed = false;
 
     @Override
     public void onStartButtonPressed() {
-        limelight = new RedExperimentalDistanceLExtractor(hardwareMap);
-        turretAlignment = new RedLL(hardwareMap, limelight, voltageGet);
         colorSensor = new ColorSensor();
         rgBled = new RGBled();
 
-        limelight.startReading();
-        turretAlignment.setTelemetry(telemetry);
+        // Initialize TurretOdoAi hardware with error handling
+        try {
+            TurretOdoAi.INSTANCE.init(hardwareMap);
+            telemetry.addData("TurretOdoAi", "Initialized successfully");
+        } catch (Exception e) {
+            telemetry.addData("TurretOdoAi Init Error", e.getMessage());
+            telemetry.addData("Error Type", e.getClass().getSimpleName());
+        }
 
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
@@ -142,39 +140,33 @@ public class TurretOdoTele extends NextFTCOpMode {
 
         Gamepads.gamepad1().b()
                 .whenBecomesTrue(() -> {
-                    turretLimelightEnabled = !turretLimelightEnabled;
-                    if (!turretLimelightEnabled) {
-                        turretAlignment.stopTurret();
-                        telemetryM.addData("Limelight Turret", "Auto-Align Disabled");
+                    turretAutoAlignEnabled = !turretAutoAlignEnabled;
+                    if (!turretAutoAlignEnabled) {
+                        telemetryM.addData("Turret", "Auto-Align Disabled");
                     } else {
-                        telemetryM.addData("Limelight Turret", "Auto-Align Enabled");
+                        telemetryM.addData("Turret", "Auto-Align Enabled");
                     }
                 });
 
         Gamepads.gamepad1().dpadLeft()
                 .whenTrue(() -> {
-                    turretLimelightEnabled = false;
-                    turretAlignment.turretLeft();
+                    turretAutoAlignEnabled = false;
                 })
                 .whenBecomesFalse(() -> {
-                    turretLimelightEnabled = true;
-                    turretAlignment.stopAndEnableAlign();
+                    turretAutoAlignEnabled = true;
                 });
 
         Gamepads.gamepad1().dpadRight()
                 .whenTrue(() -> {
-                    turretLimelightEnabled = false;
-                    turretAlignment.turretRight();
+                    turretAutoAlignEnabled = false;
                 })
                 .whenBecomesFalse(() -> {
-                    turretLimelightEnabled = true;
-                    turretAlignment.stopAndEnableAlign();
+                    turretAutoAlignEnabled = true;
                 });
 
         Gamepads.gamepad1().a()
                 .whenBecomesTrue(() -> {
-                    turretLimelightEnabled = false;
-                    turretAlignment.stopTurret();
+                    turretAutoAlignEnabled = false;
                     CompliantIntake.INSTANCE.repel();
                     telemetryM.addData("Turret", "Stopped & Intake Reset");
                 });
@@ -234,109 +226,113 @@ public class TurretOdoTele extends NextFTCOpMode {
 
     @Override
     public void onUpdate() {
-        // Drive mode toggle
-        if (gamepad1.dpad_up && !togglePressed) {
-            robotCentric = !robotCentric;
-            togglePressed = true;
-        } else if (!gamepad1.dpad_up) {
-            togglePressed = false;
-        }
+        try {
+            // Drive mode toggle
+            if (gamepad1.dpad_up && !togglePressed) {
+                robotCentric = !robotCentric;
+                togglePressed = true;
+            } else if (!gamepad1.dpad_up) {
+                togglePressed = false;
+            }
 
-        // Let subsystem handle odometry update
-        TurretOdoAi.INSTANCE.periodic();
+            // Let subsystem handle odometry update with error handling
+            try {
+                TurretOdoAi.INSTANCE.periodic();
+            } catch (Exception e) {
+                telemetry.addData("TurretOdoAi Error", e.getMessage());
+            }
 
-        // Get pose ONCE and cache it
-        Pose pose = PedroComponent.follower().getPose();
+            // Get pose ONCE and cache it
+            Pose pose = PedroComponent.follower().getPose();
 
-        if (pose == null) {
-            telemetry.addData("ERROR", "Pose is null - follower not initialized");
+            if (pose == null) {
+                telemetry.addData("ERROR", "Pose is null - follower not initialized");
+                telemetry.update();
+                return;
+            }
+
+            // Cache all values from subsystem
+            double x = TurretOdoAi.INSTANCE.getX();
+            double y = TurretOdoAi.INSTANCE.getY();
+            double heading = TurretOdoAi.INSTANCE.getHeading();
+            double targetTurretAngle = TurretOdoAi.INSTANCE.getTargetAngleDeg();
+            double distanceToTarget = TurretOdoAi.INSTANCE.getDistanceToTarget();
+            double turretAngle1 = TurretOdoAi.INSTANCE.getTurretAngleDeg();
+            double Lasterror = TurretOdoAi.INSTANCE.getLastError();
+
+            // ========== ALL TELEMETRY DATA ==========
+            telemetry.addData("Drive Mode", robotCentric ? "Robot Centric" : "Field Centric");
+            telemetry.addData("X", String.format("%.1f", x));
+            telemetry.addData("Y", String.format("%.1f", y));
+            telemetry.addData("Heading (deg)", String.format("%.1f", heading));
+            telemetry.addData("Target Turret Angle (deg)", String.format("%.1f", targetTurretAngle));
+            telemetry.addData("Target", "(" + TurretOdoAi.xt + ", " + TurretOdoAi.yt + ")");
+            telemetry.addData("Distance", String.format("%.1f", distanceToTarget));
+            telemetry.addData("Turret Angle", String.format("%.1f", turretAngle1));
+            telemetry.addData("Error", String.format("%.1f°", Lasterror));
+            telemetry.addData("Auto-Align", turretAutoAlignEnabled ? "Enabled" : "Disabled");
             telemetry.update();
-            return;
-        }
 
-        // Cache all values from subsystem
-        double x = TurretOdoAi.INSTANCE.getX();
-        double y = TurretOdoAi.INSTANCE.getY();
-        double heading = TurretOdoAi.INSTANCE.getHeading();
-        double targetTurretAngle = TurretOdoAi.INSTANCE.getTargetAngleDeg();
-        double distanceToTarget = TurretOdoAi.INSTANCE.getDistanceToTarget();
-        double turretAngle1 = TurretOdoAi.INSTANCE.getTurretAngleDeg();
-        double Lasterror = TurretOdoAi.INSTANCE.getLastError();
-
-
-
-        // ========== ALL TELEMETRY DATA ==========
-        telemetry.addData("Drive Mode", robotCentric ? "Robot Centric" : "Field Centric");
-        telemetry.addData("X", String.format("%.1f", x));
-        telemetry.addData("Y", String.format("%.1f", y));
-        telemetry.addData("Heading (deg)", String.format("%.1f", heading));
-        telemetry.addData("Target Turret Angle (deg)", String.format("%.1f", targetTurretAngle));
-        telemetry.addData("Target", "(" + TurretOdoAi.xt + ", " + TurretOdoAi.yt + ")");
-        telemetry.addData("Distance", String.format("%.1f", distanceToTarget));
-        telemetry.addData("Turret Angle", String.format("%.1f", turretAngle1));
-        telemetry.addData("Error", "%.1f°", TurretOdoAi.INSTANCE.getLastError());
-        telemetry.update();
-        telemetry.update();
-
-        // ========== DRIVE CONTROL ==========
-        if (!automatedDrive) {
-            PedroComponent.follower().setTeleOpDrive(
-                    -gamepad1.left_stick_y * slowModeMultiplier,
-                    -gamepad1.left_stick_x * slowModeMultiplier,
-                    -gamepad1.right_stick_x * slowModeMultiplier,
-                    true
-            );
-        }
-
-        // CRITICAL: Only ONE follower update per loop
-        PedroComponent.follower().update();
-
-        // Cache velocity values
-        double targetVel = TurretPID.activeTargetVelocity;
-        double actualVel = TurretPID.turret.getVelocity();
-
-        // ========== HOOD CONTROL ==========
-        if (distanceToTarget <= CLOSE_HOOD_DISTANCE) {
-            Hood.INSTANCE.close();
-        } else {
-            if (targetVel > 500) {
-                Hood.INSTANCE.compensateFromVelocity(targetVel, actualVel);
+            // ========== DRIVE CONTROL ==========
+            if (!automatedDrive) {
+                PedroComponent.follower().setTeleOpDrive(
+                        -gamepad1.left_stick_y * slowModeMultiplier,
+                        -gamepad1.left_stick_x * slowModeMultiplier,
+                        -gamepad1.right_stick_x * slowModeMultiplier,
+                        true
+                );
             }
-        }
 
-        // ========== TURRET LIMELIGHT ALIGNMENT ==========
-        if (turretLimelightEnabled) {
-            if (distanceToTarget > DISTANCE_THRESHOLD) {
-                turretAlignment.farAlign();
+            // CRITICAL: Only ONE follower update per loop
+            PedroComponent.follower().update();
+
+            // Cache velocity values
+            double targetVel = TurretPID.activeTargetVelocity;
+            double actualVel = TurretPID.turret.getVelocity();
+
+            // ========== HOOD CONTROL ==========
+            if (distanceToTarget <= CLOSE_HOOD_DISTANCE) {
+                Hood.INSTANCE.close();
             } else {
-                turretAlignment.closeAlign();
+                if (targetVel > 500) {
+                    Hood.INSTANCE.compensateFromVelocity(targetVel, actualVel);
+                }
             }
+
+            // ========== TURRET AUTO ALIGNMENT ==========
+            //        if (turretAutoAlignEnabled) {
+            //            // Use odometry-based turret alignment
+            //            TurretOdoAi.INSTANCE.alignTurret();
+            //        }
+
+            // ========== COLOR SENSOR BALL COUNTING ==========
+            if (intakeToggle) {
+                colorSensor.IncountBalls();
+
+                int ballCount = colorSensor.artifactcounter;
+
+                if (ballCount > 0) {
+                    // RGBled.INSTANCE.open();
+                }
+                if (ballCount >= 2) {
+                    Transfer.INSTANCE.advance();
+                    // RGBled.INSTANCE.midopen();
+                }
+                if (ballCount >= 3) {
+                    // RGBled.INSTANCE.close();
+                    CompliantIntake.INSTANCE.off();
+                    Transfer.INSTANCE.off();
+                    intakeToggle = false;
+                    intakeStartTime = 0;
+                    gamepad1.rumble(500);
+                    colorSensor.artifactcounter = 0;
+                }
+            }
+        } catch (Exception e) {
+            telemetry.addData("CRITICAL ERROR", e.getMessage());
+            telemetry.addData("Error Type", e.getClass().getSimpleName());
+            telemetry.addData("Stack", e.getStackTrace()[0].toString());
+            telemetry.update();
         }
-
-        // ========== COLOR SENSOR BALL COUNTING ==========
-        if (intakeToggle) {
-            colorSensor.IncountBalls();
-
-            int ballCount = colorSensor.artifactcounter;
-
-            if (ballCount > 0) {
-//                RGBled.INSTANCE.open();
-            }
-            if (ballCount >= 2) {
-                Transfer.INSTANCE.advance();
-//                RGBled.INSTANCE.midopen();
-            }
-            if (ballCount >= 3) {
-//                RGBled.INSTANCE.close();
-                CompliantIntake.INSTANCE.off();
-                Transfer.INSTANCE.off();
-                intakeToggle = false;
-                intakeStartTime = 0;
-                gamepad1.rumble(500);
-                colorSensor.artifactcounter = 0;
-            }
-        }
-
-        limelight.update();
     }
 }

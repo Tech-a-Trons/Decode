@@ -8,10 +8,10 @@ import org.firstinspires.ftc.teamcode.Season.Auto.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Hood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Transfer;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdoAi;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdoAiFixed;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID;
 
+import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.Gamepads;
@@ -23,20 +23,19 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "Regionals Teleop Turret")
-public class TeleOpProgram extends NextFTCOpMode {
+@TeleOp(name = "Regionals Teleop")
+public class FullCodewithTurret extends NextFTCOpMode {
 
     private boolean intakeToggle = false;
     private boolean turretManualMode = false;
 
-    public TeleOpProgram() {
+    public FullCodewithTurret() {
         addComponents(
                 new SubsystemComponent(
 
                         CompliantIntake.INSTANCE,
                         Transfer.INSTANCE,
                         TurretPID.INSTANCE,
-                        TurretOdoAi.INSTANCE,  // Added TurretOdoAiFixed
                         Hood.INSTANCE
                 ),
                 BulkReadComponent.INSTANCE,
@@ -57,9 +56,12 @@ public class TeleOpProgram extends NextFTCOpMode {
     public void onStartButtonPressed() {
 
         // Initialize turret safely
-        TurretOdoAi.INSTANCE.init(hardwareMap);  // Initialize TurretOdoAiFixed
+        TurretOdoAiFixed.INSTANCE.init(hardwareMap);  // Initialize TurretOdoAiFixed
 
         // Set target position for turret auto-aiming
+        TurretOdoAiFixed.xt = TARGET_X;
+        TurretOdoAiFixed.yt = TARGET_Y;
+
         // Set initial pose
         PedroComponent.follower().setPose(new Pose(38, 22.5, Math.toRadians(180)));
 
@@ -155,30 +157,27 @@ public class TeleOpProgram extends NextFTCOpMode {
         PedroComponent.follower().setTeleOpDrive(
                 -gamepad1.left_stick_y,
                 -gamepad1.left_stick_x ,
-                -gamepad1.right_stick_x,
+                -gamepad1.right_stick_x ,
                 true // Robot Centric
         );
         PedroComponent.follower().update();
 
-        Pose pose = PedroComponent.follower().getPose();
-        if (pose == null) {
-            telemetry.addData("ERROR", "Pose is null");
-            telemetry.update();
-            return;
+        Pose currentPose = PedroComponent.follower().getPose();
+        if (currentPose == null) return;
+
+        telemetry.addData("X", currentPose.getX());
+        telemetry.addData("Y", currentPose.getY());
+        telemetry.addData("Heading", Math.toDegrees(currentPose.getHeading()));
+
+        // Add turret telemetry
+        telemetry.addData("Turret Mode", turretManualMode ? "MANUAL" : "AUTO");
+        if (turretManualMode) {
+            telemetry.addData("Turret Position", String.format("%.2f", TurretOdoAiFixed.INSTANCE.getManualPosition()));
+        } else {
+            telemetry.addData("Turret Target X", TurretOdoAiFixed.xt);
+            telemetry.addData("Turret Target Y", TurretOdoAiFixed.yt);
         }
 
-        telemetry.addData("Status", "Running");
-        telemetry.addData("X", String.format("%.1f", pose.getX()));
-        telemetry.addData("Y", String.format("%.1f", pose.getY()));
-        telemetry.addData("Heading", String.format("%.1f", Math.toDegrees(pose.getHeading())));
-        telemetry.addData("Turret", "ENABLED" );
-
-        if (TurretOdoAi.INSTANCE.isHardwareInitialized()) {
-            telemetry.addData("Turret Angle", String.format("%.1f°", TurretOdoAi.INSTANCE.getTurretAngleDeg()));
-            telemetry.addData("Target Angle", String.format("%.1f°", TurretOdoAi.INSTANCE.getTargetAngleDeg()));
-            telemetry.addData("Error", String.format("%.1f°", TurretOdoAi.INSTANCE.getLastError()));
-            telemetry.addData("Distance", String.format("%.1f", TurretOdoAi.INSTANCE.getDistanceToTarget()));
-        }
         telemetry.update();
     }
 }

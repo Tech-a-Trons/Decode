@@ -121,7 +121,7 @@ public class TurretPID implements Subsystem {
 
     private static long lastShotTime = 0;
 
-    public static boolean canShootMoving(
+    public static boolean pleasespeedineedthis(
             double currentFlywheelVel,
             double targetFlywheelVel,
             double flywheelTolerance,

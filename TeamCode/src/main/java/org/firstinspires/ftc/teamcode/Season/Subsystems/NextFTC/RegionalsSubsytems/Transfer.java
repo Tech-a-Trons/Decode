@@ -18,6 +18,9 @@ public class Transfer implements Subsystem {
     public void repel() {
         transfer.setPower(0.2);
     }
+    public void nice() {
+        transfer.setPower(-0.34);
+    }
     public void advance() {
         transfer.setPower(-0.4);
     }

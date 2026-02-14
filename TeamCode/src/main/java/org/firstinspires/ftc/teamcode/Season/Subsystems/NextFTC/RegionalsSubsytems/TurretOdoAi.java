@@ -22,8 +22,8 @@ public class TurretOdoAi implements Subsystem {
     private double heading = 0;
 
     // ------------------ Target (Red Goal) ------------------
-    public static double xt = 60;
-    public static double yt = 60;
+    public static double xt = 121;
+    public static double yt = 121;
 
     // ------------------ Turret ------------------
     private double targetAngleDeg = 0;      // Where turret should point
@@ -31,8 +31,13 @@ public class TurretOdoAi implements Subsystem {
     private double distanceToTarget = 0;
 
     // Servo safety
-    public static double SERVO_MIN = 0.0;
+    public static double SERVO_MIN = 0; //0
     public static double SERVO_MAX = 1.0;
+
+    // ------------------ ANGLE OFFSET ------------------
+    // Adjust this value to compensate for real-world mounting/calibration differences
+    // Positive values rotate the turret clockwise, negative counter-clockwise
+    public static double ANGLE_OFFSET_DEG = 290;
 
     private double lastError = 0;
 
@@ -99,17 +104,22 @@ public class TurretOdoAi implements Subsystem {
             targetAngleDeg = fieldAngleDeg - heading;
             targetAngleDeg = normalizeDegrees(targetAngleDeg);
 
-            // === 4. DIRECT SERVO CONTROL (NO PID) ===
-            // Convert target angle directly to servo position
-            double servoPos = angleToServo(targetAngleDeg);
+            // === 4. APPLY ANGLE OFFSET ===
+            // Add the offset to compensate for real-world mounting differences
+            double adjustedAngleDeg = targetAngleDeg + ANGLE_OFFSET_DEG;
+            adjustedAngleDeg = normalizeDegrees(adjustedAngleDeg);
+
+            // === 5. DIRECT SERVO CONTROL (NO PID) ===
+            // Convert adjusted angle to servo position
+            double servoPos = angleToServo(adjustedAngleDeg);
             servoPos = clamp(servoPos, SERVO_MIN, SERVO_MAX);
 
             // Set servos to target position immediately
             turretServo1.setPosition(servoPos);
             turretServo2.setPosition(servoPos);
 
-            // Update current turret angle for telemetry
-            turretAngleDeg = targetAngleDeg;
+            // Update current turret angle for telemetry (with offset applied)
+            turretAngleDeg = adjustedAngleDeg;
 
             // Calculate error for telemetry
             lastError = 0; // No error since we're setting directly to target
@@ -155,4 +165,5 @@ public class TurretOdoAi implements Subsystem {
     public double getDistanceToTarget() { return distanceToTarget; }
     public double getLastError() { return lastError; }
     public boolean isHardwareInitialized() { return hardwareInitialized; }
+    public double getAngleOffset() { return ANGLE_OFFSET_DEG; }
 }

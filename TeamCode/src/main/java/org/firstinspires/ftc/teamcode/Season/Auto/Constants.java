@@ -37,8 +37,8 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .xVelocity(64)
-            .yVelocity(54);
+            .xVelocity(80)
+            .yVelocity(63);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
             .forwardPodY(2)
@@ -52,7 +52,7 @@ public class Constants {
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
     public static PathConstraints pathConstraints = new PathConstraints(
-            0.8, //0.995
+            0.67, //0.995
             500,
             1,
             1

@@ -70,7 +70,7 @@ public class TurretPID implements Subsystem {
         double velocity =
                 0.041 * distance * distance
                         - 2.9 * distance
-                        + 1350;
+                        + 1400; //1350
 
         if (distance > 60) {
             velocity -= 2.2 * (distance - 60);

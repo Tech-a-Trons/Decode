@@ -1,20 +1,18 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.RegionalsPrototypeTeleops;
 
-import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RobotContext.lastPose;
 import static dev.nextftc.bindings.Bindings.button;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Season.Auto.Constants;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RobotContext;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Hood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.NewHood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Transfer;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdoAi;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdoAiFixed;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID;
 
+import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.Gamepads;
@@ -26,20 +24,19 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "Regionals Teleop Turret")
-public class TeleOpProgram extends NextFTCOpMode {
+@TeleOp(name = "testing Teleop")
+public class PanelsOpMode extends NextFTCOpMode {
 
     private boolean intakeToggle = false;
     private boolean turretManualMode = false;
 
-    public TeleOpProgram() {
+    public PanelsOpMode() {
         addComponents(
                 new SubsystemComponent(
 
                         CompliantIntake.INSTANCE,
                         Transfer.INSTANCE,
                         TurretPID.INSTANCE,
-                        TurretOdoAi.INSTANCE,  // Added TurretOdoAiFixed
                         NewHood.INSTANCE
                 ),
                 BulkReadComponent.INSTANCE,
@@ -50,7 +47,7 @@ public class TeleOpProgram extends NextFTCOpMode {
 
     private static final double TARGET_X = 121;  // Example: center of field
     private static final double TARGET_Y = 121;
-    private Pose Middle = new Pose(72, 35, 180);
+    private Pose Middle = new Pose(72,35,180);
     private final MotorEx frontLeftMotor = new MotorEx("fl").reversed();
     private final MotorEx frontRightMotor = new MotorEx("fr");
     private final MotorEx backLeftMotor = new MotorEx("bl").reversed();
@@ -58,19 +55,17 @@ public class TeleOpProgram extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-// Set goal position for hood distance calculations
-        NewHood.INSTANCE.midopen();
+
         // Initialize turret safely
-        TurretOdoAi.INSTANCE.init(hardwareMap);  // Initialize TurretOdoAiFixed
+        TurretOdoAiFixed.INSTANCE.init(hardwareMap);  // Initialize TurretOdoAiFixed
 
         // Set target position for turret auto-aiming
+        TurretOdoAiFixed.xt = TARGET_X;
+        TurretOdoAiFixed.yt = TARGET_Y;
+
         // Set initial pose
-        if (lastPose != null){
-            PedroComponent.follower().setPose(lastPose);
-        }
-        else {
-            PedroComponent.follower().setPose(new Pose(0,0,0));
-        }
+        PedroComponent.follower().setPose(new Pose(38, 22.5, Math.toRadians(180)));
+
         PedroComponent.follower().startTeleopDrive();
 
         Gamepads.gamepad1().dpadDown()
@@ -90,22 +85,12 @@ public class TeleOpProgram extends NextFTCOpMode {
 //        driverControlled.schedule();
 
         // Shoot
-        button(() -> gamepad1.right_trigger > 0.05)
-                .whenTrue(() -> {
-                    Pose pose = PedroComponent.follower().getPose();
-                    double d = Math.hypot(
-                            TARGET_X - pose.getX(),
-                            TARGET_Y - pose.getY()
-                    );
 
-                    // Set hood based on distance  ← NEW LINE
-
-
-                    // Set flywheel based on distance
-                    TurretPID.INSTANCE.newshooterdistance(d).schedule();
-                    TurretPID.shootRequested = true;
-                    TurretPID.hasShot = false;
-                });
+    button(() -> gamepad1.right_trigger > 0.05)
+            .whenTrue(() -> {
+        NewHood.INSTANCE.complete();
+        TurretPID.INSTANCE.setShooterSpeed(600);
+    });
 
         // Intake toggle
         Gamepads.gamepad1().rightBumper()
@@ -114,7 +99,7 @@ public class TeleOpProgram extends NextFTCOpMode {
 
                     if (intakeToggle) {
                         CompliantIntake.INSTANCE.on();
-                        Transfer.INSTANCE.nice();
+                        Transfer.INSTANCE.off();
                     } else {
                         CompliantIntake.INSTANCE.off();
                         Transfer.INSTANCE.off();
@@ -133,7 +118,7 @@ public class TeleOpProgram extends NextFTCOpMode {
         Gamepads.gamepad1().leftBumper()
                 .whenBecomesTrue(() -> {
                     TurretPID.INSTANCE.resetShooter().schedule();
-                    NewHood.INSTANCE.midopen();
+                    Hood.INSTANCE.midopen();
                     CompliantIntake.INSTANCE.off();
                     Transfer.INSTANCE.off();
                     intakeToggle = false;
@@ -162,40 +147,33 @@ public class TeleOpProgram extends NextFTCOpMode {
                     }
                 });
     }
-    @Override
-    public void onStop() {
-        RobotContext.lastPose = PedroComponent.follower().getPose();
-    }
+
     @Override
     public void onUpdate() {
-
         PedroComponent.follower().setTeleOpDrive(
                 -gamepad1.left_stick_y,
-                -gamepad1.left_stick_x,
-                -gamepad1.right_stick_x,
+                -gamepad1.left_stick_x ,
+                -gamepad1.right_stick_x ,
                 true // Robot Centric
         );
         PedroComponent.follower().update();
 
-        Pose pose = PedroComponent.follower().getPose();
-        if (pose == null) {
-            telemetry.addData("ERROR", "Pose is null");
-            telemetry.update();
-            return;
+        Pose currentPose = PedroComponent.follower().getPose();
+        if (currentPose == null) return;
+
+        telemetry.addData("X", currentPose.getX());
+        telemetry.addData("Y", currentPose.getY());
+        telemetry.addData("Heading", Math.toDegrees(currentPose.getHeading()));
+
+        // Add turret telemetry
+        telemetry.addData("Turret Mode", turretManualMode ? "MANUAL" : "AUTO");
+        if (turretManualMode) {
+            telemetry.addData("Turret Position", String.format("%.2f", TurretOdoAiFixed.INSTANCE.getManualPosition()));
+        } else {
+            telemetry.addData("Turret Target X", TurretOdoAiFixed.xt);
+            telemetry.addData("Turret Target Y", TurretOdoAiFixed.yt);
         }
 
-        telemetry.addData("Status", "Running");
-        telemetry.addData("X", String.format("%.1f", pose.getX()));
-        telemetry.addData("Y", String.format("%.1f", pose.getY()));
-        telemetry.addData("Heading", String.format("%.1f", Math.toDegrees(pose.getHeading())));
-        telemetry.addData("Turret", String.format("%.1f°",TurretPID.activeTargetVelocity));
-
-        if (TurretOdoAi.INSTANCE.isHardwareInitialized()) {
-            telemetry.addData("Turret Angle", String.format("%.1f°", TurretOdoAi.INSTANCE.getTurretAngleDeg()));
-            telemetry.addData("Target Angle", String.format("%.1f°", TurretOdoAi.INSTANCE.getTargetAngleDeg()));
-            telemetry.addData("Error", String.format("%.1f°", TurretOdoAi.INSTANCE.getLastError()));
-            telemetry.addData("Distance", String.format("%.1f", TurretOdoAi.INSTANCE.getDistanceToTarget()));
-        }
         telemetry.update();
     }
 }

@@ -5,7 +5,7 @@ import dev.nextftc.hardware.impl.MotorEx;
 
 public class Intake implements Subsystem {
     public static final Intake INSTANCE = new Intake();
-    private Intake() { }
+    public Intake() { }
     public MotorEx activeintake = new MotorEx("activeintake");
 
     public static void on() {

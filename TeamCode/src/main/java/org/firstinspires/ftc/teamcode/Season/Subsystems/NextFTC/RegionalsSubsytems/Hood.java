@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.impl.ServoEx;
@@ -111,4 +112,6 @@ public class Hood implements Subsystem {
         // Ensure hardware is initialized on first periodic call
         ensureInitialized();
     }
+
+
 }

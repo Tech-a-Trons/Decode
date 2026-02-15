@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Season.Auto.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Hood;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.NewHood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Transfer;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdoAi;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdoAiFixed;
@@ -37,7 +38,7 @@ public class TeleOpProgram extends NextFTCOpMode {
                         Transfer.INSTANCE,
                         TurretPID.INSTANCE,
                         TurretOdoAi.INSTANCE,  // Added TurretOdoAiFixed
-                        Hood.INSTANCE
+                        NewHood.INSTANCE
                 ),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE,
@@ -58,7 +59,7 @@ public class TeleOpProgram extends NextFTCOpMode {
 
         // Initialize turret safely
         TurretOdoAi.INSTANCE.init(hardwareMap);  // Initialize TurretOdoAiFixed
-
+        NewHood.INSTANCE.init(hardwareMap);
         // Set target position for turret auto-aiming
         // Set initial pose
         PedroComponent.follower().setPose(new Pose(72, 72, Math.toRadians(270)));

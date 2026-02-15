@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsyt
 
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.impl.ServoEx;
@@ -41,11 +42,11 @@ public class NewHood implements Subsystem {
     private ServoEx hood;
     private boolean isOpen = false;
     private boolean manualOverride = false;
-
-    public NewHood() {
+    public void init(HardwareMap hardwareMap) {
         hood = new ServoEx("hood");
         hood.setPosition(midopenPos);
     }
+
 
     // ===== BASIC CONTROL =====
 
@@ -186,4 +187,6 @@ public class NewHood implements Subsystem {
             adjustForCurrentDistance();
         }
     }
+
+
 }

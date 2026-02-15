@@ -264,7 +264,8 @@ public class TurretOdoAi implements Subsystem {
     private double clamp(double val, double min, double max) {
         return Math.max(min, Math.min(max, val));
     }
-
+// Manual Mode
+    
     // ------------------ Getters ------------------
     public double getX() { return x; }
     public double getY() { return y; }

@@ -47,7 +47,7 @@ public class TeleOpProgram extends NextFTCOpMode {
 
     private static final double TARGET_X = 121;  // Example: center of field
     private static final double TARGET_Y = 121;
-    private Pose Middle = new Pose(72,35,180);
+    private Pose Middle = new Pose(72,72,Math.toRadians(270));
     private final MotorEx frontLeftMotor = new MotorEx("fl").reversed();
     private final MotorEx frontRightMotor = new MotorEx("fr");
     private final MotorEx backLeftMotor = new MotorEx("bl").reversed();
@@ -61,7 +61,7 @@ public class TeleOpProgram extends NextFTCOpMode {
 
         // Set target position for turret auto-aiming
         // Set initial pose
-        PedroComponent.follower().setPose(new Pose(38, 22.5, Math.toRadians(180)));
+        PedroComponent.follower().setPose(new Pose(72, 72, Math.toRadians(270)));
 
         PedroComponent.follower().startTeleopDrive();
 
@@ -126,7 +126,28 @@ public class TeleOpProgram extends NextFTCOpMode {
                     intakeToggle = false;
                 });
 
+        // Toggle between manual and auto turret mode with D-pad Up
+        Gamepads.gamepad1().dpadUp()
+                .whenBecomesTrue(() -> {
+                    turretManualMode = !turretManualMode;
+                    TurretOdoAiFixed.INSTANCE.setManualMode(turretManualMode);
+                });
 
+        // Manual turret control - D-pad Left (turn left, decrease position)
+        Gamepads.gamepad1().dpadLeft()
+                .whenBecomesTrue(() -> {
+                    if (turretManualMode) {
+                        TurretOdoAiFixed.INSTANCE.turnLeft();
+                    }
+                });
+
+        // Manual turret control - D-pad Right (turn right, increase position)
+        Gamepads.gamepad1().dpadRight()
+                .whenBecomesTrue(() -> {
+                    if (turretManualMode) {
+                        TurretOdoAiFixed.INSTANCE.turnRight();
+                    }
+                });
     }
 
     @Override
@@ -152,7 +173,7 @@ public class TeleOpProgram extends NextFTCOpMode {
         telemetry.addData("Heading", String.format("%.1f", Math.toDegrees(pose.getHeading())));
         telemetry.addData("Turret", "ENABLED" );
 
-        if (TurretOdoAi.INSTANCE.isHardwareInitialized()) {
+        if (TurretOdoAi.INSTANCE.hardwareInitialized) {
             telemetry.addData("Turret Angle", String.format("%.1f°", TurretOdoAi.INSTANCE.getTurretAngleDeg()));
             telemetry.addData("Target Angle", String.format("%.1f°", TurretOdoAi.INSTANCE.getTargetAngleDeg()));
             telemetry.addData("Error", String.format("%.1f°", TurretOdoAi.INSTANCE.getLastError()));

@@ -126,28 +126,7 @@ public class TeleOpProgram extends NextFTCOpMode {
                     intakeToggle = false;
                 });
 
-        // Toggle between manual and auto turret mode with D-pad Up
-        Gamepads.gamepad1().dpadUp()
-                .whenBecomesTrue(() -> {
-                    turretManualMode = !turretManualMode;
-                    TurretOdoAiFixed.INSTANCE.setManualMode(turretManualMode);
-                });
 
-        // Manual turret control - D-pad Left (turn left, decrease position)
-        Gamepads.gamepad1().dpadLeft()
-                .whenBecomesTrue(() -> {
-                    if (turretManualMode) {
-                        TurretOdoAiFixed.INSTANCE.turnLeft();
-                    }
-                });
-
-        // Manual turret control - D-pad Right (turn right, increase position)
-        Gamepads.gamepad1().dpadRight()
-                .whenBecomesTrue(() -> {
-                    if (turretManualMode) {
-                        TurretOdoAiFixed.INSTANCE.turnRight();
-                    }
-                });
     }
 
     @Override

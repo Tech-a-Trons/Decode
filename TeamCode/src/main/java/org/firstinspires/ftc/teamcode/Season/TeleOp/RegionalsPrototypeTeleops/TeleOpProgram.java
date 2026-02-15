@@ -29,6 +29,7 @@ public class TeleOpProgram extends NextFTCOpMode {
 
     private boolean intakeToggle = false;
     private boolean turretManualMode = false;
+    public double SlowModeMultipler = 0;
 
     public TeleOpProgram() {
         addComponents(
@@ -71,16 +72,6 @@ public class TeleOpProgram extends NextFTCOpMode {
                     PedroComponent.follower().setPose(Middle);
                 });
 
-//        Command driverControlled = new MecanumDriverControlled(
-//                frontLeftMotor,
-//                frontRightMotor,
-//                backLeftMotor,
-//                backRightMotor,
-//                Gamepads.gamepad1().leftStickY().negate(),
-//                Gamepads.gamepad1().leftStickX(),
-//                Gamepads.gamepad1().rightStickX()
-//        );
-//        driverControlled.schedule();
 
         // Shoot
         button(() -> gamepad1.right_trigger > 0.05)
@@ -154,9 +145,9 @@ public class TeleOpProgram extends NextFTCOpMode {
     @Override
     public void onUpdate() {
         PedroComponent.follower().setTeleOpDrive(
-                -gamepad1.left_stick_y,
-                -gamepad1.left_stick_x ,
-                -gamepad1.right_stick_x,
+                gamepad1.left_stick_y * SlowModeMultipler,
+                gamepad1.left_stick_x * SlowModeMultipler,
+                gamepad1.right_stick_x * SlowModeMultipler,
                 true // Robot Centric
         );
         PedroComponent.follower().update();

@@ -35,11 +35,10 @@ public class TeleOpProgram extends NextFTCOpMode {
     public TeleOpProgram() {
         addComponents(
                 new SubsystemComponent(
-
                         CompliantIntake.INSTANCE,
                         Transfer.INSTANCE,
                         TurretPID.INSTANCE,
-                        TurretOdoAi.INSTANCE,  // Added TurretOdoAiFixed
+                        TurretOdoAi.INSTANCE,
                         NewHood.INSTANCE
                 ),
                 BulkReadComponent.INSTANCE,
@@ -48,9 +47,9 @@ public class TeleOpProgram extends NextFTCOpMode {
         );
     }
 
-    private static final double TARGET_X = 121;  // Example: center of field
+    private static final double TARGET_X = 121;
     private static final double TARGET_Y = 121;
-    private Pose Middle = new Pose(72,72,Math.toRadians(270));
+    private Pose Middle = new Pose(72, 72, Math.toRadians(270));
     private final MotorEx frontLeftMotor = new MotorEx("fl").reversed();
     private final MotorEx frontRightMotor = new MotorEx("fr");
     private final MotorEx backLeftMotor = new MotorEx("bl").reversed();
@@ -58,21 +57,18 @@ public class TeleOpProgram extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-
         // Initialize turret safely
-        TurretOdoAi.INSTANCE.init(hardwareMap);  // Initialize TurretOdoAiFixed
+        TurretOdoAi.INSTANCE.init(hardwareMap);
         NewHood.INSTANCE.init(hardwareMap);
-        // Set target position for turret auto-aiming
+
         // Set initial pose
         PedroComponent.follower().setPose(new Pose(72, 72, Math.toRadians(270)));
-
         PedroComponent.follower().startTeleopDrive();
 
         Gamepads.gamepad1().dpadDown()
                 .whenBecomesTrue(() -> {
                     PedroComponent.follower().setPose(Middle);
                 });
-
 
         // Shoot
         button(() -> gamepad1.right_trigger > 0.05)
@@ -119,19 +115,15 @@ public class TeleOpProgram extends NextFTCOpMode {
                     Transfer.INSTANCE.off();
                     intakeToggle = false;
                     ColorSensor.INSTANCE.artifactcounter = 0;
-
                 });
-
-        // Toggle between manual and auto turret mode with D-pad Up
-
     }
 
     @Override
     public void onUpdate() {
         PedroComponent.follower().setTeleOpDrive(
                 -gamepad1.left_stick_y,
-               - gamepad1.left_stick_x ,
-                -gamepad1.right_stick_x ,
+                -gamepad1.left_stick_x,
+                -gamepad1.right_stick_x,
                 true // Robot Centric
         );
         PedroComponent.follower().update();
@@ -147,7 +139,7 @@ public class TeleOpProgram extends NextFTCOpMode {
         telemetry.addData("X", String.format("%.1f", pose.getX()));
         telemetry.addData("Y", String.format("%.1f", pose.getY()));
         telemetry.addData("Heading", String.format("%.1f", Math.toDegrees(pose.getHeading())));
-        telemetry.addData("Turret", "ENABLED" );
+        telemetry.addData("Turret", "ENABLED");
 
         if (TurretOdoAi.INSTANCE.hardwareInitialized) {
             telemetry.addData("Turret Angle", String.format("%.1f°", TurretOdoAi.INSTANCE.getTurretAngleDeg()));

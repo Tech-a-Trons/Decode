@@ -1,4 +1,3 @@
-
 package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems;
 
 import com.pedropathing.geometry.Pose;
@@ -35,12 +34,10 @@ public class TurretOdoAi implements Subsystem {
     public static double SERVO_MAX = 1.0;
     public boolean hardwareInitialized = false;
 
-
-
     // ========== PID CONSTANTS (TUNE THESE!) ==========
-    public static double kP = 7.00;         // Proportional gain
-    public static double kI = 0.000;          // Integral gain (start at 0)
-    public static double kD = 0.008;        // Derivative gain
+    public static double kP = 9.00;         // Proportional gain
+    public static double kI = 0.000;        // Integral gain (start at 0)
+    public static double kD = 0.012;        // Derivative gain
 
     double currentServoPos = 0;
 
@@ -73,72 +70,19 @@ public class TurretOdoAi implements Subsystem {
 
     // ------------------ Loop ------------------
     @Override
-//    public void periodic() {
-//        // === 0. HARDWARE CHECK ===
-//        if (!hardwareInitialized || turretServo1 == null || turretServo2 == null) {
-//            return; // Skip if hardware not initialized
-//        }
-//
-//        try {
-//            // === 1. SAFETY CHECKS ===
-//            if (PedroComponent.follower() == null) {
-//                return;
-//            }
-//
-//            // DO NOT CALL follower.update() - it's called in main loop
-//
-//            Pose currentPose = PedroComponent.follower().getPose();
-//            if (currentPose == null) {
-//                return;
-//            }
-//
-//            // === 2. UPDATE ROBOT POSE ===
-//            x = currentPose.getX() - 72;
-//            y = currentPose.getY() - 72;
-//            heading = Math.toDegrees(currentPose.getHeading());
-//            heading = (heading + 360) % 360;
-//            // === 3. CALCULATE TARGET ANGLE ===
-//            // Field-centric angle to goal
-//            double fieldAngleDeg = Math.toDegrees(Math.atan2(yt - y, xt - x));
-//            fieldAngleDeg = (fieldAngleDeg + 360) % 360;
-//
-//            // Distance to target
-//            distanceToTarget = Math.hypot(xt - x, yt - y);
-//
-//            // Robot-centric target angle (where turret should point)
-//            targetAngleDeg = fieldAngleDeg - heading + 180;  // Add 180° offset to fix inverted pointing
-//            targetAngleDeg = normalizeDegrees(targetAngleDeg);
-//
-//            // === 4. DIRECT SERVO CONTROL (NO PID) ===
-//            // Convert target angle directly to servo position
-//            double servoPos = angleToServo(targetAngleDeg);
-//            servoPos = clamp(servoPos, SERVO_MIN, SERVO_MAX);
-//
-//            // Set servos to target position immediately
-//            turretServo1.setPosition(servoPos);
-//            turretServo2.setPosition(servoPos);
-//
-//            // Update current turret angle for telemetry
-//            turretAngleDeg = targetAngleDeg;
-//
-//            // Calculate error for telemetry
-//            lastError = 0; // No error since we're setting directly to target
-//
-//        } catch (Exception e) {
-//            // Catch any errors in periodic to prevent crashes
-//        }
-//
+    public void periodic() {
+        // === 0. HARDWARE CHECK ===
+        if (!hardwareInitialized || turretServo1 == null || turretServo2 == null) {
+            return; // Skip if hardware not initialized
+        }
 
-        // PID Break Point
-
-
-        public void periodic() {
+        try {
             // === 1. SAFETY CHECKS ===
             if (PedroComponent.follower() == null) {
                 return;
             }
 
-            PedroComponent.follower().update();
+            // DO NOT CALL follower.update() - it's called in main loop
 
             Pose currentPose = PedroComponent.follower().getPose();
             if (currentPose == null) {
@@ -166,7 +110,6 @@ public class TurretOdoAi implements Subsystem {
             // === 4. READ CURRENT TURRET POSITION ===
             // Get servo position and convert to angle
             currentServoPos = turretServo1.getPosition();
-
             turretAngleDeg = servoToAngle(currentServoPos);
 
             // === 5. CALCULATE ERROR (SHORTEST PATH) ===
@@ -232,8 +175,11 @@ public class TurretOdoAi implements Subsystem {
             // === 10. UPDATE STATE FOR NEXT LOOP ===
             lastError = error;
             lastTime = currentTime;
-        }
 
+        } catch (Exception e) {
+            // Catch any errors in periodic to prevent crashes
+        }
+    }
 
     // ------------------ Helper Functions ------------------
 
@@ -275,7 +221,6 @@ public class TurretOdoAi implements Subsystem {
     private double clamp(double val, double min, double max) {
         return Math.max(min, Math.min(max, val));
     }
-// Manual Mode
 
     // ------------------ Getters ------------------
     public double getX() { return x; }
@@ -286,6 +231,5 @@ public class TurretOdoAi implements Subsystem {
     public double getDistanceToTarget() { return distanceToTarget; }
     public double getLastError() { return lastError; }  // For debugging
     public double getIntegral() { return integral; }    // For debugging
-
-    public double getKp() {return kP;}
+    public double getKp() { return kP; }
 }

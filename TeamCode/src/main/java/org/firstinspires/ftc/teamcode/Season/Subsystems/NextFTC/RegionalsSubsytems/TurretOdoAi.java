@@ -30,6 +30,11 @@ public class TurretOdoAi implements Subsystem {
     private double turretAngleDeg = 0;
     private double distanceToTarget = 0;
 
+    // ========== ANGLE OFFSET (TUNE THIS TO FIX POINTING!) ==========
+    // Positive values rotate the turret clockwise, negative counter-clockwise
+    // Adjust in small increments (5-10 degrees) until turret points accurately at target
+    public static double ANGLE_OFFSET = -25;  // degrees
+
     // Servo safety
     public static double SERVO_MIN = 0.0;
     public static double SERVO_MAX = 1.0;
@@ -47,7 +52,7 @@ public class TurretOdoAi implements Subsystem {
     double currentServoPos = 0;
 
     // Motion limits
-    public static double MAX_VELOCITY = 800.0;
+    public static double MAX_VELOCITY = 1000;
     public static double TOLERANCE = 2.0;
 
     // ========== PID STATE VARIABLES ==========
@@ -78,31 +83,26 @@ public class TurretOdoAi implements Subsystem {
     private static final int MAX_SERVO_READ_FAILURES = 5;
 
     // ========== CRASH PREVENTION: Bounds checking ==========
-    private static final double EMERGENCY_STOP_THRESHOLD = 0.95; // Stop if servo position is dangerously close to limits
+    private static final double EMERGENCY_STOP_THRESHOLD = 0.95;
 
     private TurretOdoAi() {
     }
 
     // ------------------ Initialization ------------------
     public void init(HardwareMap hardwareMap) {
-        // ========== CRASH PREVENTION: Safe initialization with error recovery ==========
         try {
-            // Try to get servos
             turretServo1 = hardwareMap.get(Servo.class, "turretServo1");
             turretServo2 = hardwareMap.get(Servo.class, "turretServo2");
 
-            // ========== CRASH PREVENTION: Verify servos are actually responsive ==========
             if (!verifyServoHealth()) {
                 throw new Exception("Servos not responding");
             }
 
-            // Set safe initial position with verification
             setSafeServoPosition(0.25);
             manualPosition = 0.25;
             lastServo1Position = 0.25;
             lastServo2Position = 0.25;
 
-            // Initialize timers
             loopTimer.reset();
             lastUpdateTime = loopTimer.seconds();
             firstRun = true;
@@ -114,24 +114,18 @@ public class TurretOdoAi implements Subsystem {
         } catch (Exception e) {
             hardwareInitialized = false;
             errorRecoveryMode = true;
-            // Don't throw - just mark as failed and continue
         }
     }
 
-    /**
-     * ========== CRASH PREVENTION: Verify servos are connected and responsive ==========
-     */
     private boolean verifyServoHealth() {
         try {
             if (turretServo1 == null || turretServo2 == null) {
                 return false;
             }
 
-            // Try to read position - this will fail if servo is disconnected
             double pos1 = turretServo1.getPosition();
             double pos2 = turretServo2.getPosition();
 
-            // Check if positions are in valid range
             return (pos1 >= 0.0 && pos1 <= 1.0) && (pos2 >= 0.0 && pos2 <= 1.0);
 
         } catch (Exception e) {
@@ -139,9 +133,6 @@ public class TurretOdoAi implements Subsystem {
         }
     }
 
-    /**
-     * ========== CRASH PREVENTION: Safe servo position setter ==========
-     */
     private void setSafeServoPosition(double position) {
         try {
             position = clamp(position, SERVO_MIN, SERVO_MAX);
@@ -156,7 +147,7 @@ public class TurretOdoAi implements Subsystem {
                 lastServo2Position = position;
             }
 
-            servoReadFailures = 0; // Reset failure counter on success
+            servoReadFailures = 0;
 
         } catch (Exception e) {
             servoReadFailures++;
@@ -167,18 +158,14 @@ public class TurretOdoAi implements Subsystem {
         }
     }
 
-    /**
-     * ========== CRASH PREVENTION: Safe servo position getter ==========
-     */
     private double getSafeServoPosition() {
         try {
             if (turretServo1 == null) {
-                return lastServo1Position; // Return last known position
+                return lastServo1Position;
             }
 
             double position = turretServo1.getPosition();
 
-            // Sanity check
             if (position < 0.0 || position > 1.0) {
                 return lastServo1Position;
             }
@@ -193,28 +180,22 @@ public class TurretOdoAi implements Subsystem {
                 hardwareInitialized = false;
                 errorRecoveryMode = true;
             }
-            return lastServo1Position; // Return last known good position
+            return lastServo1Position;
         }
     }
 
     // ------------------ Manual Control ------------------
 
-    /**
-     * Increment servo position by a fixed amount (for tap control)
-     */
     public void incrementPosition(double delta) {
         if (!hardwareInitialized || errorRecoveryMode) return;
 
         try {
             manualPosition = clamp(manualPosition + delta, SERVO_MIN, SERVO_MAX);
 
-            // ========== CRASH PREVENTION: Emergency bounds check ==========
             if (manualPosition >= EMERGENCY_STOP_THRESHOLD || manualPosition <= (1.0 - EMERGENCY_STOP_THRESHOLD)) {
-                // Near limits - reduce position to safe zone
                 manualPosition = clamp(manualPosition, 0.05, 0.95);
             }
 
-            // Only update if change is significant
             if (Math.abs(getSafeServoPosition() - manualPosition) > 0.002) {
                 setSafeServoPosition(manualPosition);
             }
@@ -227,23 +208,14 @@ public class TurretOdoAi implements Subsystem {
         }
     }
 
-    /**
-     * Single tap right - moves 0.05
-     */
     public void turnRight() {
         incrementPosition(0.05);
     }
 
-    /**
-     * Single tap left - moves 0.05
-     */
     public void turnLeft() {
         incrementPosition(-0.05);
     }
 
-    /**
-     * Continuous turn right - for smooth sweeping when button is held
-     */
     public void continuousTurnRight(double speed) {
         if (!hardwareInitialized || errorRecoveryMode) return;
 
@@ -251,10 +223,9 @@ public class TurretOdoAi implements Subsystem {
             double delta = 0.01 * speed;
             manualPosition = clamp(manualPosition + delta, SERVO_MIN, SERVO_MAX);
 
-            // ========== CRASH PREVENTION: Emergency bounds check ==========
             if (manualPosition >= EMERGENCY_STOP_THRESHOLD) {
                 manualPosition = EMERGENCY_STOP_THRESHOLD;
-                return; // Don't go further
+                return;
             }
 
             setSafeServoPosition(manualPosition);
@@ -267,9 +238,6 @@ public class TurretOdoAi implements Subsystem {
         }
     }
 
-    /**
-     * Continuous turn left - for smooth sweeping when button is held
-     */
     public void continuousTurnLeft(double speed) {
         if (!hardwareInitialized || errorRecoveryMode) return;
 
@@ -277,10 +245,9 @@ public class TurretOdoAi implements Subsystem {
             double delta = -0.01 * speed;
             manualPosition = clamp(manualPosition + delta, SERVO_MIN, SERVO_MAX);
 
-            // ========== CRASH PREVENTION: Emergency bounds check ==========
             if (manualPosition <= (1.0 - EMERGENCY_STOP_THRESHOLD)) {
                 manualPosition = (1.0 - EMERGENCY_STOP_THRESHOLD);
-                return; // Don't go further
+                return;
             }
 
             setSafeServoPosition(manualPosition);
@@ -293,77 +260,57 @@ public class TurretOdoAi implements Subsystem {
         }
     }
 
-    /**
-     * Switch to auto mode - PID control enabled
-     */
     public void setAutoMode() {
         manualMode = false;
 
-        // Reset PID state when entering auto mode
         integral = 0;
         lastError = 0;
         firstRun = true;
         lastUpdateTime = loopTimer.seconds();
 
-        // Invalidate pose cache
         cachedPose = null;
 
-        // ========== CRASH PREVENTION: Reset error tracking ==========
         consecutiveErrors = 0;
 
-        // ========== CRASH PREVENTION: Try to recover from error mode ==========
         if (errorRecoveryMode && verifyServoHealth()) {
             errorRecoveryMode = false;
             hardwareInitialized = true;
         }
     }
 
-    /**
-     * Switch to manual mode - PID control disabled
-     */
     public void setManualMode() {
         manualMode = true;
 
-        // Sync manual position with current servo position
         if (hardwareInitialized && turretServo1 != null) {
             try {
                 manualPosition = getSafeServoPosition();
             } catch (Exception e) {
-                manualPosition = 0.25; // Safe default
+                manualPosition = 0.25;
             }
         }
 
-        // ========== CRASH PREVENTION: Reset error tracking ==========
         consecutiveErrors = 0;
 
-        // ========== CRASH PREVENTION: Try to recover from error mode ==========
         if (errorRecoveryMode && verifyServoHealth()) {
             errorRecoveryMode = false;
             hardwareInitialized = true;
         }
     }
 
-    /**
-     * ========== CRASH PREVENTION: Cached pose fetching with null safety ==========
-     */
     private Pose getCachedPose() {
         try {
             double currentTime = loopTimer.seconds();
 
-            // Return cached pose if still valid
             if (cachedPose != null && (currentTime - lastPoseFetchTime) < POSE_CACHE_DURATION) {
                 return cachedPose;
             }
 
-            // Safety check
             if (PedroComponent.follower() == null) {
-                return cachedPose; // Return last known pose
+                return cachedPose;
             }
 
-            // Fetch new pose
             Pose newPose = PedroComponent.follower().getPose();
 
-            // Validate pose before caching
             if (newPose != null) {
                 cachedPose = newPose;
                 lastPoseFetchTime = currentTime;
@@ -372,7 +319,6 @@ public class TurretOdoAi implements Subsystem {
             return cachedPose;
 
         } catch (Exception e) {
-            // On error, return last known good pose
             return cachedPose;
         }
     }
@@ -380,23 +326,20 @@ public class TurretOdoAi implements Subsystem {
     // ------------------ Loop ------------------
     @Override
     public void periodic() {
-        // ========== CRASH PREVENTION: Error recovery mode check ==========
         if (errorRecoveryMode) {
-            // Try to recover every few seconds
-            if (loopTimer.seconds() % 3.0 < 0.1) { // Every 3 seconds
+            if (loopTimer.seconds() % 3.0 < 0.1) {
                 if (verifyServoHealth()) {
                     errorRecoveryMode = false;
                     hardwareInitialized = true;
                     consecutiveErrors = 0;
                 }
             }
-            return; // Don't run PID in error mode
+            return;
         }
 
         // === 0. MANUAL MODE CHECK ===
         if (manualMode) {
             try {
-                // Simplified manual mode telemetry
                 Pose currentPose = getCachedPose();
                 if (currentPose != null) {
                     x = currentPose.getX() - 72;
@@ -404,14 +347,14 @@ public class TurretOdoAi implements Subsystem {
                     heading = Math.toDegrees(currentPose.getHeading());
                     heading = (heading + 360) % 360;
 
-                    // Calculate target angle for telemetry only
                     double fieldAngleDeg = Math.toDegrees(Math.atan2(yt - y, xt - x));
                     fieldAngleDeg = (fieldAngleDeg + 360) % 360;
                     distanceToTarget = Math.hypot(xt - x, yt - y);
-                    targetAngleDeg = fieldAngleDeg - heading + 180;
+
+                    // Apply angle offset in manual mode too (for telemetry)
+                    targetAngleDeg = fieldAngleDeg - heading + 180 + ANGLE_OFFSET;
                     targetAngleDeg = normalizeDegrees(targetAngleDeg);
 
-                    // Get current angle safely
                     if (hardwareInitialized) {
                         currentServoPos = getSafeServoPosition();
                         turretAngleDeg = servoToAngle(currentServoPos);
@@ -440,12 +383,11 @@ public class TurretOdoAi implements Subsystem {
             return;
         }
 
-        // ========== CRASH PREVENTION: Wrap entire PID loop in try-catch ==========
         try {
-            // === 3. GET POSE (cached and null-safe) ===
+            // === 3. GET POSE ===
             Pose currentPose = getCachedPose();
             if (currentPose == null) {
-                return; // Can't run PID without pose
+                return;
             }
 
             // === 4. UPDATE ROBOT POSE ===
@@ -454,30 +396,29 @@ public class TurretOdoAi implements Subsystem {
             heading = Math.toDegrees(currentPose.getHeading());
             heading = (heading + 360) % 360;
 
-            // === 5. CALCULATE TARGET ANGLE ===
+            // === 5. CALCULATE TARGET ANGLE WITH OFFSET ===
             double fieldAngleDeg = Math.toDegrees(Math.atan2(yt - y, xt - x));
             fieldAngleDeg = (fieldAngleDeg + 360) % 360;
 
             distanceToTarget = Math.hypot(xt - x, yt - y);
 
-            targetAngleDeg = fieldAngleDeg - heading + 180;
+            // Apply base 180° offset + tunable ANGLE_OFFSET
+            targetAngleDeg = fieldAngleDeg - heading + 180 + ANGLE_OFFSET;
             targetAngleDeg = normalizeDegrees(targetAngleDeg);
 
-            // === 6. READ CURRENT TURRET POSITION (safely) ===
+            // === 6. READ CURRENT TURRET POSITION ===
             currentServoPos = getSafeServoPosition();
             turretAngleDeg = servoToAngle(currentServoPos);
 
             // === 7. CALCULATE ERROR ===
             double error = targetAngleDeg - turretAngleDeg;
 
-            // Wrap error to -180 to +180
             if (error > 180) error -= 360;
             if (error < -180) error += 360;
 
-            // Skip updates if error is very small
             if (Math.abs(error) < 0.5) {
                 lastUpdateTime = currentTime;
-                consecutiveErrors = 0; // Reset on normal operation
+                consecutiveErrors = 0;
                 return;
             }
 
@@ -489,8 +430,7 @@ public class TurretOdoAi implements Subsystem {
                 firstRun = false;
             }
 
-            // ========== CRASH PREVENTION: Validate dt ==========
-            if (dt <= 0 || dt > 0.5) { // Extended max dt to 0.5s for safety
+            if (dt <= 0 || dt > 0.5) {
                 dt = MIN_LOOP_TIME;
             }
 
@@ -521,12 +461,10 @@ public class TurretOdoAi implements Subsystem {
             double newServoPos = angleToServo(newAngle);
             newServoPos = clamp(newServoPos, SERVO_MIN, SERVO_MAX);
 
-            // ========== CRASH PREVENTION: Emergency bounds check ==========
             if (newServoPos >= EMERGENCY_STOP_THRESHOLD || newServoPos <= (1.0 - EMERGENCY_STOP_THRESHOLD)) {
                 newServoPos = clamp(newServoPos, 0.05, 0.95);
             }
 
-            // Only update servos if position changed significantly
             if (Math.abs(newServoPos - currentServoPos) > 0.002) {
                 setSafeServoPosition(newServoPos);
             }
@@ -534,10 +472,9 @@ public class TurretOdoAi implements Subsystem {
             // === 12. UPDATE STATE ===
             lastError = error;
             lastUpdateTime = currentTime;
-            consecutiveErrors = 0; // Reset on successful update
+            consecutiveErrors = 0;
 
         } catch (Exception e) {
-            // ========== CRASH PREVENTION: Handle any PID loop errors ==========
             consecutiveErrors++;
             if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
                 errorRecoveryMode = true;
@@ -583,8 +520,8 @@ public class TurretOdoAi implements Subsystem {
     public double getLoopTime() { return loopTimer.seconds() - lastUpdateTime; }
     public boolean isManualMode() { return manualMode; }
     public double getManualPosition() { return manualPosition; }
+    public double getAngleOffset() { return ANGLE_OFFSET; }
 
-    // ========== CRASH PREVENTION: Status getters ==========
     public boolean isErrorRecoveryMode() { return errorRecoveryMode; }
     public int getConsecutiveErrors() { return consecutiveErrors; }
 }

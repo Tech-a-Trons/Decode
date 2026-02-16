@@ -36,7 +36,7 @@ public class ColorSensor implements Subsystem {
 
     public int purple = 0;
 
-    public int artifactcounter = 0;
+    public static int artifactcounter = 0;
 
     public float current_sat = 0;
 

@@ -147,6 +147,10 @@ public class TeleOpProgram extends NextFTCOpMode {
             telemetry.addData("Error", String.format("%.1f°", TurretOdoAi.INSTANCE.getLastError()));
             telemetry.addData("Distance", String.format("%.1f", TurretOdoAi.INSTANCE.getDistanceToTarget()));
             telemetry.addData("Kp", String.format("%.1f", TurretOdoAi.INSTANCE.getKp()));
+
+            telemetry.addData("Skipped Loops", TurretOdoAi.INSTANCE.getSkippedLoops());
+            telemetry.addData("Update Rate", String.format("%.0f Hz", 1.0 / TurretOdoAi.INSTANCE.getLoopTime()));
+
         }
         telemetry.update();
     }

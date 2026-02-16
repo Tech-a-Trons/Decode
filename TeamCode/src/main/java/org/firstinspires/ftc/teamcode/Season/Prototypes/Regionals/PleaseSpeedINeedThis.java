@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Season.Prototypes.Regionals;
 
+//import static org.firstinspires.ftc.teamcode.Season.Auto.Tuning.telemetryM;
+
 import android.health.connect.TimeRangeFilter;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -14,10 +16,14 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsyte
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID;
 
 import dev.nextftc.core.commands.Command;
+import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.hardware.impl.MotorEx;
 
 @TeleOp(name = "Tuff Shooting")
 public class PleaseSpeedINeedThis extends OpMode {
+
+    private long intakeStartTime;
+    private boolean intakeToggle = false;
     TurretPID turretPID;
     TurretOdoAi turret;
     CompliantIntake intake;
@@ -87,6 +93,33 @@ public class PleaseSpeedINeedThis extends OpMode {
         boolean isshot = false;
 
         Command activeShootCommand = null;
+
+        Gamepads.gamepad1().rightBumper()
+                .whenBecomesTrue(() -> {
+                    intakeToggle = !intakeToggle;
+
+                    if (intakeToggle) {
+                        // Starting intake
+                        intakeStartTime = System.currentTimeMillis();
+                        CompliantIntake.INSTANCE.on();
+                        Transfer.INSTANCE.slight();
+
+                        // Reset ball counter when starting intake
+                       // colorSensor.artifactcounter = 0;
+
+                        //telemetry.addData("Intake", "ON - Counting Balls");
+                    } else {
+                        // Manually stopping intake
+                        intakeStartTime = 0;
+                        CompliantIntake.INSTANCE.off();
+                        Transfer.INSTANCE.off();
+
+                        // Reset ball counter
+//                        colorSensor.artifactcounter = 0;
+
+                        //telemetry.addData("Intake", "OFF - Manual Stop");
+                    }
+                });
 
         if (gamepad1.a && !isshot) {
 

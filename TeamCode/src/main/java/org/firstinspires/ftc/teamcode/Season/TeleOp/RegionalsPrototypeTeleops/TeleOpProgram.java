@@ -125,9 +125,9 @@ public class TeleOpProgram extends NextFTCOpMode {
     @Override
     public void onUpdate() {
         PedroComponent.follower().setTeleOpDrive(
-                gamepad1.left_stick_y * SlowModeMultipler,
-                gamepad1.left_stick_x * SlowModeMultipler,
-                gamepad1.right_stick_x * SlowModeMultipler,
+                -gamepad1.left_stick_y,
+               - gamepad1.left_stick_x ,
+                -gamepad1.right_stick_x ,
                 true // Robot Centric
         );
         PedroComponent.follower().update();

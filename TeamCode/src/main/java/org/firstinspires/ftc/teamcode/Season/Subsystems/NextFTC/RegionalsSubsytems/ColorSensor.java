@@ -1,10 +1,12 @@
-package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems;
+package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 
 import android.graphics.Color;
 
+import com.bylazar.lights.RGBIndicator;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import dev.nextftc.core.subsystems.Subsystem;
@@ -43,8 +45,7 @@ public class ColorSensor implements Subsystem {
     public float current_val = 0;
 
 
-
-//    public int activeslot = 0;
+    //    public int activeslot = 0;
     public int asc = 0;
     // asc = active slot color
 //    int[] slots = new int[10];
@@ -58,12 +59,17 @@ public class ColorSensor implements Subsystem {
     RevColorSensorV3 colorsensor;
     RevColorSensorV3 colorsensor2;
 
+    static Servo rgbindicator;
+
+
     public ColorSensor() {
+        rgbindicator = hardwareMap.get(Servo.class, "rgbled");
         colorsensor = hardwareMap.get(RevColorSensorV3.class, "ColorSensor");
         //colorsensor2 = hardwareMap.get(RevColorSensorV3.class, "ColorSensor2");
     }
-//    Servo rgbindicator = hardwareMap.get(Servo.class, "rgbled");
-
+//    public Rgbindicator() {
+//        rgbindicator = hardwareMap.get(Servo.class, "rgbled");
+//    }
 
     public String Getcolor() {
 //        colorsensor.enableLed(e);
@@ -164,6 +170,7 @@ public class ColorSensor implements Subsystem {
         }
 
     }
+
     public void IncountBalls() {
         String color = getColor();
         current_sat = getsat();
@@ -199,19 +206,7 @@ public class ColorSensor implements Subsystem {
 //        green = (slots[0] + slots[1] + slots[2]) / 5;
 //        purple = (slots[0] + slots[1] + slots[2]) % 5;
     }
-    public void light() {
-//        if (artifactcounter == 0) {
-//            rgbindicator.setPosition(0);
-//        } else if (artifactcounter == 1) {
-//            rgbindicator.setPosition(0.3);
-//        } else if (artifactcounter == 2) {
-//            rgbindicator.setPosition(0.375);
-//        } else if (artifactcounter == 3) {
-//            rgbindicator.setPosition(0.5);
-//        } else if (artifactcounter > 3) {
-//            rgbindicator.setPosition(0.6);
-//        }
-    }
+
 
 //    public void AssignColors() {
 //        slots[activeslot] = asc;
@@ -223,12 +218,15 @@ public class ColorSensor implements Subsystem {
     public float gethue() {
         return chue;
     }
+
     public float getsat() {
         return csat;
     }
+
     public float getval() {
         return cval;
     }
+
     public float getred() {
         return red;
     }
@@ -236,12 +234,36 @@ public class ColorSensor implements Subsystem {
     public float getblue() {
         return blue;
     }
+
     public float getgreen() {
         return green;
     }
+
     public float getalpha() {
         return alpha;
     }
+
     //public float getAlpha2(){return alpha2; }
-    public String getColor() {return Getcolor();}
+    public String getColor() {
+        return Getcolor();
+    }
+
+    @Override
+    public void periodic() {
+        light();
+    }
+
+    public void light() {
+        if (artifactcounter == 0) {
+            rgbindicator.setPosition(0);
+        } else if (artifactcounter == 1) {
+            rgbindicator.setPosition(0.3);
+        } else if (artifactcounter == 2) {
+            rgbindicator.setPosition(0.375);
+        } else if (artifactcounter == 3) {
+            rgbindicator.setPosition(0.5);
+        } else if (artifactcounter > 3) {
+            rgbindicator.setPosition(0.6);
+        }
+    }
 }

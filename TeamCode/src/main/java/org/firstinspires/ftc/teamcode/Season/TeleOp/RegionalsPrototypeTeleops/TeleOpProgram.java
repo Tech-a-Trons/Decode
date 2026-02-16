@@ -5,6 +5,7 @@ import static dev.nextftc.bindings.Bindings.button;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Season.Auto.Constants;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.ColorSensor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Hood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.NewHood;
@@ -94,6 +95,7 @@ public class TeleOpProgram extends NextFTCOpMode {
                     if (intakeToggle) {
                         CompliantIntake.INSTANCE.on();
                         Transfer.INSTANCE.nice();
+                        ColorSensor.INSTANCE.IncountBalls();
                     } else {
                         CompliantIntake.INSTANCE.off();
                         Transfer.INSTANCE.off();
@@ -116,6 +118,8 @@ public class TeleOpProgram extends NextFTCOpMode {
                     CompliantIntake.INSTANCE.off();
                     Transfer.INSTANCE.off();
                     intakeToggle = false;
+                    ColorSensor.INSTANCE.artifactcounter = 0;
+
                 });
 
         // Toggle between manual and auto turret mode with D-pad Up
@@ -150,6 +154,7 @@ public class TeleOpProgram extends NextFTCOpMode {
             telemetry.addData("Target Angle", String.format("%.1f°", TurretOdoAi.INSTANCE.getTargetAngleDeg()));
             telemetry.addData("Error", String.format("%.1f°", TurretOdoAi.INSTANCE.getLastError()));
             telemetry.addData("Distance", String.format("%.1f", TurretOdoAi.INSTANCE.getDistanceToTarget()));
+            telemetry.addData("Kp", String.format("%.1f", TurretOdoAi.INSTANCE.getKp()));
         }
         telemetry.update();
     }

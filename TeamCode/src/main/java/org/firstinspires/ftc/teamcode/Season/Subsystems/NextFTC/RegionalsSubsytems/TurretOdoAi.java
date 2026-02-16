@@ -38,9 +38,9 @@ public class TurretOdoAi implements Subsystem {
 
 
     // ========== PID CONSTANTS (TUNE THESE!) ==========
-    public static double kP = 0.100;         // Proportional gain
-    public static double kI = 0.0;          // Integral gain (start at 0)
-    public static double kD = 0.003;        // Derivative gain
+    public static double kP = 7.00;         // Proportional gain
+    public static double kI = 0.000;          // Integral gain (start at 0)
+    public static double kD = 0.008;        // Derivative gain
 
     double currentServoPos = 0;
 
@@ -286,4 +286,6 @@ public class TurretOdoAi implements Subsystem {
     public double getDistanceToTarget() { return distanceToTarget; }
     public double getLastError() { return lastError; }  // For debugging
     public double getIntegral() { return integral; }    // For debugging
+
+    public double getKp() {return kP;}
 }

@@ -3,9 +3,11 @@ package org.firstinspires.ftc.teamcode.Season.Auto.RegionalsAuto;
 
 import org.firstinspires.ftc.teamcode.Season.Auto.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Turret;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.AutoOuttake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Hood;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.NewHood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.RedLL;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RobotContext;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Transfer;
@@ -24,6 +26,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
+import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
@@ -33,7 +36,7 @@ public class RedGate15 extends NextFTCOpMode {
 
     public RedGate15() {
         addComponents(
-                new SubsystemComponent(AutoOuttake.INSTANCE, Hood.INSTANCE, CompliantIntake.INSTANCE,Transfer.INSTANCE),
+                new SubsystemComponent(AutoOuttake.INSTANCE, NewHood.INSTANCE, CompliantIntake.INSTANCE,Transfer.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE
         );
@@ -59,9 +62,10 @@ public class RedGate15 extends NextFTCOpMode {
 
     private Path scorePreload;
     private RedExperimentalDistanceLExtractor limelight;
-    private RedLL turretAlignment;
 
 
+    private static final double TARGET_X = 121;  // Example: center of field
+    private static final double TARGET_Y = 121;
     private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
     private PathChain grabPrePickup1, grabPrePickup2, grabPrePickup3, gatepickup, curvescore,leave;
 
@@ -166,7 +170,7 @@ public class RedGate15 extends NextFTCOpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                Hood.INSTANCE.auto();
+                NewHood.INSTANCE.midopen();
 
                 secondshotforyouuuuu();
                 follower.followPath(scorePreload, true);
@@ -305,6 +309,7 @@ public class RedGate15 extends NextFTCOpMode {
         CompliantIntake.INSTANCE.off();
         Transfer.INSTANCE.off();
         AutoOuttake.INSTANCE.resetShooter();
+
     }
 
     public void setPathState(int pState) {
@@ -314,7 +319,7 @@ public class RedGate15 extends NextFTCOpMode {
 
     @Override
     public void onUpdate() {
-        turretAlignment.setTurretPower(0.009);
+
 
 
 
@@ -333,9 +338,6 @@ public class RedGate15 extends NextFTCOpMode {
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
         volt.init(hardwareMap);
-        limelight = new RedExperimentalDistanceLExtractor(hardwareMap);
-        turretAlignment = new RedLL(hardwareMap, limelight,voltageGet);
-        limelight.startReading();
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
         buildPaths();

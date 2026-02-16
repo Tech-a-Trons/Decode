@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems;
 
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;
@@ -17,6 +19,8 @@ public class TurretPID implements Subsystem {
     public static double kI = 0.0;
     public static double kD = 0.0;
 
+    double newvelo;
+
     public static double kV = 0.0;
     public static double kA = 0.0;
     public static double kS = 0.01;
@@ -26,8 +30,6 @@ public class TurretPID implements Subsystem {
     public static boolean hasShot = false;
     public static double VELO_TOL = 75;
     public static double activeTargetVelocity = 0;
-
-
 
     public static MotorGroup turret = new MotorGroup(
             new MotorEx("outtakeleft"),
@@ -66,23 +68,25 @@ public class TurretPID implements Subsystem {
         hasShot = false;
         return new RunToVelocity(controller, velocity, 5).requires(this);
     }
+
+    double newactv;
     public Command newshooterdistance(double distance) {
-        double velocity =
+         newvelo =
                 0.041 * distance * distance
                         - 2.9 * distance
                         + 1400; //1350
 
         if (distance > 60) {
-            velocity -= 2.2 * (distance - 60);
+            newvelo -= 2.2 * (distance - 60);
         }
 
-        velocity = Math.max(1200, Math.min(2000, velocity));
+        newvelo= Math.max(1200, Math.min(2000, newvelo));
 
-        activeTargetVelocity = velocity;
+        newactv = newvelo;
         shootRequested = true;
         hasShot = false;
 
-        return new RunToVelocity(controller, velocity, 5).requires(this);
+        return new RunToVelocity(controller, newvelo, 5).requires(this);
     }
 
     public Command setFarShooterSpeed(){
@@ -95,63 +99,71 @@ public class TurretPID implements Subsystem {
         ).requires(this);
     }
 
-    public static double getMovingTurretAngle(
+    public Command tuffshot(
             double robotX, double robotY,
-            double goalX, double goalY,
-            double robotHeading,
-            double robotVx, double robotVy,
-            double projectileSpeed) {
+            double robotHeadingRad,
+            double vx, double vy,
+            double goalX, double goalY) {
 
+        // --------- 1. Compute distance to goal ---------
         double dx = goalX - robotX;
         double dy = goalY - robotY;
-
         double distance = Math.hypot(dx, dy);
 
-        // Time projectile is in air
-        double time = distance / projectileSpeed;
+        // --------- 2. Compute flywheel velocity ---------
+        double flywheelVelo = 0.041 * distance * distance
+                - 2.9 * distance
+                + 1350;
+        if (distance > 60) flywheelVelo -= 2.2 * (distance - 60);
+        flywheelVelo = Math.max(1200, Math.min(2000, flywheelVelo));
 
-        // Lead the shot based on robot motion
-        double leadX = dx - robotVx * time;
-        double leadY = dy - robotVy * time;
+        // --------- 3. Store for lead calculations ---------
+        newactv = flywheelVelo;
 
+        // --------- 4. Optionally, compute turret angle for moving shot ---------
+        double projectileSpeed = flywheelVelo * 0.08; // tune this to inches/sec
+        double timeToTarget = (projectileSpeed > 0.001) ? distance / projectileSpeed : 0;
+
+        double leadX = dx - vx * timeToTarget;
+        double leadY = dy - vy * timeToTarget;
         double globalAngle = Math.atan2(leadY, leadX);
+        double turretAngleRad = Math.atan2(
+                Math.sin(globalAngle - robotHeadingRad),
+                Math.cos(globalAngle - robotHeadingRad)
+        );
 
-        return angleWrap(globalAngle - robotHeading);
+        // --------- 5. Store turret angle in member variable if needed ---------
+        double currentTurretTarget = turretAngleRad; // assuming you have a variable for PID
+
+        // --------- 6. Return RunToVelocity command (sets shooter velocity) ---------
+        return new RunToVelocity(controller, newactv, 5)
+                .requires(this);
     }
 
-    private static long lastShotTime = 0;
 
-    public static boolean pleasespeedineedthis(
-            double currentFlywheelVel,
-            double targetFlywheelVel,
-            double flywheelTolerance,
-            double robotTurnRateRadPerSec,
-            double maxTurnRateRadPerSec,
-            long recoveryTimeMs) {
-
-        long now = System.currentTimeMillis();
-
-        boolean flywheelReady =
-                Math.abs(currentFlywheelVel - targetFlywheelVel) < flywheelTolerance;
-
-        boolean turningTooFast =
-                Math.abs(robotTurnRateRadPerSec) > maxTurnRateRadPerSec;
-
-        boolean recovered = (now - lastShotTime) > recoveryTimeMs;
-
-        return flywheelReady && !turningTooFast && recovered;
-    }
-
-    public static void recordShotTime() {
-        lastShotTime = System.currentTimeMillis();
-    }
-
-    public static double angleWrap(double angle) {
-        while (angle > Math.PI) angle -= 2 * Math.PI;
-        while (angle < -Math.PI) angle += 2 * Math.PI;
-        return angle;
-    }
-
+//    private double computeDistance(double dx, double dy) {
+//        return Math.hypot(dx, dy);
+//    }
+//
+//    private double computeFlightTime(double distance, double projectileSpeed) {
+//        if (projectileSpeed <= 0.001) return 0.0;
+//        return distance / projectileSpeed;
+//    }
+//
+//    private double computeLead(double delta, double robotVelocity, double time) {
+//        return delta - robotVelocity * time;
+//    }
+//
+//    private double estimateProjectileSpeed(double flywheelVelocity) {
+//
+//        double kVelocityToMetersPerSec = 0.0065; // TUNE THIS
+//
+//        return flywheelVelocity * kVelocityToMetersPerSec;
+//    }
+//
+//    private double angleWrap(double angle) {
+//        return Math.atan2(Math.sin(angle), Math.cos(angle));
+//    }
 
     public Command shotforyou(){
         //ll.update();
@@ -199,6 +211,10 @@ public class TurretPID implements Subsystem {
                 0,
                 0
         ).requires(this);
+    }
+
+    public double newgetActiveVelocity() {
+        return newactv;
     }
 
     @Override

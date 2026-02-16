@@ -5,7 +5,7 @@ import dev.nextftc.hardware.impl.MotorEx;
 
 public class Transfer implements Subsystem {
     public static final Transfer INSTANCE = new Transfer();
-    private Transfer() { }
+    public Transfer() { }
     public static MotorEx transfer = new MotorEx("transfer");
 
 

@@ -110,18 +110,32 @@ public class TurretPID implements Subsystem {
         double dy = goalY - robotY;
         double distance = Math.hypot(dx, dy);
 
-        // --------- 2. Compute flywheel velocity ---------
+        // --------- 2. Compute BASE flywheel velocity ---------
         double flywheelVelo = 0.041 * distance * distance
                 - 2.9 * distance
-                + 1350;
+                + 1150;
         if (distance > 60) flywheelVelo -= 2.2 * (distance - 60);
-        flywheelVelo = Math.max(1200, Math.min(2000, flywheelVelo));
 
-        // --------- 3. Store for lead calculations ---------
+        // --------- 3. COMPENSATE for robot velocity ---------
+        // Calculate velocity component along the shot direction
+        double shotDirX = dx / distance;  // normalized direction to goal
+        double shotDirY = dy / distance;
+        double velocityTowardGoal = vx * shotDirX + vy * shotDirY;  // dot product
+
+        // Adjust flywheel: if moving toward goal (positive), reduce power
+        // if moving away (negative), increase power
+        // Start with a gain of 10-15 and tune from there
+        double velocityCompensationGain = 10.0;  // TUNE THIS VALUE
+        flywheelVelo -= velocityTowardGoal * velocityCompensationGain;
+
+        // Clamp to safe range
+        flywheelVelo = Math.max(1000, Math.min(2000, flywheelVelo));
+
+        // --------- 4. Store for later use ---------
         newactv = flywheelVelo;
 
-        // --------- 4. Optionally, compute turret angle for moving shot ---------
-        double projectileSpeed = flywheelVelo * 0.08; // tune this to inches/sec
+        // --------- 5. Compute turret angle for moving shot ---------
+        double projectileSpeed = flywheelVelo * 0.05; // tune this to inches/sec
         double timeToTarget = (projectileSpeed > 0.001) ? distance / projectileSpeed : 0;
 
         double leadX = dx - vx * timeToTarget;
@@ -132,10 +146,10 @@ public class TurretPID implements Subsystem {
                 Math.cos(globalAngle - robotHeadingRad)
         );
 
-        // --------- 5. Store turret angle in member variable if needed ---------
-        double currentTurretTarget = turretAngleRad; // assuming you have a variable for PID
+        // Store turret angle - make sure you're actually setting the turret target!
+        // TurretOdoAi.INSTANCE.setTargetAngle(turretAngleRad); // or whatever your method is
 
-        // --------- 6. Return RunToVelocity command (sets shooter velocity) ---------
+        // --------- 6. Return RunToVelocity command ---------
         return new RunToVelocity(controller, newactv, 5)
                 .requires(this);
     }

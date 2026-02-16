@@ -30,7 +30,7 @@ public class TeleOpProgram extends NextFTCOpMode {
 
     private boolean intakeToggle = false;
     private boolean turretManualMode = false;
-    public double SlowModeMultipler = 0;
+    public double SlowModeMultipler = 1;
 
     public TeleOpProgram() {
         addComponents(
@@ -91,7 +91,7 @@ public class TeleOpProgram extends NextFTCOpMode {
                     if (intakeToggle) {
                         CompliantIntake.INSTANCE.on();
                         Transfer.INSTANCE.nice();
-                        ColorSensor.INSTANCE.IncountBalls();
+//                        ColorSensor.INSTANCE.IncountBalls();
                     } else {
                         CompliantIntake.INSTANCE.off();
                         Transfer.INSTANCE.off();
@@ -104,6 +104,7 @@ public class TeleOpProgram extends NextFTCOpMode {
                 .whenBecomesTrue(() -> {
                     Transfer.INSTANCE.on();
                     CompliantIntake.INSTANCE.on();
+//                    ColorSensor.INSTANCE.artifactcounter = 0;
                 });
 
         // Emergency stop
@@ -114,16 +115,15 @@ public class TeleOpProgram extends NextFTCOpMode {
                     CompliantIntake.INSTANCE.off();
                     Transfer.INSTANCE.off();
                     intakeToggle = false;
-                    ColorSensor.INSTANCE.artifactcounter = 0;
                 });
     }
 
     @Override
     public void onUpdate() {
         PedroComponent.follower().setTeleOpDrive(
-                -gamepad1.left_stick_y,
-                -gamepad1.left_stick_x,
-                -gamepad1.right_stick_x,
+                -gamepad1.left_stick_y * SlowModeMultipler,
+                -gamepad1.left_stick_x * SlowModeMultipler,
+                -gamepad1.right_stick_x * SlowModeMultipler,
                 true // Robot Centric
         );
         PedroComponent.follower().update();
@@ -140,6 +140,7 @@ public class TeleOpProgram extends NextFTCOpMode {
         telemetry.addData("Y", String.format("%.1f", pose.getY()));
         telemetry.addData("Heading", String.format("%.1f", Math.toDegrees(pose.getHeading())));
         telemetry.addData("Turret", "ENABLED");
+
 
         if (TurretOdoAi.INSTANCE.hardwareInitialized) {
             telemetry.addData("Turret Angle", String.format("%.1f°", TurretOdoAi.INSTANCE.getTurretAngleDeg()));

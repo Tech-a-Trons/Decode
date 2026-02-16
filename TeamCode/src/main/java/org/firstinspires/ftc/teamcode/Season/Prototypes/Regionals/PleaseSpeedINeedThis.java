@@ -40,8 +40,8 @@ public class PleaseSpeedINeedThis extends OpMode {
 
     @Override
     public void init() {
-        turretPID = new TurretPID();
-        turret.init(hardwareMap);
+
+
         lastTime = System.nanoTime() / 1e9;
         lastX = turret.getX();
         lastY = turret.getY();
@@ -91,8 +91,6 @@ public class PleaseSpeedINeedThis extends OpMode {
         // Keep a reference to the active shooting command
 
         boolean isshot = false;
-
-        Command activeShootCommand = null;
 
         Gamepads.gamepad1().rightBumper()
                 .whenBecomesTrue(() -> {
@@ -144,7 +142,7 @@ public class PleaseSpeedINeedThis extends OpMode {
             br.setPower(brPower);
 
             turret.periodic();
-            activeShootCommand = turretPID.tuffshot(
+            Command activeShootCommand = turretPID.tuffshot(
                     robotX, robotY, robotHeadingRad,
                     robotVx, robotVy,
                     121.0, 121.0   // goal
@@ -175,7 +173,7 @@ public class PleaseSpeedINeedThis extends OpMode {
             bl.setPower(blPower);
             br.setPower(brPower);
 
-            activeShootCommand.stop(true);
+            turretPID.turret.setPower(0);
 
             isshot = false;
 

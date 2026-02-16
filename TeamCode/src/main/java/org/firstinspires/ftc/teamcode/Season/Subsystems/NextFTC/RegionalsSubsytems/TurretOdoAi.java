@@ -1,9 +1,9 @@
-
 package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems;
 
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -26,8 +26,8 @@ public class TurretOdoAi implements Subsystem {
     public static double yt = 68;
 
     // ------------------ Turret ------------------
-    private double targetAngleDeg = 0;      // Where turret should point
-    private double turretAngleDeg = 0;      // Where turret currently is
+    private double targetAngleDeg = 0;
+    private double turretAngleDeg = 0;
     private double distanceToTarget = 0;
 
     // Servo safety
@@ -35,247 +35,539 @@ public class TurretOdoAi implements Subsystem {
     public static double SERVO_MAX = 1.0;
     public boolean hardwareInitialized = false;
 
+    // Manual mode
+    public boolean manualMode = false;
+    private double manualPosition = 0.25;
 
-
-    // ========== PID CONSTANTS (TUNE THESE!) ==========
-    public static double kP = 7.00;         // Proportional gain
-    public static double kI = 0.000;          // Integral gain (start at 0)
-    public static double kD = 0.008;        // Derivative gain
+    // ========== PID CONSTANTS ==========
+    public static double kP = 9.00;
+    public static double kI = 0.000;
+    public static double kD = 0.012;
 
     double currentServoPos = 0;
 
     // Motion limits
-    public static double MAX_VELOCITY = 500.0;  // deg/sec max speed
-    public static double TOLERANCE = 2.0;       // degrees (acceptable error)
+    public static double MAX_VELOCITY = 800.0;
+    public static double TOLERANCE = 2.0;
 
     // ========== PID STATE VARIABLES ==========
     private double lastError = 0;
     private double integral = 0;
-    private double lastTime = 0;
+    private double lastUpdateTime = 0;
     private boolean firstRun = true;
+
+    // ========== RATE LIMITING ==========
+    private ElapsedTime loopTimer = new ElapsedTime();
+    private static final double MIN_LOOP_TIME = 0.015;
+    private int skippedLoops = 0;
+
+    // ========== CRASH PREVENTION: Pose caching ==========
+    private Pose cachedPose = null;
+    private double lastPoseFetchTime = 0;
+    private static final double POSE_CACHE_DURATION = 0.02;
+
+    // ========== CRASH PREVENTION: Error tracking ==========
+    private int consecutiveErrors = 0;
+    private static final int MAX_CONSECUTIVE_ERRORS = 10;
+    private boolean errorRecoveryMode = false;
+
+    // ========== CRASH PREVENTION: Servo health monitoring ==========
+    private double lastServo1Position = 0.25;
+    private double lastServo2Position = 0.25;
+    private int servoReadFailures = 0;
+    private static final int MAX_SERVO_READ_FAILURES = 5;
+
+    // ========== CRASH PREVENTION: Bounds checking ==========
+    private static final double EMERGENCY_STOP_THRESHOLD = 0.95; // Stop if servo position is dangerously close to limits
 
     private TurretOdoAi() {
     }
 
     // ------------------ Initialization ------------------
     public void init(HardwareMap hardwareMap) {
-        turretServo1 = hardwareMap.get(Servo.class, "turretServo1");
-        turretServo2 = hardwareMap.get(Servo.class, "turretServo2");
-        turretServo1.setPosition(0.25);
-        turretServo2.setPosition(0.25);
+        // ========== CRASH PREVENTION: Safe initialization with error recovery ==========
+        try {
+            // Try to get servos
+            turretServo1 = hardwareMap.get(Servo.class, "turretServo1");
+            turretServo2 = hardwareMap.get(Servo.class, "turretServo2");
 
-        // Initialize time tracking
-        lastTime = System.nanoTime() / 1e9;
+            // ========== CRASH PREVENTION: Verify servos are actually responsive ==========
+            if (!verifyServoHealth()) {
+                throw new Exception("Servos not responding");
+            }
+
+            // Set safe initial position with verification
+            setSafeServoPosition(0.25);
+            manualPosition = 0.25;
+            lastServo1Position = 0.25;
+            lastServo2Position = 0.25;
+
+            // Initialize timers
+            loopTimer.reset();
+            lastUpdateTime = loopTimer.seconds();
+            firstRun = true;
+
+            hardwareInitialized = true;
+            consecutiveErrors = 0;
+            errorRecoveryMode = false;
+
+        } catch (Exception e) {
+            hardwareInitialized = false;
+            errorRecoveryMode = true;
+            // Don't throw - just mark as failed and continue
+        }
+    }
+
+    /**
+     * ========== CRASH PREVENTION: Verify servos are connected and responsive ==========
+     */
+    private boolean verifyServoHealth() {
+        try {
+            if (turretServo1 == null || turretServo2 == null) {
+                return false;
+            }
+
+            // Try to read position - this will fail if servo is disconnected
+            double pos1 = turretServo1.getPosition();
+            double pos2 = turretServo2.getPosition();
+
+            // Check if positions are in valid range
+            return (pos1 >= 0.0 && pos1 <= 1.0) && (pos2 >= 0.0 && pos2 <= 1.0);
+
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * ========== CRASH PREVENTION: Safe servo position setter ==========
+     */
+    private void setSafeServoPosition(double position) {
+        try {
+            position = clamp(position, SERVO_MIN, SERVO_MAX);
+
+            if (turretServo1 != null) {
+                turretServo1.setPosition(position);
+                lastServo1Position = position;
+            }
+
+            if (turretServo2 != null) {
+                turretServo2.setPosition(position);
+                lastServo2Position = position;
+            }
+
+            servoReadFailures = 0; // Reset failure counter on success
+
+        } catch (Exception e) {
+            servoReadFailures++;
+            if (servoReadFailures >= MAX_SERVO_READ_FAILURES) {
+                hardwareInitialized = false;
+                errorRecoveryMode = true;
+            }
+        }
+    }
+
+    /**
+     * ========== CRASH PREVENTION: Safe servo position getter ==========
+     */
+    private double getSafeServoPosition() {
+        try {
+            if (turretServo1 == null) {
+                return lastServo1Position; // Return last known position
+            }
+
+            double position = turretServo1.getPosition();
+
+            // Sanity check
+            if (position < 0.0 || position > 1.0) {
+                return lastServo1Position;
+            }
+
+            lastServo1Position = position;
+            servoReadFailures = 0;
+            return position;
+
+        } catch (Exception e) {
+            servoReadFailures++;
+            if (servoReadFailures >= MAX_SERVO_READ_FAILURES) {
+                hardwareInitialized = false;
+                errorRecoveryMode = true;
+            }
+            return lastServo1Position; // Return last known good position
+        }
+    }
+
+    // ------------------ Manual Control ------------------
+
+    /**
+     * Increment servo position by a fixed amount (for tap control)
+     */
+    public void incrementPosition(double delta) {
+        if (!hardwareInitialized || errorRecoveryMode) return;
+
+        try {
+            manualPosition = clamp(manualPosition + delta, SERVO_MIN, SERVO_MAX);
+
+            // ========== CRASH PREVENTION: Emergency bounds check ==========
+            if (manualPosition >= EMERGENCY_STOP_THRESHOLD || manualPosition <= (1.0 - EMERGENCY_STOP_THRESHOLD)) {
+                // Near limits - reduce position to safe zone
+                manualPosition = clamp(manualPosition, 0.05, 0.95);
+            }
+
+            // Only update if change is significant
+            if (Math.abs(getSafeServoPosition() - manualPosition) > 0.002) {
+                setSafeServoPosition(manualPosition);
+            }
+
+        } catch (Exception e) {
+            consecutiveErrors++;
+            if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+                errorRecoveryMode = true;
+            }
+        }
+    }
+
+    /**
+     * Single tap right - moves 0.05
+     */
+    public void turnRight() {
+        incrementPosition(0.05);
+    }
+
+    /**
+     * Single tap left - moves 0.05
+     */
+    public void turnLeft() {
+        incrementPosition(-0.05);
+    }
+
+    /**
+     * Continuous turn right - for smooth sweeping when button is held
+     */
+    public void continuousTurnRight(double speed) {
+        if (!hardwareInitialized || errorRecoveryMode) return;
+
+        try {
+            double delta = 0.01 * speed;
+            manualPosition = clamp(manualPosition + delta, SERVO_MIN, SERVO_MAX);
+
+            // ========== CRASH PREVENTION: Emergency bounds check ==========
+            if (manualPosition >= EMERGENCY_STOP_THRESHOLD) {
+                manualPosition = EMERGENCY_STOP_THRESHOLD;
+                return; // Don't go further
+            }
+
+            setSafeServoPosition(manualPosition);
+
+        } catch (Exception e) {
+            consecutiveErrors++;
+            if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+                errorRecoveryMode = true;
+            }
+        }
+    }
+
+    /**
+     * Continuous turn left - for smooth sweeping when button is held
+     */
+    public void continuousTurnLeft(double speed) {
+        if (!hardwareInitialized || errorRecoveryMode) return;
+
+        try {
+            double delta = -0.01 * speed;
+            manualPosition = clamp(manualPosition + delta, SERVO_MIN, SERVO_MAX);
+
+            // ========== CRASH PREVENTION: Emergency bounds check ==========
+            if (manualPosition <= (1.0 - EMERGENCY_STOP_THRESHOLD)) {
+                manualPosition = (1.0 - EMERGENCY_STOP_THRESHOLD);
+                return; // Don't go further
+            }
+
+            setSafeServoPosition(manualPosition);
+
+        } catch (Exception e) {
+            consecutiveErrors++;
+            if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+                errorRecoveryMode = true;
+            }
+        }
+    }
+
+    /**
+     * Switch to auto mode - PID control enabled
+     */
+    public void setAutoMode() {
+        manualMode = false;
+
+        // Reset PID state when entering auto mode
+        integral = 0;
+        lastError = 0;
         firstRun = true;
+        lastUpdateTime = loopTimer.seconds();
 
-        hardwareInitialized = true;
+        // Invalidate pose cache
+        cachedPose = null;
+
+        // ========== CRASH PREVENTION: Reset error tracking ==========
+        consecutiveErrors = 0;
+
+        // ========== CRASH PREVENTION: Try to recover from error mode ==========
+        if (errorRecoveryMode && verifyServoHealth()) {
+            errorRecoveryMode = false;
+            hardwareInitialized = true;
+        }
+    }
+
+    /**
+     * Switch to manual mode - PID control disabled
+     */
+    public void setManualMode() {
+        manualMode = true;
+
+        // Sync manual position with current servo position
+        if (hardwareInitialized && turretServo1 != null) {
+            try {
+                manualPosition = getSafeServoPosition();
+            } catch (Exception e) {
+                manualPosition = 0.25; // Safe default
+            }
+        }
+
+        // ========== CRASH PREVENTION: Reset error tracking ==========
+        consecutiveErrors = 0;
+
+        // ========== CRASH PREVENTION: Try to recover from error mode ==========
+        if (errorRecoveryMode && verifyServoHealth()) {
+            errorRecoveryMode = false;
+            hardwareInitialized = true;
+        }
+    }
+
+    /**
+     * ========== CRASH PREVENTION: Cached pose fetching with null safety ==========
+     */
+    private Pose getCachedPose() {
+        try {
+            double currentTime = loopTimer.seconds();
+
+            // Return cached pose if still valid
+            if (cachedPose != null && (currentTime - lastPoseFetchTime) < POSE_CACHE_DURATION) {
+                return cachedPose;
+            }
+
+            // Safety check
+            if (PedroComponent.follower() == null) {
+                return cachedPose; // Return last known pose
+            }
+
+            // Fetch new pose
+            Pose newPose = PedroComponent.follower().getPose();
+
+            // Validate pose before caching
+            if (newPose != null) {
+                cachedPose = newPose;
+                lastPoseFetchTime = currentTime;
+            }
+
+            return cachedPose;
+
+        } catch (Exception e) {
+            // On error, return last known good pose
+            return cachedPose;
+        }
     }
 
     // ------------------ Loop ------------------
     @Override
-//    public void periodic() {
-//        // === 0. HARDWARE CHECK ===
-//        if (!hardwareInitialized || turretServo1 == null || turretServo2 == null) {
-//            return; // Skip if hardware not initialized
-//        }
-//
-//        try {
-//            // === 1. SAFETY CHECKS ===
-//            if (PedroComponent.follower() == null) {
-//                return;
-//            }
-//
-//            // DO NOT CALL follower.update() - it's called in main loop
-//
-//            Pose currentPose = PedroComponent.follower().getPose();
-//            if (currentPose == null) {
-//                return;
-//            }
-//
-//            // === 2. UPDATE ROBOT POSE ===
-//            x = currentPose.getX() - 72;
-//            y = currentPose.getY() - 72;
-//            heading = Math.toDegrees(currentPose.getHeading());
-//            heading = (heading + 360) % 360;
-//            // === 3. CALCULATE TARGET ANGLE ===
-//            // Field-centric angle to goal
-//            double fieldAngleDeg = Math.toDegrees(Math.atan2(yt - y, xt - x));
-//            fieldAngleDeg = (fieldAngleDeg + 360) % 360;
-//
-//            // Distance to target
-//            distanceToTarget = Math.hypot(xt - x, yt - y);
-//
-//            // Robot-centric target angle (where turret should point)
-//            targetAngleDeg = fieldAngleDeg - heading + 180;  // Add 180° offset to fix inverted pointing
-//            targetAngleDeg = normalizeDegrees(targetAngleDeg);
-//
-//            // === 4. DIRECT SERVO CONTROL (NO PID) ===
-//            // Convert target angle directly to servo position
-//            double servoPos = angleToServo(targetAngleDeg);
-//            servoPos = clamp(servoPos, SERVO_MIN, SERVO_MAX);
-//
-//            // Set servos to target position immediately
-//            turretServo1.setPosition(servoPos);
-//            turretServo2.setPosition(servoPos);
-//
-//            // Update current turret angle for telemetry
-//            turretAngleDeg = targetAngleDeg;
-//
-//            // Calculate error for telemetry
-//            lastError = 0; // No error since we're setting directly to target
-//
-//        } catch (Exception e) {
-//            // Catch any errors in periodic to prevent crashes
-//        }
-//
-
-        // PID Break Point
-
-
-        public void periodic() {
-            // === 1. SAFETY CHECKS ===
-            if (PedroComponent.follower() == null) {
-                return;
+    public void periodic() {
+        // ========== CRASH PREVENTION: Error recovery mode check ==========
+        if (errorRecoveryMode) {
+            // Try to recover every few seconds
+            if (loopTimer.seconds() % 3.0 < 0.1) { // Every 3 seconds
+                if (verifyServoHealth()) {
+                    errorRecoveryMode = false;
+                    hardwareInitialized = true;
+                    consecutiveErrors = 0;
+                }
             }
+            return; // Don't run PID in error mode
+        }
 
-            PedroComponent.follower().update();
+        // === 0. MANUAL MODE CHECK ===
+        if (manualMode) {
+            try {
+                // Simplified manual mode telemetry
+                Pose currentPose = getCachedPose();
+                if (currentPose != null) {
+                    x = currentPose.getX() - 72;
+                    y = currentPose.getY() - 72;
+                    heading = Math.toDegrees(currentPose.getHeading());
+                    heading = (heading + 360) % 360;
 
-            Pose currentPose = PedroComponent.follower().getPose();
+                    // Calculate target angle for telemetry only
+                    double fieldAngleDeg = Math.toDegrees(Math.atan2(yt - y, xt - x));
+                    fieldAngleDeg = (fieldAngleDeg + 360) % 360;
+                    distanceToTarget = Math.hypot(xt - x, yt - y);
+                    targetAngleDeg = fieldAngleDeg - heading + 180;
+                    targetAngleDeg = normalizeDegrees(targetAngleDeg);
+
+                    // Get current angle safely
+                    if (hardwareInitialized) {
+                        currentServoPos = getSafeServoPosition();
+                        turretAngleDeg = servoToAngle(currentServoPos);
+                    }
+                }
+            } catch (Exception e) {
+                consecutiveErrors++;
+                if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+                    errorRecoveryMode = true;
+                }
+            }
+            return;
+        }
+
+        // === 1. RATE LIMITING ===
+        double currentTime = loopTimer.seconds();
+        double timeSinceLastUpdate = currentTime - lastUpdateTime;
+
+        if (timeSinceLastUpdate < MIN_LOOP_TIME) {
+            skippedLoops++;
+            return;
+        }
+
+        // === 2. HARDWARE CHECK ===
+        if (!hardwareInitialized) {
+            return;
+        }
+
+        // ========== CRASH PREVENTION: Wrap entire PID loop in try-catch ==========
+        try {
+            // === 3. GET POSE (cached and null-safe) ===
+            Pose currentPose = getCachedPose();
             if (currentPose == null) {
-                return;
+                return; // Can't run PID without pose
             }
 
-            // === 2. UPDATE ROBOT POSE ===
+            // === 4. UPDATE ROBOT POSE ===
             x = currentPose.getX() - 72;
             y = currentPose.getY() - 72;
             heading = Math.toDegrees(currentPose.getHeading());
             heading = (heading + 360) % 360;
 
-            // === 3. CALCULATE TARGET ANGLE ===
-            // Field-centric angle to goal
+            // === 5. CALCULATE TARGET ANGLE ===
             double fieldAngleDeg = Math.toDegrees(Math.atan2(yt - y, xt - x));
             fieldAngleDeg = (fieldAngleDeg + 360) % 360;
 
-            // Distance to target
             distanceToTarget = Math.hypot(xt - x, yt - y);
 
-            // Robot-centric target angle (where turret should point)
-            targetAngleDeg = fieldAngleDeg - heading + 180;  // Add 180° offset to fix inverted pointing
+            targetAngleDeg = fieldAngleDeg - heading + 180;
             targetAngleDeg = normalizeDegrees(targetAngleDeg);
 
-            // === 4. READ CURRENT TURRET POSITION ===
-            // Get servo position and convert to angle
-            currentServoPos = turretServo1.getPosition();
-
+            // === 6. READ CURRENT TURRET POSITION (safely) ===
+            currentServoPos = getSafeServoPosition();
             turretAngleDeg = servoToAngle(currentServoPos);
 
-            // === 5. CALCULATE ERROR (SHORTEST PATH) ===
+            // === 7. CALCULATE ERROR ===
             double error = targetAngleDeg - turretAngleDeg;
 
-            // Wrap error to -180 to +180 (shortest rotation path)
+            // Wrap error to -180 to +180
             if (error > 180) error -= 360;
             if (error < -180) error += 360;
 
-            // === 6. CALCULATE TIME DELTA ===
-            double currentTime = System.nanoTime() / 1e9;  // Convert to seconds
-            double dt = currentTime - lastTime;
+            // Skip updates if error is very small
+            if (Math.abs(error) < 0.5) {
+                lastUpdateTime = currentTime;
+                consecutiveErrors = 0; // Reset on normal operation
+                return;
+            }
+
+            // === 8. CALCULATE TIME DELTA ===
+            double dt = timeSinceLastUpdate;
 
             if (firstRun) {
-                dt = 0.02;  // Assume 20ms on first run
+                dt = MIN_LOOP_TIME;
                 firstRun = false;
             }
 
-            if (dt <= 0 || dt > 0.1) {
-                dt = 0.02;  // Safety: default to 20ms if time is weird
+            // ========== CRASH PREVENTION: Validate dt ==========
+            if (dt <= 0 || dt > 0.5) { // Extended max dt to 0.5s for safety
+                dt = MIN_LOOP_TIME;
             }
 
-            // === 7. PID CALCULATIONS ===
-
-            // P term: Proportional to error
+            // === 9. PID CALCULATIONS ===
             double P_output = kP * error;
 
-            // I term: Integral (accumulated error over time)
             integral += error * dt;
 
-            // Anti-windup: Reset integral if we're close to target
             if (Math.abs(error) < TOLERANCE) {
                 integral = 0;
             }
 
-            // Clamp integral to prevent runaway accumulation
             integral = clamp(integral, -100, 100);
             double I_output = kI * integral;
 
-            // D term: Derivative (rate of change of error)
             double derivative = (error - lastError) / dt;
             double D_output = kD * derivative;
 
-            // === 8. COMBINE PID OUTPUTS ===
+            // === 10. COMBINE PID OUTPUTS ===
             double pidOutput = P_output + I_output + D_output;
-
-            // Limit to max velocity (deg/sec)
             pidOutput = clamp(pidOutput, -MAX_VELOCITY, MAX_VELOCITY);
 
-            // === 9. UPDATE SERVO POSITION ===
-            // Convert velocity to position change
+            // === 11. UPDATE SERVO POSITION ===
             double positionChange = pidOutput * dt;
             double newAngle = turretAngleDeg + positionChange;
             newAngle = normalizeDegrees(newAngle);
 
-            // Convert angle to servo position and apply
             double newServoPos = angleToServo(newAngle);
             newServoPos = clamp(newServoPos, SERVO_MIN, SERVO_MAX);
 
-            turretServo1.setPosition(newServoPos);
-            turretServo2.setPosition(newServoPos);  // Mirror servo if needed
+            // ========== CRASH PREVENTION: Emergency bounds check ==========
+            if (newServoPos >= EMERGENCY_STOP_THRESHOLD || newServoPos <= (1.0 - EMERGENCY_STOP_THRESHOLD)) {
+                newServoPos = clamp(newServoPos, 0.05, 0.95);
+            }
 
-            // === 10. UPDATE STATE FOR NEXT LOOP ===
+            // Only update servos if position changed significantly
+            if (Math.abs(newServoPos - currentServoPos) > 0.002) {
+                setSafeServoPosition(newServoPos);
+            }
+
+            // === 12. UPDATE STATE ===
             lastError = error;
-            lastTime = currentTime;
-        }
+            lastUpdateTime = currentTime;
+            consecutiveErrors = 0; // Reset on successful update
 
+        } catch (Exception e) {
+            // ========== CRASH PREVENTION: Handle any PID loop errors ==========
+            consecutiveErrors++;
+            if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+                errorRecoveryMode = true;
+                hardwareInitialized = false;
+            }
+        }
+    }
 
     // ------------------ Helper Functions ------------------
 
-    /**
-     * Convert angle in degrees to servo position (0.0 to 1.0)
-     * Includes your custom mapping with inversion
-     */
     private double angleToServo(double angleDeg) {
         angleDeg = normalizeDegrees(angleDeg);
         double pos = 1.0 - ((angleDeg + 180) / 360.0);
         return clamp(pos, SERVO_MIN, SERVO_MAX);
     }
 
-    /**
-     * Convert servo position (0.0 to 1.0) back to angle in degrees
-     * Reverse of angleToServo()
-     */
     private double servoToAngle(double servoPos) {
-        // Reverse the formula: pos = 1 - (angle + 180)/360
-        // 1 - pos = (angle + 180)/360
-        // 360 * (1 - pos) = angle + 180
-        // angle = 360 * (1 - pos) - 180
         double angle = 360.0 * (1.0 - servoPos) - 180.0;
         return normalizeDegrees(angle);
     }
 
-    /**
-     * Normalize angle to -180 to +180 range
-     */
     public double normalizeDegrees(double angle) {
         angle = (angle + 360) % 360;
         if (angle > 180) angle -= 360;
         return angle;
     }
 
-    /**
-     * Clamp value between min and max
-     */
     private double clamp(double val, double min, double max) {
         return Math.max(min, Math.min(max, val));
     }
-// Manual Mode
 
     // ------------------ Getters ------------------
     public double getX() { return x; }
@@ -284,8 +576,15 @@ public class TurretOdoAi implements Subsystem {
     public double getTargetAngleDeg() { return targetAngleDeg; }
     public double getTurretAngleDeg() { return turretAngleDeg; }
     public double getDistanceToTarget() { return distanceToTarget; }
-    public double getLastError() { return lastError; }  // For debugging
-    public double getIntegral() { return integral; }    // For debugging
+    public double getLastError() { return lastError; }
+    public double getIntegral() { return integral; }
+    public double getKp() { return kP; }
+    public int getSkippedLoops() { return skippedLoops; }
+    public double getLoopTime() { return loopTimer.seconds() - lastUpdateTime; }
+    public boolean isManualMode() { return manualMode; }
+    public double getManualPosition() { return manualPosition; }
 
-    public double getKp() {return kP;}
+    // ========== CRASH PREVENTION: Status getters ==========
+    public boolean isErrorRecoveryMode() { return errorRecoveryMode; }
+    public int getConsecutiveErrors() { return consecutiveErrors; }
 }

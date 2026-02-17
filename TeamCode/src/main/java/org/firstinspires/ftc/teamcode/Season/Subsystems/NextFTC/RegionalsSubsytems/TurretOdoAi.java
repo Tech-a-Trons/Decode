@@ -50,7 +50,7 @@ public class TurretOdoAi implements Subsystem {
 
     // Motion limits
     public static double MAX_VELOCITY = 800.0;
-    public static double TOLERANCE = 2.0;
+    public static double TOLERANCE = 0.0;
 
     // ========== PID STATE VARIABLES ==========
     private double lastError = 0;

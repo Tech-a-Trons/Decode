@@ -25,6 +25,8 @@ public class TurretOdoAi implements Subsystem {
     public static double xt = 68;
     public static double yt = 68;
 
+    double AngleOffset = -25;
+
     // ------------------ Turret ------------------
     private double targetAngleDeg = 0;
     private double turretAngleDeg = 0;
@@ -163,7 +165,7 @@ public class TurretOdoAi implements Subsystem {
                     double fieldAngleDeg = Math.toDegrees(Math.atan2(yt - y, xt - x));
                     fieldAngleDeg = (fieldAngleDeg + 360) % 360;
                     distanceToTarget = Math.hypot(xt - x, yt - y);
-                    targetAngleDeg = fieldAngleDeg - heading + 180;
+                    targetAngleDeg = fieldAngleDeg - heading + 180 + AngleOffset;
                     targetAngleDeg = normalizeDegrees(targetAngleDeg);
 
                     if (hardwareInitialized && turretServo1 != null) {
@@ -212,7 +214,7 @@ public class TurretOdoAi implements Subsystem {
 
             distanceToTarget = Math.hypot(xt - x, yt - y);
 
-            targetAngleDeg = fieldAngleDeg - heading + 180;
+            targetAngleDeg = fieldAngleDeg - heading + 180 + AngleOffset;
             targetAngleDeg = normalizeDegrees(targetAngleDeg);
 
             // === 6. READ CURRENT TURRET POSITION ===

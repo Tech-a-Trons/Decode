@@ -18,6 +18,7 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
+import dev.nextftc.ftc.components.LoopTimeComponent;
 import dev.nextftc.hardware.driving.MecanumDriverControlled;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -26,10 +27,18 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "Moving while shooting")
 public class TuffShootTele extends NextFTCOpMode {
-
     private boolean intakeToggle = false;
     private boolean turretManualMode = false;
     public double SlowModeMultipler = 0;
+
+    // Add these instance variables for continuous tracking
+    private double lastTime = System.nanoTime() / 1e9;
+    private double lastX = 0;
+    private double lastY = 0;
+    private double robotX, robotY, robotVx, robotVy;  // Fresh values updated every frame
+//    private boolean intakeToggle = false;
+//    private boolean turretManualMode = false;
+//    public double SlowModeMultipler = 0;
 
     public TuffShootTele() {
         addComponents(
@@ -42,7 +51,7 @@ public class TuffShootTele extends NextFTCOpMode {
                 ),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE,
-                new PedroComponent(Constants::createFollower)
+                new PedroComponent(Constants::createFollower), new LoopTimeComponent()
         );
     }
 
@@ -54,9 +63,9 @@ public class TuffShootTele extends NextFTCOpMode {
     private final MotorEx backLeftMotor = new MotorEx("bl").reversed();
     private final MotorEx backRightMotor = new MotorEx("br");
 
-    double lastTime = System.nanoTime() / 1e9;
-    double lastX = TurretOdoAi.INSTANCE.getX();
-    double lastY = TurretOdoAi.INSTANCE.getY();
+//    double lastTime = System.nanoTime() / 1e9;
+//    double lastX = TurretOdoAi.INSTANCE.getX();
+//    double lastY = TurretOdoAi.INSTANCE.getY();
 
     @Override
     public void onStartButtonPressed() {
@@ -70,6 +79,11 @@ public class TuffShootTele extends NextFTCOpMode {
 
         PedroComponent.follower().startTeleopDrive();
 
+        PedroComponent.follower().update();
+
+        lastX = TurretOdoAi.INSTANCE.getX();
+        lastY = TurretOdoAi.INSTANCE.getY();
+
         Gamepads.gamepad1().dpadDown()
                 .whenBecomesTrue(() -> {
                     PedroComponent.follower().setPose(Middle);
@@ -79,21 +93,6 @@ public class TuffShootTele extends NextFTCOpMode {
         // Shoot
         button(() -> gamepad1.right_trigger > 0.05)
                 .whenTrue(() -> {
-                    double currentTime = System.nanoTime() / 1e9;
-                    double dt = currentTime - lastTime;
-                    lastTime = currentTime;
-
-                    double robotX = TurretOdoAi.INSTANCE.getX();
-                    double robotY = TurretOdoAi.INSTANCE.getY();
-                    double robotHeadingDeg = TurretOdoAi.INSTANCE.getHeading();
-                    double robotHeadingRad = Math.toRadians(robotHeadingDeg);
-
-                    // ===== Compute field velocity (inches/sec) =====
-                    double robotVx = (robotX - lastX) / dt;
-                    double robotVy = (robotY - lastY) / dt;
-
-                    lastX = robotX;
-                    lastY = robotY;
 //                    Pose pose = PedroComponent.follower().getPose();
 //                    double d = Math.hypot(
 //                            TARGET_X - pose.getX(),
@@ -101,7 +100,7 @@ public class TuffShootTele extends NextFTCOpMode {
 //                    );
 //                    TurretPID.INSTANCE.newshooterdistance(d).schedule();
                     TurretPID.INSTANCE.tuffshot(
-                            robotX, robotY, robotHeadingRad,
+                            robotX, robotY,
                             robotVx, robotVy,
                             121.0, 121.0   // goal
                     ).schedule();
@@ -147,14 +146,31 @@ public class TuffShootTele extends NextFTCOpMode {
 
     @Override
     public void onUpdate() {
+
+        // ===== NORMAL TELEOP DRIVE =====
         PedroComponent.follower().setTeleOpDrive(
                 -gamepad1.left_stick_y,
                 -gamepad1.left_stick_x,
                 -gamepad1.right_stick_x,
-                true // Robot Centric
+                true
         );
         PedroComponent.follower().update();
 
+        double currentTime = System.nanoTime() / 1e9;
+        double dt = currentTime - lastTime;
+        lastTime = currentTime;
+
+        robotX = TurretOdoAi.INSTANCE.getX();
+        robotY = TurretOdoAi.INSTANCE.getY();
+
+        // Compute field velocity (inches/sec)
+        robotVx = (robotX - lastX) / dt;
+        robotVy = (robotY - lastY) / dt;
+
+        lastX = robotX;
+        lastY = robotY;
+
+        // ===== TELEMETRY =====
         Pose pose = PedroComponent.follower().getPose();
         if (pose == null) {
             telemetry.addData("ERROR", "Pose is null");
@@ -166,7 +182,9 @@ public class TuffShootTele extends NextFTCOpMode {
         telemetry.addData("X", String.format("%.1f", pose.getX()));
         telemetry.addData("Y", String.format("%.1f", pose.getY()));
         telemetry.addData("Heading", String.format("%.1f", Math.toDegrees(pose.getHeading())));
-        telemetry.addData("Turret", "ENABLED" );
+        telemetry.addData("Vx", String.format("%.1f in/s", robotVx));  // Add velocity telemetry
+        telemetry.addData("Vy", String.format("%.1f in/s", robotVy));
+        telemetry.addData("Turret", "ENABLED");
 
         if (TurretOdoAi.INSTANCE.hardwareInitialized) {
             telemetry.addData("Turret Angle", String.format("%.1f°", TurretOdoAi.INSTANCE.getTurretAngleDeg()));

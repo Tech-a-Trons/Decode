@@ -121,7 +121,7 @@ public class TeleOpProgram extends NextFTCOpMode {
                                 TARGET_X - pose.getX(),
                                 TARGET_Y - pose.getY()
                         );
-                        TurretPID.INSTANCE.newshooterdistance(d).schedule();
+                        TurretPID.INSTANCE.regionalsshooterdistance(d).schedule();
                         TurretPID.shootRequested = true;
                         TurretPID.hasShot = false;
                     }

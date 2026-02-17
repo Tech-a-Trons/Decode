@@ -89,6 +89,25 @@ public class TurretPID implements Subsystem {
         return new RunToVelocity(controller, newvelo, 5).requires(this);
     }
 
+    public Command regionalsshooterdistance(double distance) {
+        newvelo =
+                0.041 * distance * distance
+                        - 2.9 * distance
+                        + 1400; //1350
+
+        if (distance > 60) {
+            newvelo -= 3 * (distance - 60);
+        }
+
+        newvelo= Math.max(1200, Math.min(4000, newvelo));
+
+        newactv = newvelo;
+        shootRequested = true;
+        hasShot = false;
+
+        return new RunToVelocity(controller, newvelo, 5).requires(this);
+    }
+
     public Command setFarShooterSpeed(){
         //ll.update();
         //hood.INSTANCE.open();
@@ -101,55 +120,57 @@ public class TurretPID implements Subsystem {
 
     public Command tuffshot(
             double robotX, double robotY,
-            double robotHeadingRad,
             double vx, double vy,
             double goalX, double goalY) {
 
-        // --------- 1. Compute distance to goal ---------
+        // ========== 1. COMPUTE DISTANCE TO GOAL ==========
         double dx = goalX - robotX;
         double dy = goalY - robotY;
         double distance = Math.hypot(dx, dy);
 
-        // --------- 2. Compute BASE flywheel velocity ---------
+        // ========== 2. COMPUTE BASE FLYWHEEL VELOCITY ==========
         double flywheelVelo = 0.041 * distance * distance
                 - 2.9 * distance
-                + 1150;
-        if (distance > 60) flywheelVelo -= 2.2 * (distance - 60);
+                + 1050;
 
-        // --------- 3. COMPENSATE for robot velocity ---------
-        // Calculate velocity component along the shot direction
-        double shotDirX = dx / distance;  // normalized direction to goal
+        if (distance > 60) {
+            flywheelVelo -= 2.2 * (distance - 60);
+        }
+
+        // ========== 3. COMPENSATE FOR ROBOT VELOCITY ==========
+        double shotDirX = dx / distance;
         double shotDirY = dy / distance;
-        double velocityTowardGoal = vx * shotDirX + vy * shotDirY;  // dot product
+        double velocityTowardGoal = vx * shotDirX + vy * shotDirY;
 
-        // Adjust flywheel: if moving toward goal (positive), reduce power
-        // if moving away (negative), increase power
-        // Start with a gain of 10-15 and tune from there
-        double velocityCompensationGain = 10.0;  // TUNE THIS VALUE
-        flywheelVelo -= velocityTowardGoal * velocityCompensationGain;
+        // ONLY compensate if moving significantly (avoid noise when stationary)
+        double VELOCITY_THRESHOLD = 2.0;  // inches/sec
+        double compensation = 0;
 
-        // Clamp to safe range
-        flywheelVelo = Math.max(1000, Math.min(2000, flywheelVelo));
+        if (Math.abs(velocityTowardGoal) > VELOCITY_THRESHOLD) {
+            // Use quadratic scaling but with safety limits
+            double baseGain = 0.002;  // REDUCED - start smaller
+            double velocityCompensationGain = baseGain * distance * distance;
 
-        // --------- 4. Store for later use ---------
+            // Calculate compensation
+            compensation = velocityTowardGoal * velocityCompensationGain;
+
+            // LIMIT compensation to prevent going negative or too high
+            double MAX_COMPENSATION = 300;  // Don't adjust by more than 300
+            compensation = Math.max(-MAX_COMPENSATION, Math.min(MAX_COMPENSATION, compensation));
+        }
+
+        flywheelVelo += compensation;
+
+        // Clamp to safe operational range
+        flywheelVelo = Math.max(900, Math.min(2000, flywheelVelo));
+
+        // ========== 4. SET SHOOTER STATE FLAGS ==========
         newactv = flywheelVelo;
+        shootRequested = true;
+        hasShot = false;
+        activeTargetVelocity = flywheelVelo;
 
-        // --------- 5. Compute turret angle for moving shot ---------
-        double projectileSpeed = flywheelVelo * 0.05; // tune this to inches/sec
-        double timeToTarget = (projectileSpeed > 0.001) ? distance / projectileSpeed : 0;
-
-        double leadX = dx - vx * timeToTarget;
-        double leadY = dy - vy * timeToTarget;
-        double globalAngle = Math.atan2(leadY, leadX);
-        double turretAngleRad = Math.atan2(
-                Math.sin(globalAngle - robotHeadingRad),
-                Math.cos(globalAngle - robotHeadingRad)
-        );
-
-        // Store turret angle - make sure you're actually setting the turret target!
-        // TurretOdoAi.INSTANCE.setTargetAngle(turretAngleRad); // or whatever your method is
-
-        // --------- 6. Return RunToVelocity command ---------
+        // ========== 5. RETURN COMMAND TO SPIN UP FLYWHEEL ==========
         return new RunToVelocity(controller, newactv, 5)
                 .requires(this);
     }

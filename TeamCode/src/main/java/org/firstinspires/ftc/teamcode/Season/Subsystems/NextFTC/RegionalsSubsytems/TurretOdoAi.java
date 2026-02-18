@@ -22,10 +22,11 @@ public class TurretOdoAi implements Subsystem {
     private double heading = 0;
 
     // ------------------ Target (Red Goal) ------------------
-    public static double xt = 59;
-    public static double yt = 59;
+    public static double xt = 121;
+    public static double yt = 121;
 
-    double AngleOffset = -25;
+    double AngleOffset =   -25-96;
+
 
     // ------------------ Turret ------------------
     private double targetAngleDeg = 0;

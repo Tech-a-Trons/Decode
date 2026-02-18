@@ -8,27 +8,31 @@ import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.impl.ServoEx;
 import dev.nextftc.extensions.pedro.PedroComponent;
 
-
+@Config
 public class NewHood implements Subsystem {
 
     public static final NewHood INSTANCE = new NewHood();
 
     // ===== DISTANCE ZONES =====
     //   < 15"  → 1.0
-    //   15-80" → 0.5
-    //   > 80"  → 0.6
+    //   15-90" → 0.5
+    //   > 90"  → velocity-based switching (0.8 at high RPM, 0.5 at low RPM)
     public static double CLOSE_THRESHOLD = 15.0;   // inches
-    public static double FAR_THRESHOLD   = 80.0;   // inches
+    public static double FAR_THRESHOLD   = 90.0;   // inches - switches to velocity-based mode
 
     public static double CLOSE_POS = 1.0;   // < 15"
-    public static double MID_POS   = 0.5;   // 15-80"
-    public static double FAR_POS   = 0.6;   // > 80"
+    public static double MID_POS   = 0.5;   // 15-90"
+
+    // ===== FAR SHOT VELOCITY-BASED SWITCHING (> 90") =====
+    public static double FAR_HIGH_POS    = 0.8;    // High hood when RPM is good
+    public static double FAR_LOW_POS     = 0.5;    // Low hood when RPM drops
+    public static double FAR_RPM_THRESHOLD = 1600; // RPM below this switches to low hood
 
     // ===== GOAL POSITION =====
     public static double GOAL_X = 121.0;
     public static double GOAL_Y = 121.0;
 
-    // ===== FLYWHEEL VELOCITY COMPENSATION =====
+    // ===== STANDARD VELOCITY COMPENSATION (for close/mid range) =====
     public static double VEL_THRESHOLD  = 75.0;    // RPM deadband
     public static double HOOD_VEL_GAIN  = 0.0003;  // adjustment per RPM of error
     public static double MAX_VEL_ADJUST = 0.08;    // max raise from low RPM
@@ -94,13 +98,13 @@ public class NewHood implements Subsystem {
         else open();
     }
 
-    // ===== DISTANCE LOOKUP =====
+    // ===== DISTANCE LOOKUP (without velocity) =====
 
     /**
-     * Simple 3-zone distance lookup:
+     * Simple distance-only lookup (no velocity compensation):
      *   < 15"  → 1.0
-     *   15-80" → 0.5
-     *   > 80"  → 0.6
+     *   15-90" → 0.5
+     *   > 90"  → 0.8 (default high arc for far shots)
      */
     public double getHoodPositionFromDistance(double distance) {
         if (distance < CLOSE_THRESHOLD) {
@@ -108,12 +112,12 @@ public class NewHood implements Subsystem {
         } else if (distance <= FAR_THRESHOLD) {
             return MID_POS;
         } else {
-            return FAR_POS;
+            return FAR_HIGH_POS;  // Default to high arc for far shots
         }
     }
 
     /**
-     * Set hood based on current robot distance to goal
+     * Set hood based on current robot distance to goal (no velocity)
      */
     public void adjustForCurrentDistance() {
         if (PedroComponent.follower() == null) return;
@@ -125,18 +129,18 @@ public class NewHood implements Subsystem {
     }
 
     /**
-     * Set hood based on a known distance
+     * Set hood based on a known distance (no velocity)
      */
     public void adjustForDistance(double distance) {
         manualOverride = false;
         hood.setPosition(getHoodPositionFromDistance(distance));
     }
 
-    // ===== FLYWHEEL VELOCITY COMPENSATION =====
+    // ===== VELOCITY COMPENSATION =====
 
     /**
      * Adjust hood based on flywheel RPM error only (uses BASE_POS as starting point).
-     * Under RPM → hood goes up (more arch). Over RPM → hood goes down (flatter).
+     * For close/mid range shots.
      *
      * @param targetRPM  RPM your flywheel should be at
      * @param actualRPM  RPM your flywheel is actually at
@@ -156,18 +160,43 @@ public class NewHood implements Subsystem {
     }
 
     /**
-     * Distance lookup + flywheel RPM compensation combined.
-     * This is the recommended method to call when shooting.
+     * Distance + velocity combined.
+     *
+     * BEHAVIOR:
+     * - Distance < 15":  Always use CLOSE_POS (1.0)
+     * - Distance 15-90": Use MID_POS (0.5) + standard velocity compensation
+     * - Distance > 90":  Velocity-based switching:
+     *                    actualRPM >= FAR_RPM_THRESHOLD → FAR_HIGH_POS (0.8)
+     *                    actualRPM <  FAR_RPM_THRESHOLD → FAR_LOW_POS (0.5)
      *
      * @param distance   Current distance to goal in inches
-     * @param targetRPM  RPM your flywheel should be at
+     * @param targetRPM  RPM your flywheel should be at (used for close/mid compensation)
      * @param actualRPM  RPM your flywheel is actually at
      */
     public void adjustForDistanceAndVelocity(double distance, double targetRPM, double actualRPM) {
         manualOverride = false;
 
-        double basePos = getHoodPositionFromDistance(distance);
+        // === CLOSE RANGE: < 15" ===
+        if (distance < CLOSE_THRESHOLD) {
+            hood.setPosition(CLOSE_POS);
+            lastVelAdjust = 0.0;
+            return;
+        }
 
+        // === FAR RANGE: > 90" - Velocity-based switching ===
+        if (distance > FAR_THRESHOLD) {
+            // Switch between high and low hood based on actual RPM
+            if (actualRPM >= FAR_RPM_THRESHOLD) {
+                hood.setPosition(FAR_HIGH_POS);  // High arc when RPM is good
+            } else {
+                hood.setPosition(FAR_LOW_POS);   // Drop to low arc when RPM falls
+            }
+            lastVelAdjust = 0.0;
+            return;
+        }
+
+        // === MID RANGE: 15-90" - Standard velocity compensation ===
+        double basePos = MID_POS;
         double error = targetRPM - actualRPM;
         double velAdjust = 0.0;
 
@@ -177,6 +206,23 @@ public class NewHood implements Subsystem {
 
         lastVelAdjust = velAdjust;
         hood.setPosition(clamp(basePos + velAdjust));
+    }
+
+    /**
+     * Simplified far-shot method - just pass actual RPM, no target needed.
+     * Automatically uses current distance from odometry.
+     *
+     * @param actualRPM Current flywheel RPM
+     */
+    public void adjustForCurrentDistanceWithRPM(double actualRPM) {
+        if (PedroComponent.follower() == null) return;
+        Pose pose = PedroComponent.follower().getPose();
+        if (pose == null) return;
+
+        double distance = Math.hypot(GOAL_X - pose.getX(), GOAL_Y - pose.getY());
+
+        // For far shots, we don't need target RPM - just check if actual is good
+        adjustForDistanceAndVelocity(distance, actualRPM, actualRPM);
     }
 
     // ===== PERIODIC =====

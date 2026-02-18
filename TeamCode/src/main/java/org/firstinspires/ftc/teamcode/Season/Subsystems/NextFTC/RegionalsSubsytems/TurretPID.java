@@ -19,7 +19,7 @@ public class TurretPID implements Subsystem {
     public static double kI = 0.0;
     public static double kD = 0.0;
 
-    double newvelo;
+    public static double newvelo;
 
     public static double kV = 0.0;
     public static double kA = 0.0;
@@ -97,7 +97,7 @@ public class TurretPID implements Subsystem {
 
         if (distance > 95) {
 //            newvelo -= 0.7 * (distance - 95);
-            newvelo += -(0.25 * (distance - 52.5));
+            newvelo += -(0.25 * (distance - 42.5)) + 75;
         }
 
         newvelo= Math.max(1200, Math.min(2000, newvelo));
@@ -118,7 +118,9 @@ public class TurretPID implements Subsystem {
                 5
         ).requires(this);
     }
-
+    public double getActualVelocity() {
+        return turret.getState().getVelocity();
+    }
     public Command tuffshot(
             double robotX, double robotY,
             double vx, double vy,

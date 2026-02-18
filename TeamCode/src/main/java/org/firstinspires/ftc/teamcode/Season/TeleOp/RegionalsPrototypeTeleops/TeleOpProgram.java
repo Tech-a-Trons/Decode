@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.RegionalsPrototypeTeleops;
 
+import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID.newvelo;
 import static dev.nextftc.bindings.Bindings.button;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -67,7 +68,9 @@ public class TeleOpProgram extends NextFTCOpMode {
     public void onStartButtonPressed() {
         // Initialize turret safely
         TurretOdoAi.INSTANCE.init(hardwareMap);
-        NewHood.INSTANCE.init(hardwareMap);
+       NewHood.INSTANCE.init(hardwareMap);
+
+       TurretOdoAi.INSTANCE.AngleAdjust = 0;
 
         // Set initial pose
         PedroComponent.follower().setPose(new Pose(72, 72, Math.toRadians(270)));
@@ -77,35 +80,30 @@ public class TeleOpProgram extends NextFTCOpMode {
         telemetryTimer.reset();
 
         // === TURRET MODE CONTROL (Gamepad 1) ===
-        Gamepads.gamepad1().dpadRight()
-                .whenBecomesTrue(() -> {
-                    TurretOdoAi.INSTANCE.setManualMode();
-                    gamepad1.rumble(500);
-                });
-
-        Gamepads.gamepad1().dpadLeft()
-                .whenBecomesTrue(() -> {
-                    TurretOdoAi.INSTANCE.setAutoMode();
-                    gamepad1.rumble(200);
-                });
+//        Gamepads.gamepad1().dpadRight()
+//                .whenBecomesTrue(() -> {
+//                    TurretOdoAi.INSTANCE.setManualMode();
+//                    gamepad1.rumble(500);
+//                });
+//
+//        Gamepads.gamepad1().dpadLeft()
+//                .whenBecomesTrue(() -> {
+//                    TurretOdoAi.INSTANCE.setAutoMode();
+//                    gamepad1.rumble(200);
+//                });
 
         // === MANUAL TURRET CONTROL - SINGLE TAP (Gamepad 2) ===
         Gamepads.gamepad2().dpadRight()
                 .whenBecomesTrue(() -> {
-                    if (TurretOdoAi.INSTANCE.isManualMode()) {
-                        TurretOdoAi.INSTANCE.turnRight();
-                        turretRightHoldTimer.reset();
-                    }
+                    TurretOdoAi.INSTANCE.turnRight();
+
                 });
 
         Gamepads.gamepad2().dpadLeft()
                 .whenBecomesTrue(() -> {
-                    if (TurretOdoAi.INSTANCE.isManualMode()) {
-                        TurretOdoAi.INSTANCE.turnLeft();
-                        turretLeftHoldTimer.reset();
-                    }
-                });
+                    TurretOdoAi.INSTANCE.turnLeft();
 
+                });
         // === POSE RESET ===
         Gamepads.gamepad1().dpadDown()
                 .whenBecomesTrue(() -> {
@@ -122,6 +120,8 @@ public class TeleOpProgram extends NextFTCOpMode {
                                 TARGET_Y - pose.getY()
                         );
                         TurretPID.INSTANCE.regionalsshooterdistance(d).schedule();
+                        double actualRPM = TurretPID.INSTANCE.getActualVelocity();
+                        NewHood.INSTANCE.adjustForDistanceAndVelocity(d, newvelo, actualRPM);
                         TurretPID.shootRequested = true;
                         TurretPID.hasShot = false;
                     }
@@ -137,7 +137,7 @@ public class TeleOpProgram extends NextFTCOpMode {
                         Transfer.INSTANCE.nice();
                     } else {
                         CompliantIntake.INSTANCE.off();
-                        Transfer.INSTANCE.off();
+                        Transfer.INSTANCE.repel();
                     }
                 });
 
@@ -153,7 +153,7 @@ public class TeleOpProgram extends NextFTCOpMode {
         Gamepads.gamepad1().leftBumper()
                 .whenBecomesTrue(() -> {
                     TurretPID.INSTANCE.resetShooter().schedule();
-                    Hood.INSTANCE.midopen();
+//                    NewHood.INSTANCE.midopen();
                     CompliantIntake.INSTANCE.off();
                     Transfer.INSTANCE.off();
                     intakeToggle = false;
@@ -162,41 +162,42 @@ public class TeleOpProgram extends NextFTCOpMode {
 
     @Override
     public void onUpdate() {
+        NewHood.INSTANCE.adjustForCurrentDistance();
         // === KILLSWITCH - Hold Y to stop robot ===
-        double currentMultiplier = SlowModeMultiplier;
-        if (gamepad2.y) {
-            currentMultiplier = 0;
-            frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        }
+//        double currentMultiplier = SlowModeMultiplier;
+//        if (gamepad2.y) {
+//            currentMultiplier = 0;
+//            frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//            frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//            backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//            backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        }
 
         // Drive control - runs every loop for responsive driving
         PedroComponent.follower().setTeleOpDrive(
-                -gamepad1.left_stick_y * currentMultiplier,
-                -gamepad1.left_stick_x * currentMultiplier,
-                -gamepad1.right_stick_x * currentMultiplier,
+                -gamepad1.left_stick_y,
+                -gamepad1.left_stick_x ,
+                -gamepad1.right_stick_x ,
                 true
         );
         PedroComponent.follower().update();
 
         // === CONTINUOUS TURRET CONTROL (Hold Mode) ===
-        if (TurretOdoAi.INSTANCE.isManualMode()) {
-            // Right - continuous movement after holding
-            if (gamepad2.dpad_right && turretRightHoldTimer.seconds() > HOLD_THRESHOLD) {
-                TurretOdoAi.INSTANCE.continuousTurnRight(CONTINUOUS_SPEED);
-            } else if (!gamepad2.dpad_right) {
-                turretRightHoldTimer.reset();
-            }
-
-            // Left - continuous movement after holding
-            if (gamepad2.dpad_left && turretLeftHoldTimer.seconds() > HOLD_THRESHOLD) {
-                TurretOdoAi.INSTANCE.continuousTurnLeft(CONTINUOUS_SPEED);
-            } else if (!gamepad2.dpad_left) {
-                turretLeftHoldTimer.reset();
-            }
-        }
+//        if (TurretOdoAi.INSTANCE.isManualMode()) {
+//            // Right - continuous movement after holding
+//            if (gamepad2.dpad_right && turretRightHoldTimer.seconds() > HOLD_THRESHOLD) {
+//                TurretOdoAi.INSTANCE.continuousTurnRight(CONTINUOUS_SPEED);
+//            } else if (!gamepad2.dpad_right) {
+//                turretRightHoldTimer.reset();
+//            }
+//
+//            // Left - continuous movement after holding
+//            if (gamepad2.dpad_left && turretLeftHoldTimer.seconds() > HOLD_THRESHOLD) {
+//                TurretOdoAi.INSTANCE.continuousTurnLeft(CONTINUOUS_SPEED);
+//            } else if (!gamepad2.dpad_left) {
+//                turretLeftHoldTimer.reset();
+//            }
+//        }
 
         // Throttled telemetry - updates every 50ms
         if (telemetryTimer.seconds() >= TELEMETRY_UPDATE_INTERVAL) {

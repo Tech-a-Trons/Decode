@@ -21,6 +21,8 @@ public class TurretOdoAi implements Subsystem {
     private double y = 0;
     private double heading = 0;
 
+    public double AngleAdjust = 0;
+
     // ------------------ Target (Red Goal) ------------------
     public static double xt = 121;
     public static double yt = 121;
@@ -120,66 +122,6 @@ public class TurretOdoAi implements Subsystem {
         }
     }
 
-    public void turnRight() {
-        incrementPosition(0.05);
-    }
-
-    public void turnLeft() {
-        incrementPosition(-0.05);
-    }
-
-    public void continuousTurnRight(double speed) {
-        if (!hardwareInitialized) return;
-
-        double delta = 0.01 * speed;
-        manualPosition = clamp(manualPosition + delta, SERVO_MIN, SERVO_MAX);
-
-        turretServo1.setPosition(manualPosition);
-        turretServo2.setPosition(manualPosition);
-
-        // Update commanded angle
-        commandedAngle = servoToAngle(manualPosition);
-    }
-
-    public void continuousTurnLeft(double speed) {
-        if (!hardwareInitialized) return;
-
-        double delta = -0.01 * speed;
-        manualPosition = clamp(manualPosition + delta, SERVO_MIN, SERVO_MAX);
-
-        turretServo1.setPosition(manualPosition);
-        turretServo2.setPosition(manualPosition);
-
-        // Update commanded angle
-        commandedAngle = servoToAngle(manualPosition);
-    }
-
-    public void setAutoMode() {
-        manualMode = false;
-
-        // Reset PID state when entering auto mode
-        integral = 0;
-        lastError = 0;
-        firstRun = true;
-        lastUpdateTime = loopTimer.seconds();
-
-        // Initialize commanded angle from current position
-        if (hardwareInitialized && turretServo1 != null) {
-            currentServoPos = turretServo1.getPosition();
-            commandedAngle = servoToAngle(currentServoPos);
-            commandedAngleInitialized = true;
-        }
-    }
-
-    public void setManualMode() {
-        manualMode = true;
-
-        // Sync manual position with current servo position
-        if (hardwareInitialized && turretServo1 != null) {
-            manualPosition = turretServo1.getPosition();
-            commandedAngle = servoToAngle(manualPosition);
-        }
-    }
 
     // ------------------ Loop ------------------
     @Override
@@ -227,7 +169,7 @@ public class TurretOdoAi implements Subsystem {
             double fieldAngleDeg = Math.toDegrees(Math.atan2(dy, dx));
             if (fieldAngleDeg < 0) fieldAngleDeg += 360;
 
-            targetAngleDeg = fieldAngleDeg - heading + 180 + AngleOffset;
+            targetAngleDeg = fieldAngleDeg - heading + 180 + AngleOffset + AngleAdjust;
             targetAngleDeg = normalizeDegrees(targetAngleDeg);
 
             // === READ CURRENT POSITION ===
@@ -308,7 +250,7 @@ public class TurretOdoAi implements Subsystem {
                 if (fieldAngleDeg < 0) fieldAngleDeg += 360;
 
                 distanceToTarget = Math.sqrt(dx * dx + dy * dy);
-                targetAngleDeg = fieldAngleDeg - heading + 180 + AngleOffset;
+                targetAngleDeg = fieldAngleDeg - heading + 180 + AngleOffset + AngleAdjust;
                 targetAngleDeg = normalizeDegrees(targetAngleDeg);
 
                 if (hardwareInitialized && turretServo1 != null) {
@@ -320,7 +262,13 @@ public class TurretOdoAi implements Subsystem {
     }
 
     // ------------------ Helper Functions ------------------
+    public void turnRight() {
+        AngleAdjust += 2;
+    }
 
+    public void turnLeft() {
+        AngleAdjust -= 2;
+    }
     private double angleToServo(double angleDeg) {
         angleDeg = normalizeDegrees(angleDeg);
         double pos = 1.0 - ((angleDeg + 180) / 360.0);

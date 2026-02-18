@@ -24,7 +24,7 @@ import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import com.pedropathing.geometry.Pose;
 
-@TeleOp(name = "Regionals Teleop FINAL")
+@TeleOp(name = "Regionals Teleop FINAL w/Manual")
 public class TeleOpProgram extends NextFTCOpMode {
 
     private boolean intakeToggle = false;
@@ -76,34 +76,17 @@ public class TeleOpProgram extends NextFTCOpMode {
         // Start telemetry timer
         telemetryTimer.reset();
 
-        // === TURRET MODE CONTROL (Gamepad 1) ===
-        Gamepads.gamepad1().dpadRight()
-                .whenBecomesTrue(() -> {
-                    TurretOdoAi.INSTANCE.setManualMode();
-                    gamepad1.rumble(500);
-                });
-
-        Gamepads.gamepad1().dpadLeft()
-                .whenBecomesTrue(() -> {
-                    TurretOdoAi.INSTANCE.setAutoMode();
-                    gamepad1.rumble(200);
-                });
-
         // === MANUAL TURRET CONTROL - SINGLE TAP (Gamepad 2) ===
         Gamepads.gamepad2().dpadRight()
                 .whenBecomesTrue(() -> {
-                    if (TurretOdoAi.INSTANCE.isManualMode()) {
-                        TurretOdoAi.INSTANCE.turnRight();
-                        turretRightHoldTimer.reset();
-                    }
+                    TurretOdoAi.INSTANCE.turnRight();
+
                 });
 
         Gamepads.gamepad2().dpadLeft()
                 .whenBecomesTrue(() -> {
-                    if (TurretOdoAi.INSTANCE.isManualMode()) {
-                        TurretOdoAi.INSTANCE.turnLeft();
-                        turretLeftHoldTimer.reset();
-                    }
+                    TurretOdoAi.INSTANCE.turnLeft();
+
                 });
 
         // === POSE RESET ===
@@ -181,22 +164,6 @@ public class TeleOpProgram extends NextFTCOpMode {
         );
         PedroComponent.follower().update();
 
-        // === CONTINUOUS TURRET CONTROL (Hold Mode) ===
-        if (TurretOdoAi.INSTANCE.isManualMode()) {
-            // Right - continuous movement after holding
-            if (gamepad2.dpad_right && turretRightHoldTimer.seconds() > HOLD_THRESHOLD) {
-                TurretOdoAi.INSTANCE.continuousTurnRight(CONTINUOUS_SPEED);
-            } else if (!gamepad2.dpad_right) {
-                turretRightHoldTimer.reset();
-            }
-
-            // Left - continuous movement after holding
-            if (gamepad2.dpad_left && turretLeftHoldTimer.seconds() > HOLD_THRESHOLD) {
-                TurretOdoAi.INSTANCE.continuousTurnLeft(CONTINUOUS_SPEED);
-            } else if (!gamepad2.dpad_left) {
-                turretLeftHoldTimer.reset();
-            }
-        }
 
         // Throttled telemetry - updates every 50ms
         if (telemetryTimer.seconds() >= TELEMETRY_UPDATE_INTERVAL) {
@@ -231,20 +198,14 @@ public class TeleOpProgram extends NextFTCOpMode {
 
         // === TURRET TELEMETRY ===
         if (TurretOdoAi.INSTANCE.hardwareInitialized) {
-            telemetry.addData("Mode", TurretOdoAi.INSTANCE.isManualMode() ? "MANUAL" : "AUTO");
-
-            // Show hold status in manual mode
-            if (TurretOdoAi.INSTANCE.isManualMode()) {
-                if (gamepad2.dpad_right && turretRightHoldTimer.seconds() > HOLD_THRESHOLD) {
-                    telemetry.addData("Control", "SWEEP RIGHT >>>");
-                } else if (gamepad2.dpad_left && turretLeftHoldTimer.seconds() > HOLD_THRESHOLD) {
-                    telemetry.addData("Control", "<<< SWEEP LEFT");
-                }
-            }
+      // Show hold status in manual mode
 
             telemetry.addData("Turret", String.format("%.1f° → %.1f°",
                     TurretOdoAi.INSTANCE.getTurretAngleDeg(),
                     TurretOdoAi.INSTANCE.getTargetAngleDeg()));
+            telemetry.addData("Distance", String.format("%.1f", TurretOdoAi.INSTANCE.getDistanceToTarget()));
+            telemetry.addData("Skipped Loops", TurretOdoAi.INSTANCE.getSkippedLoops());
+            telemetry.addData("Angle Adjust", TurretOdoAi.INSTANCE.AngleAdjust());
             telemetry.addData("Error", String.format("%.1f°", TurretOdoAi.INSTANCE.getLastError()));
 
             // Only show update rate if relevant

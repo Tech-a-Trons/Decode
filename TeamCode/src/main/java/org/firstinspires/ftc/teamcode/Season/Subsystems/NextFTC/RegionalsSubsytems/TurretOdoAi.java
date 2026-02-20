@@ -28,6 +28,8 @@ public class TurretOdoAi implements Subsystem {
     private double heading = 0;
 
     public double AngleAdjust = 0;
+    public double ManualAngleAdjust = 0;
+
 
     // ------------------ Target (Red Goal) ------------------
     public static double xt = 130;
@@ -197,7 +199,7 @@ public class TurretOdoAi implements Subsystem {
             double fieldAngleDeg = Math.toDegrees(Math.atan2(dy, dx));
             if (fieldAngleDeg < 0) fieldAngleDeg += 360;
 
-            targetAngleDeg = fieldAngleDeg - heading + 180 + AngleOffset + AngleAdjust;
+            targetAngleDeg = fieldAngleDeg - heading + 180 + AngleOffset + AngleAdjust + ManualAngleAdjust;
             targetAngleDeg = normalizeDegrees(targetAngleDeg);
 
             // === READ CURRENT POSITION ===
@@ -356,7 +358,7 @@ public class TurretOdoAi implements Subsystem {
             double odoDy = yt - odoCenteredY;
             double odoFieldAngleDeg = Math.toDegrees(Math.atan2(odoDy, odoDx));
             if (odoFieldAngleDeg < 0) odoFieldAngleDeg += 360;
-            double odoTargetAngle = normalizeDegrees(odoFieldAngleDeg - heading + 180 + AngleOffset + AngleAdjust);
+            double odoTargetAngle = normalizeDegrees(odoFieldAngleDeg - heading + 180 + AngleOffset + AngleAdjust + ManualAngleAdjust);
 
             // ── 5. Commit pose correction to Pedro follower ────────────────────
             //    Pedro stores pose as raw field coords (before our -72 centering)
@@ -474,11 +476,11 @@ public class TurretOdoAi implements Subsystem {
 
     // ------------------ Helper Functions ------------------
     public void turnRight() {
-        AngleAdjust += 2;
+        ManualAngleAdjust += 2;
     }
 
     public void turnLeft() {
-        AngleAdjust -= 2;
+        ManualAngleAdjust -= 2;
     }
 
     private double angleToServo(double angleDeg) {

@@ -67,6 +67,9 @@ public class RegionalRed extends NextFTCOpMode {
         NewHood.INSTANCE.setAlliance("red");
         TurretOdoAi.INSTANCE.setAlliance("red");
         TurretOdoAi.INSTANCE.AngleAdjust = 0;
+        TurretOdoAi.INSTANCE.ManualAngleAdjust= 0;
+
+        // Reseters
         ColorSensor.artifactcounter = 0;
 
 

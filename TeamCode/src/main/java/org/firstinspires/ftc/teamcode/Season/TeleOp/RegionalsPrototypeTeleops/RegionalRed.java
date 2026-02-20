@@ -4,13 +4,10 @@ import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Regionals
 import static dev.nextftc.bindings.Bindings.button;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Season.Auto.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.ColorSensor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Hood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.NewHood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Transfer;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdoAi;
@@ -33,7 +30,6 @@ public class RegionalRed extends NextFTCOpMode {
     public double SlowModeMultiplier = 1.0;
 
     // Telemetry throttling
-    private ElapsedTime telemetryTimer = new ElapsedTime();
     private static final double TELEMETRY_UPDATE_INTERVAL = 0.05; // 50ms = 20 Hz
 
     public RegionalRed() {
@@ -77,29 +73,13 @@ public class RegionalRed extends NextFTCOpMode {
         // Set initial pose
         PedroComponent.follower().setPose(new Pose(72, 72, Math.toRadians(270)));
         PedroComponent.follower().startTeleopDrive();
-
-        // Start telemetry timer
-        telemetryTimer.reset();
-
-        // === TURRET MODE CONTROL (Gamepad 1) ===
-//        Gamepads.gamepad1().dpadRight()
-//                .whenBecomesTrue(() -> {
-//                    TurretOdoAi.INSTANCE.setManualMode();
-//                    gamepad1.rumble(500);
-//                });
 //
-//        Gamepads.gamepad1().dpadLeft()
-//                .whenBecomesTrue(() -> {
-//                    TurretOdoAi.INSTANCE.setAutoMode();
-//                    gamepad1.rumble(200);
-//                });
-
-
-        Gamepads.gamepad1().dpadRight()
-                .whenBecomesTrue(TurretOdoAi.INSTANCE::relocalize);
-
-        Gamepads.gamepad1().dpadUp()
-                .whenBecomesTrue(TurretOdoAi.INSTANCE::correctWithLimelight);
+//
+//        Gamepads.gamepad1().dpadRight()
+//                .whenBecomesTrue(TurretOdoAi.INSTANCE::relocalize);
+//
+//        Gamepads.gamepad1().dpadUp()
+//                .whenBecomesTrue(TurretOdoAi.INSTANCE::correctWithLimelight);
 
         // === POSE RESET ===
         Gamepads.gamepad1().dpadDown()
@@ -212,6 +192,11 @@ public class RegionalRed extends NextFTCOpMode {
                 .whenBecomesTrue(() -> {
                     TurretPID.shootRequested = false;
                 });
+        Gamepads.gamepad2().dpadDown()
+                .whenBecomesTrue(TurretOdoAi.INSTANCE::relocalize);
+
+        Gamepads.gamepad2().dpadUp()
+                .whenBecomesTrue(TurretOdoAi.INSTANCE::correctWithLimelight);
 
     }
     @Override
@@ -219,7 +204,7 @@ public class RegionalRed extends NextFTCOpMode {
         NewHood.INSTANCE.adjustForCurrentDistance();
         if (intakeToggle) {
             ColorSensor.INSTANCE.IncountBalls();
-            if (ColorSensor.artifactcounter==0){
+            if (ColorSensor.artifactcounter == 0) {
             }
             if (ColorSensor.artifactcounter == 1) {
                 Transfer.INSTANCE.advance();
@@ -234,14 +219,11 @@ public class RegionalRed extends NextFTCOpMode {
                 // Turn off intake and transfer
                 CompliantIntake.INSTANCE.off();
                 Transfer.INSTANCE.off();
-
                 // Reset toggle state
                 intakeToggle = false;
-
                 // Optional: Rumble controller to alert driver
                 gamepad1.rumble(250);
-
-
+                gamepad2.rumble(250);
             }
         }
         // Drive control - runs every loop for responsive driving
@@ -252,20 +234,5 @@ public class RegionalRed extends NextFTCOpMode {
                 true
         );
         PedroComponent.follower().update();
-
-
-
-        // Throttled telemetry - updates every 50ms
-
     }
-
-    /**
-     * Telemetry update - called every 50ms (20 Hz)
-     */
-
-
-
-        // === POSE TELEMETRY ===
-
-
     }

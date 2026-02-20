@@ -17,7 +17,7 @@ public class ColorHueTester extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         // FIX: Initialize ColorSensor here so hardwareMap is available
-        ColorSensor.init(hardwareMap);
+        ColorSensor.INSTANCE.init(hardwareMap);
 
         telemetry.addLine("Ready!");
         telemetry.update();

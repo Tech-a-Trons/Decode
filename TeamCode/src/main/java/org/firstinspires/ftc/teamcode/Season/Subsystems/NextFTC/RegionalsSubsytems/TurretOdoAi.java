@@ -1,9 +1,14 @@
 package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems;
 
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -15,6 +20,7 @@ public class TurretOdoAi implements Subsystem {
     // ------------------ Hardware ------------------
     private Servo turretServo1;
     private Servo turretServo2;
+    Limelight3A limelight;
 
     // ------------------ Robot Pose ------------------
     private double x = 0;
@@ -66,6 +72,20 @@ public class TurretOdoAi implements Subsystem {
     private static final double MIN_LOOP_TIME = 0.010;
     private int skippedLoops = 0;
 
+    // ========== LIMELIGHT CORRECTION ==========
+    private ElapsedTime limelightCorrectionTimer = new ElapsedTime();
+    public static double LIMELIGHT_CORRECTION_INTERVAL = 0.5; // seconds between corrections
+    public static double MAX_POSE_CORRECTION_INCHES = 12.0;   // sanity check — reject wild jumps
+    public static double MAX_ANGLE_CORRECTION_DEG  = 20.0;   // max AngleAdjust delta per correction
+    public static boolean limelightCorrectionEnabled = true;
+
+    // Diagnostics
+    private double lastLimelightCorrectionTime = -1;
+    private int    limelightCorrectionCount    = 0;
+    private double lastPoseCorrectionMag       = 0;
+    private double lastAngleCorrectionDelta    = 0;
+    private boolean lastCorrectionSucceeded    = false;
+
     // ========== IMPROVED WRAPPING FIX ==========
     private double commandedAngle = 0;
     private boolean commandedAngleInitialized = false;
@@ -94,6 +114,8 @@ public class TurretOdoAi implements Subsystem {
         try {
             turretServo1 = hardwareMap.get(Servo.class, "turretServo1");
             turretServo2 = hardwareMap.get(Servo.class, "turretServo2");
+
+            limelight = hardwareMap.get(Limelight3A.class, "Limelight");
 
             // Set safe initial position
             turretServo1.setPosition(0.25);
@@ -165,6 +187,8 @@ public class TurretOdoAi implements Subsystem {
             heading = Math.toDegrees(headingRad);
             if (heading < 0) heading += 360;
 
+           correctWithLimelight();
+
             // === OPTIMIZED: Combined angle calculation ===
             double dx = xt - x;
             double dy = yt - y;
@@ -189,7 +213,7 @@ public class TurretOdoAi implements Subsystem {
             // === CALCULATE ERROR ===
             double error = targetAngleDeg - commandedAngle;
 
-            // Wrap error to shortest path
+            // Wrap error to the shortest path
             if (error > 180) error -= 360;
             else if (error < -180) error += 360;
 
@@ -265,6 +289,188 @@ public class TurretOdoAi implements Subsystem {
 //                }
 
 
+
+    // ==================== LIMELIGHT CORRECTION ====================
+    /**
+     * Uses MegaTag (Pipeline 4) to:
+     *   1. Correct PedroPathing odometry pose to Limelight's bot-pose estimate.
+     *   2. Correct AngleAdjust to account for accumulated servo offset error.
+     *
+     * Call this from your OpMode at whatever cadence you want (e.g. every 500ms,
+     * or triggered by a button). It is safe to call from periodic() with the
+     * interval guard below — it will self-throttle.
+     *
+     * @return true if a correction was successfully applied, false otherwise.
+     */
+    public boolean correctWithLimelight() {
+        lastCorrectionSucceeded = false;
+
+        if (!limelightCorrectionEnabled)  return false;
+        if (!hardwareInitialized)         return false;
+        if (limelight == null)            return false;
+        if (PedroComponent.follower() == null) return false;
+
+        // Self-throttle so periodic() callers don't spam corrections
+        if (limelightCorrectionTimer.seconds() - lastLimelightCorrectionTime
+                < LIMELIGHT_CORRECTION_INTERVAL) {
+            return false;
+        }
+
+        try {
+            // ── 1. Switch to MegaTag pipeline and grab a fresh result ──────────
+            limelight.pipelineSwitch(4);
+            limelight.updateRobotOrientation(heading); // feed IMU heading for MegaTag2 if used
+
+            LLResult result = limelight.getLatestResult();
+            if (result == null || !result.isValid()) return false;
+
+            // Require at least one visible AprilTag for a trustworthy fix
+            if (result.getFiducialResults() == null
+                    || result.getFiducialResults().isEmpty()) return false;
+
+            Pose3D botPose3D = result.getBotpose();
+            if (botPose3D == null) return false;
+
+            // ── 2. Convert LL bot-pose to field inches (same convention as getRobotPosFromTarget) ──
+            double llX = botPose3D.getPosition().y / 0.0254 + 70.625;   // inches, field coords
+            double llY = -botPose3D.getPosition().x / 0.0254 + 70.625;
+
+            double llYawDeg = botPose3D.getOrientation().getYaw(AngleUnit.DEGREES) + 90.0;
+            if (llYawDeg > 360) llYawDeg -= 360;
+            if (llYawDeg < 0)   llYawDeg += 360;
+            double llYawRad = Math.toRadians(llYawDeg);
+
+            // ── 3. Sanity check: reject if correction magnitude is unreasonably large ──
+            double dx = llX - (x + 72); // x is stored offset by -72
+            double dy = llY - (y + 72);
+            double correctionMag = Math.sqrt(dx * dx + dy * dy);
+            if (correctionMag > MAX_POSE_CORRECTION_INCHES) return false;
+
+            lastPoseCorrectionMag = correctionMag;
+
+            // ── 4. Compute the corrected target angle BEFORE updating pose ──────
+            //    (so we can diff against what odometry was saying)
+            double odoCenteredX = x;  // already = pose.x - 72
+            double odoCenteredY = y;
+            double odoDx = xt - odoCenteredX;
+            double odoDy = yt - odoCenteredY;
+            double odoFieldAngleDeg = Math.toDegrees(Math.atan2(odoDy, odoDx));
+            if (odoFieldAngleDeg < 0) odoFieldAngleDeg += 360;
+            double odoTargetAngle = normalizeDegrees(odoFieldAngleDeg - heading + 180 + AngleOffset + AngleAdjust);
+
+            // ── 5. Commit pose correction to Pedro follower ────────────────────
+            //    Pedro stores pose as raw field coords (before our -72 centering)
+            Pose correctedPose = new Pose(llX, llY, llYawRad);
+            PedroComponent.follower().setPose(correctedPose);
+
+            // ── 6. Recompute target angle with LL-corrected pose ───────────────
+            double llCenteredX = llX - 72;
+            double llCenteredY = llY - 72;
+            double llDx = xt - llCenteredX;
+            double llDy = yt - llCenteredY;
+            double llFieldAngleDeg = Math.toDegrees(Math.atan2(llDy, llDx));
+            if (llFieldAngleDeg < 0) llFieldAngleDeg += 360;
+            double llTargetAngle = normalizeDegrees(llFieldAngleDeg - llYawDeg + 180 + AngleOffset + AngleAdjust);
+
+            // ── 7. Derive servo offset correction ─────────────────────────────
+            //    If odometry was wrong, the turret has been pointed at the wrong angle.
+            //    The difference tells us how far off AngleAdjust needs to shift.
+            double angleCorrection = normalizeDegrees(llTargetAngle - odoTargetAngle);
+
+            // Clamp correction to prevent a single bad reading from wildly swinging the turret
+            angleCorrection = clamp(angleCorrection, -MAX_ANGLE_CORRECTION_DEG, MAX_ANGLE_CORRECTION_DEG);
+
+            // Apply a soft blend (0.5 = half-correction per call, tune as needed)
+            double blendFactor = 0.5;
+            double adjustDelta = angleCorrection * blendFactor;
+            AngleAdjust += adjustDelta;
+            AngleAdjust  = clamp(AngleAdjust, -45, 45); // safety rails
+
+            lastAngleCorrectionDelta = adjustDelta;
+
+            // ── 8. Reset PID integral to prevent windup after pose jump ────────
+            integral = 0;
+            lastError = 0;
+
+            // ── 9. Update diagnostics ──────────────────────────────────────────
+            lastLimelightCorrectionTime = limelightCorrectionTimer.seconds();
+            limelightCorrectionCount++;
+            lastCorrectionSucceeded = true;
+
+            return true;
+
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // ── Diagnostic getters ───────────────────────────────────────────────────────
+    public int LimelightCorrectionCount()  { return limelightCorrectionCount; }
+    public double getLastPoseCorrectionMag()     { return lastPoseCorrectionMag; }
+    public double getLastAngleCorrectionDelta()  { return lastAngleCorrectionDelta; }
+    public boolean wasLastCorrectionSuccessful() { return lastCorrectionSucceeded; }
+
+    public Pose getRobotPosFromTarget() {
+        LLResult result = limelight.getLatestResult();
+        if (result != null && result.isValid()) {
+            Pose3D robotPos = result.getBotpose();
+            double angle = robotPos.getOrientation().getYaw(AngleUnit.DEGREES) + 90;
+            if (angle > 360) angle -= 360;
+            return new Pose((robotPos.getPosition().y / 0.0254) + 70.625, (-robotPos.getPosition().x / 0.0254) + 70.625);
+        }
+        return null;
+    }
+
+    // ------------------ Limelight Relocalization ------------------
+    /**
+     * Uses MegaTag (Pipeline 4) to snap Pedro odometry to Limelight's bot-pose.
+     * Call this on a button press or at a timed interval.
+     *
+     * @return true if relocalization was applied, false if no valid result.
+     */
+    public boolean relocalize() {
+        if (!hardwareInitialized) return false;
+        if (limelight == null) return false;
+        if (PedroComponent.follower() == null) return false;
+
+        try {
+            limelight.pipelineSwitch(4);
+            limelight.updateRobotOrientation(heading); // feed current heading to MegaTag
+
+            LLResult result = limelight.getLatestResult();
+            if (result == null || !result.isValid()) return false;
+
+            // Require at least one visible AprilTag
+            if (result.getFiducialResults() == null
+                    || result.getFiducialResults().isEmpty()) return false;
+
+            // Use the existing conversion method
+            Pose llPose = getRobotPosFromTarget();
+            if (llPose == null) return false;
+
+            // Sanity check — reject if LL says we jumped too far from current odo
+            double currentX = PedroComponent.follower().getPose().getX();
+            double currentY = PedroComponent.follower().getPose().getY();
+            double dx = llPose.getX() - currentX;
+            double dy = llPose.getY() - currentY;
+            double correctionMag = Math.sqrt(dx * dx + dy * dy);
+            if (correctionMag > MAX_POSE_CORRECTION_INCHES) return false;
+
+            // Preserve current heading from Pedro since getRobotPosFromTarget() doesn't return one
+            double currentHeading = PedroComponent.follower().getPose().getHeading();
+            Pose correctedPose = new Pose(llPose.getX(), llPose.getY(), currentHeading);
+            PedroComponent.follower().setPose(correctedPose);
+
+            // Reset PID to avoid windup after the pose snap
+            integral = 0;
+            lastError = 0;
+
+            return true;
+
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     // ------------------ Helper Functions ------------------
     public void turnRight() {

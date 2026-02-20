@@ -12,7 +12,7 @@ import dev.nextftc.core.subsystems.Subsystem;
 public class ColorSensor implements Subsystem {
 
     // INSTANCE is now set via init() instead of at class load time
-    public static ColorSensor INSTANCE;
+    public static final ColorSensor INSTANCE = new ColorSensor();
 
     float chue;
     float csat;
@@ -38,19 +38,16 @@ public class ColorSensor implements Subsystem {
     ElapsedTime IncountTimer = new ElapsedTime();
 
     RevColorSensorV3 colorsensor;
-    static Servo rgbindicator;
+    Servo rgbindicator;
 
     // Private constructor — call init() from your OpMode
-    public ColorSensor(HardwareMap hardwareMap) {
-        rgbindicator = hardwareMap.get(Servo.class, "rgbled");
-        colorsensor = hardwareMap.get(RevColorSensorV3.class, "ColorSensor");
-    }
-
+    public ColorSensor() {}
     /**
      * Call this once at the top of runOpMode() before using INSTANCE.
      */
-    public static void init(HardwareMap hardwareMap) {
-        INSTANCE = new ColorSensor(hardwareMap);
+    public void init(HardwareMap hardwareMap) {
+        rgbindicator = hardwareMap.get(Servo.class, "rgbled");
+        colorsensor = hardwareMap.get(RevColorSensorV3.class, "ColorSensor");
     }
 
     public String Getcolor() {

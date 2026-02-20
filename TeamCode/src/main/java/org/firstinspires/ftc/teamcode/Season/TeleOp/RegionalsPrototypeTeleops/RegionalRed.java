@@ -69,12 +69,12 @@ public class RegionalRed extends NextFTCOpMode {
     public void onStartButtonPressed() {
 
         // Initialize turret safely
-        TurretOdoAi.INSTANCE.init(hardwareMap);
+       TurretOdoAi.INSTANCE.init(hardwareMap);
        NewHood.INSTANCE.init(hardwareMap);
-        ColorSensor.init(hardwareMap);
+       ColorSensor.INSTANCE.init(hardwareMap);
 
         NewHood.INSTANCE.setAlliance("red");
-TurretOdoAi.INSTANCE.setAlliance("red");
+       TurretOdoAi.INSTANCE.setAlliance("red");
        TurretOdoAi.INSTANCE.AngleAdjust = 0;
         ColorSensor.artifactcounter = 0;
 
@@ -111,6 +111,13 @@ TurretOdoAi.INSTANCE.setAlliance("red");
                     TurretOdoAi.INSTANCE.turnLeft();
 
                 });
+
+        Gamepads.gamepad1().dpadRight()
+                .whenBecomesTrue(TurretOdoAi.INSTANCE::relocalize);
+
+        Gamepads.gamepad1().dpadUp()
+                .whenBecomesTrue(TurretOdoAi.INSTANCE::correctWithLimelight);
+
         // === POSE RESET ===
         Gamepads.gamepad1().dpadDown()
                 .whenBecomesTrue(() -> {
@@ -129,11 +136,12 @@ TurretOdoAi.INSTANCE.setAlliance("red");
                         TurretPID.INSTANCE.regionalsshooterdistance(d).schedule();
                         double actualRPM = TurretPID.INSTANCE.getActualVelocity();
                         NewHood.INSTANCE.adjustForDistanceAndVelocity(d, newvelo, actualRPM);
+                        TurretOdoAi.INSTANCE.correctWithLimelight();
                         TurretPID.shootRequested = true;
                         TurretPID.hasShot = false;
                     }
                 });
-Gamepads.gamepad1().dpadLeft()
+        Gamepads.gamepad1().dpadLeft()
                 .whenTrue(() ->{
                     Transfer.INSTANCE.repel();
                         });

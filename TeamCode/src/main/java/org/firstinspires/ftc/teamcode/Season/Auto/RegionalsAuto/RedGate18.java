@@ -175,7 +175,7 @@ public class RedGate18 extends NextFTCOpMode {
         switch (pathState) {
             case 0:
                 NewHood.INSTANCE.midopen();
-                ManualTurret.INSTANCE.setPosition(0.98);
+                ManualTurret.INSTANCE.setPosition(1);
                 secondshotforyouuuuu();
                 follower.followPath(scorePreload, true);
                 setPathState(1);

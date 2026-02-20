@@ -41,7 +41,7 @@ public class ColorSensor implements Subsystem {
     static Servo rgbindicator;
 
     // Private constructor — call init() from your OpMode
-    private ColorSensor(HardwareMap hardwareMap) {
+    public ColorSensor(HardwareMap hardwareMap) {
         rgbindicator = hardwareMap.get(Servo.class, "rgbled");
         colorsensor = hardwareMap.get(RevColorSensorV3.class, "ColorSensor");
     }
@@ -104,7 +104,7 @@ public class ColorSensor implements Subsystem {
                 asc += 5;
                 light();
                 IncountTimer.reset();
-            } else if (current_hue > 167) {
+            } else if (current_hue > 210) {
                 artifactcounter += 1;
                 light();
                 IncountTimer.reset();

@@ -11,6 +11,8 @@ public class ColorHueTester extends LinearOpMode {
     public float current_sat = 0;
     public float current_hue = 0;
 
+
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -19,6 +21,7 @@ public class ColorHueTester extends LinearOpMode {
 
         telemetry.addLine("Ready!");
         telemetry.update();
+        ColorSensor.artifactcounter = 0;
 
         waitForStart();
 

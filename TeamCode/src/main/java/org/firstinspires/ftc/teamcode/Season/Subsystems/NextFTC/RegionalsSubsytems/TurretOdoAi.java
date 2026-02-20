@@ -27,7 +27,7 @@ public class TurretOdoAi implements Subsystem {
     public static double xt = 130;
     public static double yt = 130;
 
-    double AngleOffset = -25;
+    double AngleOffset = -30;
 
 
     // ------------------ Turret ------------------
@@ -45,7 +45,7 @@ public class TurretOdoAi implements Subsystem {
     private double manualPosition = 0.25;
 
     // ========== PID CONSTANTS ==========
-    public static double kP = 40.00;
+    public static double kP = 10.00;
     public static double kI = 0.001;
     public static double kD = 0.04;
 
@@ -53,7 +53,7 @@ public class TurretOdoAi implements Subsystem {
 
     // Motion limits
     public static double MAX_VELOCITY = 1100;
-    public static double TOLERANCE = 0.0;
+    public static double TOLERANCE = 0.1;
 
     // ========== PID STATE VARIABLES ==========
     private double lastError = 0;
@@ -83,7 +83,7 @@ public class TurretOdoAi implements Subsystem {
             AngleOffset = -30 + 90;
         }
         if (alliance.equals("red")) {
-            AngleOffset = -30;
+            AngleOffset = -36;
             xt = 130;
             yt = 130;
         }
@@ -136,11 +136,6 @@ public class TurretOdoAi implements Subsystem {
     @Override
     public void periodic() {
         // === EARLY EXIT: Manual mode lightweight update ===
-        if (manualMode) {
-            updateManualModeTelemetry();
-            return;
-        }
-
         // === EARLY EXIT: Hardware check ===
         if (!hardwareInitialized) return;
 
@@ -238,37 +233,38 @@ public class TurretOdoAi implements Subsystem {
             lastError = error;
             lastUpdateTime = currentTime;
 
+
+
         } catch (Exception e) {
             // Silent catch to prevent crashes
         }
     }
 
     // === OPTIMIZED: Lightweight manual mode telemetry update ===
-    private void updateManualModeTelemetry() {
-        if (PedroComponent.follower() != null) {
-            Pose currentPose = PedroComponent.follower().getPose();
-            if (currentPose != null) {
-                x = currentPose.getX() - 72;
-                y = currentPose.getY() - 72;
-                heading = Math.toDegrees(currentPose.getHeading());
-                if (heading < 0) heading += 360;
+//    private void updateManualModeTelemetry() {
+//        if (PedroComponent.follower() != null) {
+//            Pose currentPose = PedroComponent.follower().getPose();
+//            if (currentPose != null) {
+//                x = currentPose.getX() - 72;
+//                y = currentPose.getY() - 72;
+//                heading = Math.toDegrees(currentPose.getHeading());
+//                if (heading < 0) heading += 360;
+//
+//                double dx = xt - x;
+//                double dy = yt - y;
+//                double fieldAngleDeg = Math.toDegrees(Math.atan2(dy, dx));
+//                if (fieldAngleDeg < 0) fieldAngleDeg += 360;
+//
+//                distanceToTarget = Math.sqrt(dx * dx + dy * dy);
+//                targetAngleDeg = fieldAngleDeg - heading + 180 + AngleOffset + AngleAdjust;
+//                targetAngleDeg = normalizeDegrees(targetAngleDeg);
+//
+//                if (hardwareInitialized && turretServo1 != null) {
+//                    currentServoPos = turretServo1.getPosition();
+//                    turretAngleDeg = servoToAngle(currentServoPos);
+//                }
 
-                double dx = xt - x;
-                double dy = yt - y;
-                double fieldAngleDeg = Math.toDegrees(Math.atan2(dy, dx));
-                if (fieldAngleDeg < 0) fieldAngleDeg += 360;
 
-                distanceToTarget = Math.sqrt(dx * dx + dy * dy);
-                targetAngleDeg = fieldAngleDeg - heading + 180 + AngleOffset + AngleAdjust;
-                targetAngleDeg = normalizeDegrees(targetAngleDeg);
-
-                if (hardwareInitialized && turretServo1 != null) {
-                    currentServoPos = turretServo1.getPosition();
-                    turretAngleDeg = servoToAngle(currentServoPos);
-                }
-            }
-        }
-    }
 
     // ------------------ Helper Functions ------------------
     public void turnRight() {
@@ -281,12 +277,12 @@ public class TurretOdoAi implements Subsystem {
 
     private double angleToServo(double angleDeg) {
         angleDeg = normalizeDegrees(angleDeg);
-        double pos = 1.0 - ((angleDeg + 180) / 360.0);
+        double pos = 1 - ((angleDeg + 180) / 340);
         return clamp(pos, SERVO_MIN, SERVO_MAX);
     }
 
     private double servoToAngle(double servoPos) {
-        double angle = 360.0 * (1.0 - servoPos) - 180.0;
+        double angle = 340 * (1.0 - servoPos) - 180.0;
         return normalizeDegrees(angle);
     }
 
@@ -295,11 +291,11 @@ public class TurretOdoAi implements Subsystem {
      */
     public double normalizeDegrees(double angle) {
         if (angle > 180) {
-            angle -= 360;
-            if (angle > 180) angle -= 360;
+            angle -= 340;
+            if (angle > 180) angle -= 340;
         } else if (angle < -180) {
-            angle += 360;
-            if (angle < -180) angle += 360;
+            angle += 340;
+            if (angle < -180) angle += 340;
         }
         return angle;
     }

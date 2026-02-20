@@ -138,10 +138,10 @@ Gamepads.gamepad1().dpadLeft()
 
                     if (intakeToggle) {
                         CompliantIntake.INSTANCE.on();
-                        Transfer.INSTANCE.nice();
+                        Transfer.INSTANCE.off();
                     } else {
                         CompliantIntake.INSTANCE.off();
-                        Transfer.INSTANCE.repel();
+                       Transfer.INSTANCE.off();
                     }
                 });
 

@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsyte
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Hood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.ManualTurret;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.NewHood;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.OuttakePID;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.RedLL;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RobotContext;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Transfer;
@@ -33,13 +34,13 @@ import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 import dev.nextftc.ftc.components.LoopTimeComponent;
 
-@Autonomous(name = "RedGate15", group = "Examples")
-public class RedGate15 extends NextFTCOpMode {
+@Autonomous(name = "RedGate18", group = "Examples")
+public class RedGate18 extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
 
-    public RedGate15() {
+    public RedGate18() {
         addComponents(
-                new SubsystemComponent(TurretPID.INSTANCE, NewHood.INSTANCE, CompliantIntake.INSTANCE,Transfer.INSTANCE,ManualTurret.INSTANCE),
+                new SubsystemComponent(NewHood.INSTANCE, CompliantIntake.INSTANCE,Transfer.INSTANCE,ManualTurret.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE, new LoopTimeComponent()
         );
@@ -308,10 +309,10 @@ public class RedGate15 extends NextFTCOpMode {
         RobotContext.lastPose = follower.getPose();
     }
     private void scheduleOuttake() {
-        TurretPID.INSTANCE.setShooterSpeed(1370).schedule();
+        OuttakePID.INSTANCE.setTargetVelocity(1400);
     }
     private void secondshotforyouuuuu() {
-        TurretPID.INSTANCE.setShooterSpeed(1400).schedule();
+        OuttakePID.INSTANCE.setTargetVelocity(1400);
     }
     private void Intake() {
         CompliantIntake.INSTANCE.on();
@@ -341,7 +342,7 @@ public class RedGate15 extends NextFTCOpMode {
         sleep(700);
         CompliantIntake.INSTANCE.off();
         Transfer.INSTANCE.off();
-        TurretPID.INSTANCE.resetShooter();
+        OuttakePID.INSTANCE.setTargetVelocity(0);
 
     }
 
@@ -353,7 +354,7 @@ public class RedGate15 extends NextFTCOpMode {
     @Override
     public void onUpdate() {
 
-
+        OuttakePID.INSTANCE.update();
 
 
         follower.update();
@@ -367,6 +368,8 @@ public class RedGate15 extends NextFTCOpMode {
 
     @Override
     public void onInit() {
+        OuttakePID.init(hardwareMap);
+
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();

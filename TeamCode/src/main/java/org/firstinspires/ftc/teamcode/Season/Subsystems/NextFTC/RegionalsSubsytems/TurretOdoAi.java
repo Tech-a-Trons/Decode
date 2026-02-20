@@ -24,10 +24,10 @@ public class TurretOdoAi implements Subsystem {
     public double AngleAdjust = 0;
 
     // ------------------ Target (Red Goal) ------------------
-    public static double xt = 121;
-    public static double yt = 121;
+    public static double xt = 130;
+    public static double yt = 130;
 
-    double AngleOffset =   -25-96;
+    double AngleOffset = -25;
 
 
     // ------------------ Turret ------------------
@@ -52,7 +52,7 @@ public class TurretOdoAi implements Subsystem {
     double currentServoPos = 0;
 
     // Motion limits
-    public static double MAX_VELOCITY = 800.0;
+    public static double MAX_VELOCITY = 1100;
     public static double TOLERANCE = 0.0;
 
     // ========== PID STATE VARIABLES ==========
@@ -63,20 +63,30 @@ public class TurretOdoAi implements Subsystem {
 
     // ========== RATE LIMITING ==========
     private ElapsedTime loopTimer = new ElapsedTime();
-    private static final double MIN_LOOP_TIME = 0.010;  // Reduced to 10ms for faster updates
+    private static final double MIN_LOOP_TIME = 0.010;
     private int skippedLoops = 0;
 
     // ========== IMPROVED WRAPPING FIX ==========
-    // Track the actual commanded position (before servo limits)
     private double commandedAngle = 0;
     private boolean commandedAngleInitialized = false;
 
     // ========== PERFORMANCE OPTIMIZATIONS ==========
-    private Pose cachedPose = null;  // Cache pose reference
+    private Pose cachedPose = null;
     private static final double DEG_TO_RAD = Math.PI / 180.0;
     private static final double RAD_TO_DEG = 180.0 / Math.PI;
 
     private TurretOdoAi() {
+    }
+
+    public void setAlliance(String alliance) {
+        if (alliance.equals("blue")) {
+            AngleOffset = -30 + 90;
+        }
+        if (alliance.equals("red")) {
+            AngleOffset = -30;
+            xt = 130;
+            yt = 130;
+        }
     }
 
     // ------------------ Initialization ------------------
@@ -90,8 +100,8 @@ public class TurretOdoAi implements Subsystem {
             turretServo2.setPosition(0.25);
             manualPosition = 0.25;
 
-            // Initialize commanded angle tracking
-            commandedAngle = servoToAngle(0.25);
+            // Initialize commanded angle tracking — normalize on init
+            commandedAngle = normalizeDegrees(servoToAngle(0.25));
             commandedAngleInitialized = true;
 
             // Initialize timers
@@ -107,7 +117,6 @@ public class TurretOdoAi implements Subsystem {
     }
 
     // ------------------ Manual Control ------------------
-
     public void incrementPosition(double delta) {
         if (!hardwareInitialized) return;
 
@@ -117,8 +126,8 @@ public class TurretOdoAi implements Subsystem {
             turretServo1.setPosition(manualPosition);
             turretServo2.setPosition(manualPosition);
 
-            // Update commanded angle when manually moving
-            commandedAngle = servoToAngle(manualPosition);
+            // Update commanded angle when manually moving — normalize to prevent drift
+            commandedAngle = normalizeDegrees(servoToAngle(manualPosition));
         }
     }
 
@@ -164,7 +173,7 @@ public class TurretOdoAi implements Subsystem {
             // === OPTIMIZED: Combined angle calculation ===
             double dx = xt - x;
             double dy = yt - y;
-            distanceToTarget = Math.sqrt(dx * dx + dy * dy);  // Slightly faster than hypot
+            distanceToTarget = Math.sqrt(dx * dx + dy * dy);
 
             double fieldAngleDeg = Math.toDegrees(Math.atan2(dy, dx));
             if (fieldAngleDeg < 0) fieldAngleDeg += 360;
@@ -176,9 +185,9 @@ public class TurretOdoAi implements Subsystem {
             currentServoPos = turretServo1.getPosition();
             turretAngleDeg = servoToAngle(currentServoPos);
 
-            // === Initialize commanded angle if needed ===
+            // === Initialize commanded angle if needed — always normalized ===
             if (!commandedAngleInitialized) {
-                commandedAngle = turretAngleDeg;
+                commandedAngle = normalizeDegrees(turretAngleDeg);
                 commandedAngleInitialized = true;
             }
 
@@ -213,10 +222,10 @@ public class TurretOdoAi implements Subsystem {
 
             double pidOutput = clamp(P_output + I_output + D_output, -MAX_VELOCITY, MAX_VELOCITY);
 
-            // === UPDATE POSITION ===
+            // === UPDATE POSITION — normalize commandedAngle to prevent unbounded drift ===
             commandedAngle += pidOutput * dt;
-            double normalizedAngle = normalizeDegrees(commandedAngle);
-            double newServoPos = angleToServo(normalizedAngle);
+            commandedAngle = normalizeDegrees(commandedAngle);  // FIX: keep commandedAngle bounded
+            double newServoPos = angleToServo(commandedAngle);  // no need for separate normalizedAngle
             newServoPos = clamp(newServoPos, SERVO_MIN, SERVO_MAX);
 
             // === OPTIMIZED: Single comparison, batch servo writes ===
@@ -269,6 +278,7 @@ public class TurretOdoAi implements Subsystem {
     public void turnLeft() {
         AngleAdjust -= 2;
     }
+
     private double angleToServo(double angleDeg) {
         angleDeg = normalizeDegrees(angleDeg);
         double pos = 1.0 - ((angleDeg + 180) / 360.0);
@@ -286,7 +296,7 @@ public class TurretOdoAi implements Subsystem {
     public double normalizeDegrees(double angle) {
         if (angle > 180) {
             angle -= 360;
-            if (angle > 180) angle -= 360;  // Handle extreme cases
+            if (angle > 180) angle -= 360;
         } else if (angle < -180) {
             angle += 360;
             if (angle < -180) angle += 360;

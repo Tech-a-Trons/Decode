@@ -7,10 +7,12 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.AutoOuttake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Hood;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.ManualTurret;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.NewHood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.RedLL;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RobotContext;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Transfer;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdoAi;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.Sensors.VoltageGet;
 
@@ -29,6 +31,7 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
+import dev.nextftc.ftc.components.LoopTimeComponent;
 
 @Autonomous(name = "RedGate15", group = "Examples")
 public class RedGate15 extends NextFTCOpMode {
@@ -36,9 +39,9 @@ public class RedGate15 extends NextFTCOpMode {
 
     public RedGate15() {
         addComponents(
-                new SubsystemComponent(AutoOuttake.INSTANCE, NewHood.INSTANCE, CompliantIntake.INSTANCE,Transfer.INSTANCE),
+                new SubsystemComponent(TurretPID.INSTANCE, NewHood.INSTANCE, CompliantIntake.INSTANCE,Transfer.INSTANCE,ManualTurret.INSTANCE),
                 BulkReadComponent.INSTANCE,
-                BindingsComponent.INSTANCE
+                BindingsComponent.INSTANCE, new LoopTimeComponent()
         );
     }
     private VoltageGet voltageGet;
@@ -171,7 +174,7 @@ public class RedGate15 extends NextFTCOpMode {
         switch (pathState) {
             case 0:
                 NewHood.INSTANCE.midopen();
-
+                ManualTurret.INSTANCE.setPosition(0.98);
                 secondshotforyouuuuu();
                 follower.followPath(scorePreload, true);
                 setPathState(1);
@@ -248,21 +251,51 @@ public class RedGate15 extends NextFTCOpMode {
 //
             case 9:
                 if (!follower.isBusy()) {
+                    follower.followPath(grabPrePickup2);
 
-                    follower.followPath(grabPickup3, true);
-                    scheduleOuttake();
-//                    shootThreeBalls();
                     setPathState(10);
                 }
                 break;
-//
             case 10:
                 if (!follower.isBusy()) {
-                 follower.followPath(scorePickup3);
+                    GateIntake();
+                    follower.followPath(scorePickup2);
+                    scheduleOuttake();
                     setPathState(11);
                 }
                 break;
+//
             case 11:
+                if (!follower.isBusy()) {
+                    shootThreeBalls();
+                    Intake();
+
+//                    shootThreeBalls();
+
+                    setPathState(12);
+                }
+                break;
+            case 12:
+            if (!follower.isBusy()) {
+                follower.followPath(grabPickup3, true);
+                scheduleOuttake();
+                Intake();
+
+//                    shootThreeBalls();
+//                    follower.followPath(grabPickup3, true);
+//                    scheduleOuttake();
+                setPathState(13);
+            }
+            break;
+            case 13:
+                if (!follower.isBusy()) {
+                    follower.followPath(scorePickup3);
+//                    shootThreeBalls();
+//                    follower.followPath(leave);
+                    setPathState(14);
+                }
+                break;
+            case 14:
                 if (!follower.isBusy()) {
                     shootThreeBalls();
                     follower.followPath(leave);
@@ -275,10 +308,10 @@ public class RedGate15 extends NextFTCOpMode {
         RobotContext.lastPose = follower.getPose();
     }
     private void scheduleOuttake() {
-        AutoOuttake.INSTANCE.setMidCloseShooterSpeed().schedule();
+        TurretPID.INSTANCE.setShooterSpeed(1370).schedule();
     }
     private void secondshotforyouuuuu() {
-        AutoOuttake.INSTANCE.shotforyou().schedule();
+        TurretPID.INSTANCE.setShooterSpeed(1400).schedule();
     }
     private void Intake() {
         CompliantIntake.INSTANCE.on();
@@ -290,13 +323,13 @@ public class RedGate15 extends NextFTCOpMode {
                 96 - pose.getX(),  // TARGET_X = 96 (your scorePose X)
                 96 - pose.getY()   // TARGET_Y = 96 (your scorePose Y)
         );
-        AutoOuttake.INSTANCE.setShooterFromDistance(distance).schedule();
+        TurretPID.INSTANCE.setShooterFromDistance(distance).schedule();
     }
 
     private void GateIntake() {
         CompliantIntake.INSTANCE.on();
         Transfer.INSTANCE.advance();
-        sleep(1000);
+        sleep(1200);
         Transfer.INSTANCE.off();
 
     }
@@ -305,10 +338,10 @@ public class RedGate15 extends NextFTCOpMode {
         sleep(500);
         CompliantIntake.INSTANCE.on();
         Transfer.INSTANCE.on();
-        sleep(1500);
+        sleep(700);
         CompliantIntake.INSTANCE.off();
         Transfer.INSTANCE.off();
-        AutoOuttake.INSTANCE.resetShooter();
+        TurretPID.INSTANCE.resetShooter();
 
     }
 
@@ -339,6 +372,9 @@ public class RedGate15 extends NextFTCOpMode {
         opmodeTimer.resetTimer();
         volt.init(hardwareMap);
         follower = Constants.createFollower(hardwareMap);
+        NewHood.INSTANCE.init(hardwareMap);
+        ManualTurret.INSTANCE.init(hardwareMap);
+        NewHood.INSTANCE.setAlliance("red");
         follower.setStartingPose(startPose);
         buildPaths();
     }

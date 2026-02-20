@@ -25,8 +25,8 @@ import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import com.pedropathing.geometry.Pose;
 
-@TeleOp(name = "Regionals Teleop FINAL")
-public class TeleOpProgram extends NextFTCOpMode {
+@TeleOp(name = "Blue Teleop")
+public class RegionalBlue extends NextFTCOpMode {
 
     private boolean intakeToggle = false;
     public double SlowModeMultiplier = 1.0;
@@ -41,7 +41,7 @@ public class TeleOpProgram extends NextFTCOpMode {
     private ElapsedTime telemetryTimer = new ElapsedTime();
     private static final double TELEMETRY_UPDATE_INTERVAL = 0.05; // 50ms = 20 Hz
 
-    public TeleOpProgram() {
+    public RegionalBlue() {
         addComponents(
                 new SubsystemComponent(
                         CompliantIntake.INSTANCE,
@@ -56,8 +56,8 @@ public class TeleOpProgram extends NextFTCOpMode {
         );
     }
 
-    private static final double TARGET_X = 121;
-    private static final double TARGET_Y = 121;
+    private static final double TARGET_X = 13;
+    private static final double TARGET_Y = 130;
     private Pose Middle = new Pose(72, 72, Math.toRadians(270));
     private final MotorEx frontLeftMotor = new MotorEx("fl").reversed();
     private final MotorEx frontRightMotor = new MotorEx("fr");
@@ -68,9 +68,10 @@ public class TeleOpProgram extends NextFTCOpMode {
     public void onStartButtonPressed() {
         // Initialize turret safely
         TurretOdoAi.INSTANCE.init(hardwareMap);
-       NewHood.INSTANCE.init(hardwareMap);
-
-       TurretOdoAi.INSTANCE.AngleAdjust = 0;
+        NewHood.INSTANCE.init(hardwareMap);
+        NewHood.INSTANCE.setAlliance("blue");
+        TurretOdoAi.INSTANCE.setAlliance("blue");
+        TurretOdoAi.INSTANCE.AngleAdjust = 0;
 
         // Set initial pose
         PedroComponent.follower().setPose(new Pose(72, 72, Math.toRadians(270)));

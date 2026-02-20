@@ -54,7 +54,16 @@ public class NewHood implements Subsystem {
     private double  lastVelAdjust  = 0.0;
 
     private NewHood() {}
-
+    public void setAlliance(String alliance) {
+        if (alliance.equals("blue")) {
+           GOAL_X = 13;
+           GOAL_Y = 130;
+        }
+        if (alliance.equals("red")) {
+            GOAL_X = 130;
+            GOAL_Y = 130;
+        }
+    }
     // ===== INIT =====
     public void init(HardwareMap hardwareMap) {
         hood = new ServoEx("hood");

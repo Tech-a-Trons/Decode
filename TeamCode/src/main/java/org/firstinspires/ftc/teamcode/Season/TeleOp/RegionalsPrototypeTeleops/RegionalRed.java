@@ -32,12 +32,6 @@ public class RegionalRed extends NextFTCOpMode {
     private boolean intakeToggle = false;
     public double SlowModeMultiplier = 1.0;
 
-    // Turret hybrid control
-    private ElapsedTime turretRightHoldTimer = new ElapsedTime();
-    private ElapsedTime turretLeftHoldTimer = new ElapsedTime();
-    private static final double HOLD_THRESHOLD = 0.3;
-    private static final double CONTINUOUS_SPEED = 0.8;
-
     // Telemetry throttling
     private ElapsedTime telemetryTimer = new ElapsedTime();
     private static final double TELEMETRY_UPDATE_INTERVAL = 0.05; // 50ms = 20 Hz
@@ -70,13 +64,13 @@ public class RegionalRed extends NextFTCOpMode {
     public void onStartButtonPressed() {
 
         // Initialize turret safely
-       TurretOdoAi.INSTANCE.init(hardwareMap);
-       NewHood.INSTANCE.init(hardwareMap);
-       ColorSensor.INSTANCE.init(hardwareMap);
+        TurretOdoAi.INSTANCE.init(hardwareMap);
+        NewHood.INSTANCE.init(hardwareMap);
+        ColorSensor.INSTANCE.init(hardwareMap);
 
         NewHood.INSTANCE.setAlliance("red");
-       TurretOdoAi.INSTANCE.setAlliance("red");
-       TurretOdoAi.INSTANCE.AngleAdjust = 0;
+        TurretOdoAi.INSTANCE.setAlliance("red");
+        TurretOdoAi.INSTANCE.AngleAdjust = 0;
         ColorSensor.artifactcounter = 0;
 
 
@@ -100,18 +94,6 @@ public class RegionalRed extends NextFTCOpMode {
 //                    gamepad1.rumble(200);
 //                });
 
-        // === MANUAL TURRET CONTROL - SINGLE TAP (Gamepad 2) ===
-        Gamepads.gamepad2().dpadRight()
-                .whenBecomesTrue(() -> {
-                    TurretOdoAi.INSTANCE.turnRight();
-
-                });
-
-        Gamepads.gamepad2().dpadLeft()
-                .whenBecomesTrue(() -> {
-                    TurretOdoAi.INSTANCE.turnLeft();
-
-                });
 
         Gamepads.gamepad1().dpadRight()
                 .whenBecomesTrue(TurretOdoAi.INSTANCE::relocalize);
@@ -144,9 +126,9 @@ public class RegionalRed extends NextFTCOpMode {
                     }
                 });
         Gamepads.gamepad1().dpadLeft()
-                .whenTrue(() ->{
+                .whenTrue(() -> {
                     Transfer.INSTANCE.repel();
-                        });
+                });
         // === INTAKE TOGGLE ===
         Gamepads.gamepad1().rightBumper()
                 .whenBecomesTrue(() -> {
@@ -190,8 +172,48 @@ public class RegionalRed extends NextFTCOpMode {
                     Transfer.INSTANCE.off();
                     intakeToggle = false;
                 });
-    }
 
+// === MANUAL TURRET CONTROL - SINGLE TAP (Gamepad 2) ===
+        Gamepads.gamepad2().dpadRight()
+                .whenBecomesTrue(() -> {
+                    TurretOdoAi.INSTANCE.turnRight();
+
+                });
+
+        Gamepads.gamepad2().dpadLeft()
+                .whenBecomesTrue(() -> {
+                    TurretOdoAi.INSTANCE.turnLeft();
+
+                });
+
+        // Artifact Count Updater (Gamepad 2)
+        Gamepads.gamepad2().rightBumper()
+                .whenBecomesTrue(() -> {
+                    ColorSensor.INSTANCE.artifactcounter += 1;
+
+                });
+
+        Gamepads.gamepad2().leftBumper()
+                .whenBecomesTrue(() -> {
+                    ColorSensor.INSTANCE.artifactcounter -= 1;
+
+                });
+        // Emergency Backup Drivetrain Stop
+
+        button(() -> gamepad2.right_trigger > 0.2)
+                .whenTrue(() -> {
+                    SlowModeMultiplier = 0;
+                    gamepad1.rumble(500);
+                })
+                .whenFalse(() -> {
+                    SlowModeMultiplier = 1;
+                });
+        Gamepads.gamepad2().b()
+                .whenBecomesTrue(() -> {
+                    TurretPID.shootRequested = false;
+                });
+
+    }
     @Override
     public void onUpdate() {
         NewHood.INSTANCE.adjustForCurrentDistance();
@@ -224,9 +246,9 @@ public class RegionalRed extends NextFTCOpMode {
         }
         // Drive control - runs every loop for responsive driving
         PedroComponent.follower().setTeleOpDrive(
-                -gamepad1.left_stick_y,
-                -gamepad1.left_stick_x ,
-                -gamepad1.right_stick_x ,
+                -gamepad1.left_stick_y * SlowModeMultiplier,
+                -gamepad1.left_stick_x * SlowModeMultiplier,
+                -gamepad1.right_stick_x * SlowModeMultiplier,
                 true
         );
         PedroComponent.follower().update();

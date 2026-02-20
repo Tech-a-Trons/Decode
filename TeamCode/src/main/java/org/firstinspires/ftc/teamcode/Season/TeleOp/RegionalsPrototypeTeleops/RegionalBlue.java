@@ -21,6 +21,7 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
+import dev.nextftc.ftc.components.LoopTimeComponent;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import com.pedropathing.geometry.Pose;
@@ -52,7 +53,7 @@ public class RegionalBlue extends NextFTCOpMode {
                 ),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE,
-                new PedroComponent(Constants::createFollower)
+                new PedroComponent(Constants::createFollower),  new LoopTimeComponent()
         );
     }
 

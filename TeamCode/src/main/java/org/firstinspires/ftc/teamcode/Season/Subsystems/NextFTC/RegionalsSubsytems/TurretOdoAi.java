@@ -115,7 +115,7 @@ public class TurretOdoAi implements Subsystem {
             turretServo1 = hardwareMap.get(Servo.class, "turretServo1");
             turretServo2 = hardwareMap.get(Servo.class, "turretServo2");
 
-            limelight = hardwareMap.get(Limelight3A.class, "Limelight");
+//            limelight = hardwareMap.get(Limelight3A.class, "Limelight");
 
             // Set safe initial position
             turretServo1.setPosition(0.25);
@@ -187,7 +187,7 @@ public class TurretOdoAi implements Subsystem {
             heading = Math.toDegrees(headingRad);
             if (heading < 0) heading += 360;
 
-           correctWithLimelight();
+          // correctWithLimelight();
 
             // === OPTIMIZED: Combined angle calculation ===
             double dx = xt - x;

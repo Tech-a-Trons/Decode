@@ -21,6 +21,7 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
+import dev.nextftc.ftc.components.LoopTimeComponent;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import com.pedropathing.geometry.Pose;
@@ -53,7 +54,7 @@ public class RegionalRed extends NextFTCOpMode {
                 ),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE,
-                new PedroComponent(Constants::createFollower)
+                new PedroComponent(Constants::createFollower), new LoopTimeComponent()
         );
     }
 
@@ -127,6 +128,7 @@ public class RegionalRed extends NextFTCOpMode {
         // === SHOOT ===
         button(() -> gamepad1.right_trigger > 0.05)
                 .whenTrue(() -> {
+                    ColorSensor.artifactcounter = 0;
                     Pose pose = PedroComponent.follower().getPose();
                     if (pose != null) {
                         double d = Math.hypot(
@@ -148,37 +150,28 @@ public class RegionalRed extends NextFTCOpMode {
         // === INTAKE TOGGLE ===
         Gamepads.gamepad1().rightBumper()
                 .whenBecomesTrue(() -> {
+
                     intakeToggle = !intakeToggle;
 
                     if (intakeToggle) {
-            ColorSensor.INSTANCE.IncountBalls();
-            if (ColorSensor.artifactcounter==0){
-            }
-            if (ColorSensor.artifactcounter == 1) {
-                Transfer.INSTANCE.advance();
-                // Reset toggle state
-            }
-            if (ColorSensor.artifactcounter == 2) {
-                Transfer.INSTANCE.advance();
-                // Reset toggle state
-            }
-            // Auto-stop when 3 balls are collected
-            if (ColorSensor.artifactcounter == 3) {
-                // Turn off intake and transfer
-                CompliantIntake.INSTANCE.off();
-                Transfer.INSTANCE.off();
 
-                // Reset toggle state
-                intakeToggle = false;
+                        CompliantIntake.INSTANCE.on();
+                        Transfer.INSTANCE.slight();
 
-                // Optional: Rumble controller to alert driver
-                gamepad1.rumble(500);
+                        // Reset ball counter when starting intake
 
-                // Reset ball counter
-                ColorSensor.artifactcounter = 0;
-            }
-        }
+
+                    } else {
+                        // Manually stopping intake
+                        CompliantIntake.INSTANCE.off();
+                        Transfer.INSTANCE.off();
+
+                        // Reset ball counter
+
+
+                    }
                 });
+
 
         // === MANUAL INTAKE ===
         Gamepads.gamepad1().leftTrigger()
@@ -202,16 +195,33 @@ public class RegionalRed extends NextFTCOpMode {
     @Override
     public void onUpdate() {
         NewHood.INSTANCE.adjustForCurrentDistance();
-        // === KILLSWITCH - Hold Y to stop robot ===
-//        double currentMultiplier = SlowModeMultiplier;
-//        if (gamepad2.y) {
-//            currentMultiplier = 0;
-//            frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//            frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//            backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//            backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//        }
+        if (intakeToggle) {
+            ColorSensor.INSTANCE.IncountBalls();
+            if (ColorSensor.artifactcounter==0){
+            }
+            if (ColorSensor.artifactcounter == 1) {
+                Transfer.INSTANCE.advance();
+                // Reset toggle state
+            }
+            if (ColorSensor.artifactcounter == 2) {
+                Transfer.INSTANCE.off();
+                // Reset toggle state
+            }
+            // Auto-stop when 3 balls are collected
+            if (ColorSensor.artifactcounter == 3) {
+                // Turn off intake and transfer
+                CompliantIntake.INSTANCE.off();
+                Transfer.INSTANCE.off();
 
+                // Reset toggle state
+                intakeToggle = false;
+
+                // Optional: Rumble controller to alert driver
+                gamepad1.rumble(250);
+
+
+            }
+        }
         // Drive control - runs every loop for responsive driving
         PedroComponent.follower().setTeleOpDrive(
                 -gamepad1.left_stick_y,
@@ -221,79 +231,19 @@ public class RegionalRed extends NextFTCOpMode {
         );
         PedroComponent.follower().update();
 
-        // === CONTINUOUS TURRET CONTROL (Hold Mode) ===
-//        if (TurretOdoAi.INSTANCE.isManualMode()) {
-//            // Right - continuous movement after holding
-//            if (gamepad2.dpad_right && turretRightHoldTimer.seconds() > HOLD_THRESHOLD) {
-//                TurretOdoAi.INSTANCE.continuousTurnRight(CONTINUOUS_SPEED);
-//            } else if (!gamepad2.dpad_right) {
-//                turretRightHoldTimer.reset();
-//            }
-//
-//            // Left - continuous movement after holding
-//            if (gamepad2.dpad_left && turretLeftHoldTimer.seconds() > HOLD_THRESHOLD) {
-//                TurretOdoAi.INSTANCE.continuousTurnLeft(CONTINUOUS_SPEED);
-//            } else if (!gamepad2.dpad_left) {
-//                turretLeftHoldTimer.reset();
-//            }
-//        }
+
 
         // Throttled telemetry - updates every 50ms
-        if (telemetryTimer.seconds() >= TELEMETRY_UPDATE_INTERVAL) {
-            updateTelemetry();
-            telemetryTimer.reset();
-        }
+
     }
 
     /**
      * Telemetry update - called every 50ms (20 Hz)
      */
-    private void updateTelemetry() {
-        // Get fresh pose each telemetry update
-        Pose pose = PedroComponent.follower().getPose();
-        if (pose == null) {
-            telemetry.addData("ERROR", "Pose is null");
-            telemetry.update();
-            return;
-        }
+
+
 
         // === POSE TELEMETRY ===
-        telemetry.addData("Status", "Running");
-        telemetry.addData("X", String.format("%.1f", pose.getX()));
-        telemetry.addData("Y", String.format("%.1f", pose.getY()));
-        telemetry.addData("Heading", String.format("%.1f°", (Math.toDegrees(pose.getHeading())+360) % 360));
-        telemetry.addData("Kp", TurretOdoAi.INSTANCE.kP);
 
-        // Show killswitch status
-        if (gamepad2.y) {
-            telemetry.addData("⚠ KILLSWITCH", "ACTIVE");
-        }
 
-        // === TURRET TELEMETRY ===
-        if (TurretOdoAi.INSTANCE.hardwareInitialized) {
-            telemetry.addData("Mode", TurretOdoAi.INSTANCE.isManualMode() ? "MANUAL" : "AUTO");
-
-            // Show hold status in manual mode
-            if (TurretOdoAi.INSTANCE.isManualMode()) {
-                if (gamepad2.dpad_right && turretRightHoldTimer.seconds() > HOLD_THRESHOLD) {
-                    telemetry.addData("Control", "SWEEP RIGHT >>>");
-                } else if (gamepad2.dpad_left && turretLeftHoldTimer.seconds() > HOLD_THRESHOLD) {
-                    telemetry.addData("Control", "<<< SWEEP LEFT");
-                }
-            }
-
-            telemetry.addData("Turret", String.format("%.1f° → %.1f°",
-                    TurretOdoAi.INSTANCE.getTurretAngleDeg(),
-                    TurretOdoAi.INSTANCE.getTargetAngleDeg()));
-            telemetry.addData("Error", String.format("%.1f°", TurretOdoAi.INSTANCE.getLastError()));
-
-            // Only show update rate if relevant
-            double loopTime = TurretOdoAi.INSTANCE.getLoopTime();
-            if (loopTime > 0.001) {
-                telemetry.addData("Rate", String.format("%.0f Hz", 1.0 / loopTime));
-            }
-        }
-
-        telemetry.update();
     }
-}

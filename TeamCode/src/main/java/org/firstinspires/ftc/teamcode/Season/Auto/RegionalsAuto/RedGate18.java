@@ -84,13 +84,13 @@ public class RedGate18 extends NextFTCOpMode {
                         new BezierCurve(
                                 new Pose(85.000, 85.000),
                                 new Pose(87.608, 55.112),
-                                new Pose(129.988, 57.193)
+                                new Pose(131, 57.193)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                .addPath(
           new BezierCurve(
-            new Pose(129.988, 57.193),
+            new Pose(131, 57.193),
             new Pose(94.007, 60.817),
             new Pose(85.000, 85.000)
           )
@@ -174,7 +174,7 @@ public class RedGate18 extends NextFTCOpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                NewHood.INSTANCE.midopen();
+                NewHood.INSTANCE.midclose();
                 ManualTurret.INSTANCE.setPosition(1);
                 secondshotforyouuuuu();
                 follower.followPath(scorePreload, true);
@@ -316,7 +316,7 @@ public class RedGate18 extends NextFTCOpMode {
     }
     private void Intake() {
         CompliantIntake.INSTANCE.on();
-        Transfer.INSTANCE.advance();
+        Transfer.INSTANCE.repel();
     }
     private void setShooterFromOdometry() {
         Pose pose = follower.getPose();
@@ -329,7 +329,7 @@ public class RedGate18 extends NextFTCOpMode {
 
     private void GateIntake() {
         CompliantIntake.INSTANCE.on();
-        Transfer.INSTANCE.advance();
+        Transfer.INSTANCE.repel();
         sleep(1200);
         Transfer.INSTANCE.off();
 

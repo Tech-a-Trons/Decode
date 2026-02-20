@@ -20,7 +20,8 @@ public class NewHood implements Subsystem {
     public static double CLOSE_THRESHOLD = 15.0;   // inches
     public static double FAR_THRESHOLD   = 90.0;   // inches - switches to velocity-based mode
 
-    public static double CLOSE_POS = 1.0;   // < 15"
+    public static double CLOSE_POS = 1.0;
+    // < 15"
     public static double MID_POS   = 0.5;   // 15-90"
 
     // ===== FAR SHOT VELOCITY-BASED SWITCHING (> 90") =====
@@ -41,7 +42,7 @@ public class NewHood implements Subsystem {
     // ===== OTHER PRESETS =====
     public static double BASE_POS    = MID_POS;
     public static double complete    = 0.1;
-    public static double midclosePos = 0.5;
+    public static double midclosePos = 0.6;
     public static double openPos     = 0.3;
 
     // ===== AUTO ADJUST =====

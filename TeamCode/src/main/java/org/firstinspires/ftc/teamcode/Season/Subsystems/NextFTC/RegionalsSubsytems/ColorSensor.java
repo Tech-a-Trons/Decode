@@ -98,13 +98,13 @@ public class ColorSensor implements Subsystem {
         current_hue = gethue();
         current_val = getval();
 
-        if (IncountTimer.milliseconds() > 800) {
+        if (IncountTimer.milliseconds() > 1000) {
             if (current_sat > 0.5) {
                 artifactcounter += 1;
                 asc += 5;
                 light();
                 IncountTimer.reset();
-            } else if (current_hue > 210) {
+            } else if (current_hue > 180) {
                 artifactcounter += 1;
                 light();
                 IncountTimer.reset();

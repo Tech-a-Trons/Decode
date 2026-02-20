@@ -48,7 +48,8 @@ public class RegionalRed extends NextFTCOpMode {
                         Transfer.INSTANCE,
                         TurretPID.INSTANCE,
                         TurretOdoAi.INSTANCE,
-                        NewHood.INSTANCE
+                        NewHood.INSTANCE,
+                        ColorSensor.INSTANCE
                 ),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE,
@@ -66,12 +67,17 @@ public class RegionalRed extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
+
         // Initialize turret safely
         TurretOdoAi.INSTANCE.init(hardwareMap);
        NewHood.INSTANCE.init(hardwareMap);
-       NewHood.INSTANCE.setAlliance("red");
+        ColorSensor.init(hardwareMap);
+
+        NewHood.INSTANCE.setAlliance("red");
 TurretOdoAi.INSTANCE.setAlliance("red");
        TurretOdoAi.INSTANCE.AngleAdjust = 0;
+        ColorSensor.artifactcounter = 0;
+
 
         // Set initial pose
         PedroComponent.follower().setPose(new Pose(72, 72, Math.toRadians(270)));
@@ -137,12 +143,33 @@ Gamepads.gamepad1().dpadLeft()
                     intakeToggle = !intakeToggle;
 
                     if (intakeToggle) {
-                        CompliantIntake.INSTANCE.on();
-                        Transfer.INSTANCE.off();
-                    } else {
-                        CompliantIntake.INSTANCE.off();
-                       Transfer.INSTANCE.off();
-                    }
+            ColorSensor.INSTANCE.IncountBalls();
+            if (ColorSensor.artifactcounter==0){
+            }
+            if (ColorSensor.artifactcounter == 1) {
+                Transfer.INSTANCE.advance();
+                // Reset toggle state
+            }
+            if (ColorSensor.artifactcounter == 2) {
+                Transfer.INSTANCE.advance();
+                // Reset toggle state
+            }
+            // Auto-stop when 3 balls are collected
+            if (ColorSensor.artifactcounter == 3) {
+                // Turn off intake and transfer
+                CompliantIntake.INSTANCE.off();
+                Transfer.INSTANCE.off();
+
+                // Reset toggle state
+                intakeToggle = false;
+
+                // Optional: Rumble controller to alert driver
+                gamepad1.rumble(500);
+
+                // Reset ball counter
+                ColorSensor.artifactcounter = 0;
+            }
+        }
                 });
 
         // === MANUAL INTAKE ===

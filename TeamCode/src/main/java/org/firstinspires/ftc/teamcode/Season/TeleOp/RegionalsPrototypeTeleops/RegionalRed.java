@@ -22,8 +22,9 @@ import dev.nextftc.ftc.components.LoopTimeComponent;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name = "Red Teleop")
+@TeleOp(name = "Red Teleop w/C")
 public class RegionalRed extends NextFTCOpMode {
 
     private boolean intakeToggle = false;
@@ -55,6 +56,8 @@ public class RegionalRed extends NextFTCOpMode {
     private final MotorEx frontRightMotor = new MotorEx("fr");
     private final MotorEx backLeftMotor = new MotorEx("bl").reversed();
     private final MotorEx backRightMotor = new MotorEx("br");
+
+    ElapsedTime InttakeStopper = new ElapsedTime();
 
     @Override
     public void onStartButtonPressed() {
@@ -205,6 +208,7 @@ public class RegionalRed extends NextFTCOpMode {
     @Override
     public void onUpdate() {
         NewHood.INSTANCE.adjustForCurrentDistance();
+        InttakeStopper.reset();
         if (intakeToggle) {
             ColorSensor.INSTANCE.IncountBalls();
             if (ColorSensor.artifactcounter == 0) {
@@ -219,14 +223,18 @@ public class RegionalRed extends NextFTCOpMode {
             }
             // Auto-stop when 3 balls are collected
             if (ColorSensor.artifactcounter == 3) {
+
                 // Turn off intake and transfer
-                CompliantIntake.INSTANCE.off();
-                Transfer.INSTANCE.off();
-                // Reset toggle state
-                intakeToggle = false;
-                // Optional: Rumble controller to alert driver
-                gamepad1.rumble(250);
-                gamepad2.rumble(250);
+                    CompliantIntake.INSTANCE.off();
+                    Transfer.INSTANCE.off();
+                    // Reset toggle state
+                    intakeToggle = false;
+
+
+                    // Optional: Rumble controller to alert driver
+                    gamepad1.rumble(250);
+                    gamepad2.rumble(250);
+
             }
         }
         // Drive control - runs every loop for responsive driving

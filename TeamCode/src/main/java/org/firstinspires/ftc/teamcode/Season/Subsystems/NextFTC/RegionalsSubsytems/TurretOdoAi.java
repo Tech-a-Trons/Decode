@@ -24,38 +24,34 @@ public class TurretOdoAi implements Subsystem {
     // TWO-PHASE TRACKING STATE MACHINE
     //
     //  SEEKING
-    //    • Odometry calculates the bearing from the robot to the target and
-    //      drives the turret to that rough angle FIRST.
-    //    • This is intentional: the odometry sweep is what puts the AprilTag
-    //      inside the Limelight's FOV so it can take over.
-    //    • Transitions to TRACKING once the Limelight has seen the correct
-    //      AprilTag for LOCK_CONFIRM_FRAMES consecutive frames.
+    //    • Odometry calculates the bearing to the target and drives the
+    //      turret to that rough angle first, putting the AprilTag inside
+    //      the Limelight's FOV.
+    //    • If the Limelight sees the tag before odometry finishes, it takes
+    //      over immediately — LOCK_CONFIRM_FRAMES = 1.
     //
     //  TRACKING
-    //    • The Limelight's tx (horizontal offset in degrees) has FINAL say.
-    //    • targetAngleDeg = commandedAngle + tx_corrected
-    //    • Tag temporarily lost?
-    //        → HOLD the last commanded angle (no odometry jerk).
-    //        → After LOCK_LOST_FRAMES consecutive misses → SEEKING.
+    //    • Limelight has COMPLETE control. tx is fed directly as the PID
+    //      error. The turret drives until tx == 0 (tag perfectly centred).
+    //    • Tag briefly lost → HOLD position (error = 0, no jerk).
+    //    • After LOCK_LOST_FRAMES consecutive misses → back to SEEKING.
     //
     // CAMERA MOUNT OFFSET:
     //   The Limelight is mounted on the LEFT side of the turret.
-    //   When tx = 0, the camera crosshair is centred on the tag, but the
-    //   turret centreline is offset by CAMERA_MOUNT_OFFSET_DEG to the right.
-    //   We subtract the mount offset from every tx reading so the turret
-    //   aligns its centreline — not just the camera crosshair — with the tag.
-    //   Tune CAMERA_MOUNT_OFFSET_DEG on the field (start at 0, increase until
-    //   the turret is visually centred on the goal when isLimelightLocked()).
+    //   CAMERA_MOUNT_OFFSET_DEG corrects for this so the turret centreline —
+    //   not just the camera crosshair — centres on the goal.
+    //   Tune on field: start at 0, increase until turret barrel is on goal.
     // =====================================================================
 
     private enum TurretState { SEEKING, TRACKING }
     private TurretState state = TurretState.SEEKING;
 
-    // Consecutive valid frames required to confirm lock (SEEKING → TRACKING).
-    public static int LOCK_CONFIRM_FRAMES = 3;
+    // 1 = take over on the very first valid detection.
+    // Increase only if false positives are a problem.
+    public static int LOCK_CONFIRM_FRAMES = 1;
 
-    // Consecutive missed frames before falling back (TRACKING → SEEKING).
-    // Intentionally high to survive brief occlusions.
+    // Frames of sustained tag loss before falling back to SEEKING.
+    // At ~10ms/loop, 10 = ~100ms hold before giving up.
     public static int LOCK_LOST_FRAMES = 10;
 
     private int consecutiveDetections = 0;
@@ -79,7 +75,7 @@ public class TurretOdoAi implements Subsystem {
     double AngleOffset = -30;
 
     // ------------------ Turret state ------------------
-    private double targetAngleDeg   = 0;
+    private double targetAngleDeg   = 0;   // only meaningful during SEEKING
     private double turretAngleDeg   = 0;
     private double distanceToTarget = 0;
     private double currentServoPos  = 0;
@@ -93,8 +89,8 @@ public class TurretOdoAi implements Subsystem {
 
     // =====================================================================
     // PID CONSTANTS
-    //   SEEKING  → kP_seek  (aggressive, sweeps to rough odometry angle)
-    //   TRACKING → kP_track (gentle,     fine-centres on the tag)
+    //   SEEKING  → kP_seek  (aggressive — sweeps to rough angle quickly)
+    //   TRACKING → kP_track (gentle    — fine-centres without overshoot)
     // =====================================================================
     public static double kP_seek  = 1.0;
     public static double kP_track = 0.5;
@@ -122,19 +118,17 @@ public class TurretOdoAi implements Subsystem {
     // =====================================================================
     public static int TARGET_TAG_ID = -1;
 
-    // Physical camera mount offset (LEFT-side mount).
-    // Positive = camera is rotated left of the turret centreline.
-    // Tune on field: with isLimelightLocked() true, increment this until
-    // the turret centres on the goal, not just the camera crosshair.
+    // Physical camera mount offset (left-side mount).
+    // Tune on field: start at 0, adjust until turret barrel centres on goal.
     public static double CAMERA_MOUNT_OFFSET_DEG = 5.0;
 
-    // Fine crosshair bias trim (small residual after mount offset is set).
+    // Fine crosshair bias trim — small residual after mount offset is set.
     public static double TX_OFFSET = 0.0;
 
-    // Set to -1.0 if the turret moves the wrong direction when tracking.
+    // Flip to -1.0 if the turret moves the wrong direction when tracking.
     public static double TX_SIGN_FLIP = 1.0;
 
-    // Dead-band in TRACKING mode — don't move for tiny residual tx.
+    // Dead-band in TRACKING — ignore tiny residual tx to prevent jitter.
     public static double TX_TOLERANCE_DEG = 0.5;
 
     // Limelight heading update rate limiting
@@ -217,9 +211,9 @@ public class TurretOdoAi implements Subsystem {
 
         try {
             // ================================================================
-            // STEP 1 — Odometry pose update
-            //   Always runs — heading is needed even in TRACKING mode,
-            //   and the bearing calculation runs whenever we are SEEKING.
+            // STEP 1 — Odometry pose
+            //   Always runs — heading is needed in both states, and bearing
+            //   calculation runs whenever we are SEEKING.
             // ================================================================
             cachedPose = PedroComponent.follower().getPose();
             if (cachedPose == null) return;
@@ -253,7 +247,6 @@ public class TurretOdoAi implements Subsystem {
                             }
                         }
                     }
-                    // Opportunistically improve odometry whenever the tag is visible
                     if (targetFiducial != null) tryPoseCorrection(result);
                 }
             }
@@ -265,34 +258,31 @@ public class TurretOdoAi implements Subsystem {
                 consecutiveDetections++;
                 consecutiveMisses = 0;
 
-                // SEEKING → TRACKING
-                // Odometry has already swept the turret close enough for the
-                // camera to see the tag. Now lock on with the Limelight.
+                // SEEKING → TRACKING: Limelight sees the tag — take over now.
+                // Works whether odometry finished its sweep or not.
                 if (state == TurretState.SEEKING && consecutiveDetections >= LOCK_CONFIRM_FRAMES) {
-                    state = TurretState.TRACKING;
-                    integral  = 0;   // clear seeking wind-up
+                    state     = TurretState.TRACKING;
+                    integral  = 0;   // clear seeking wind-up before fine tracking
                     lastError = 0;
                 }
             } else {
                 consecutiveMisses++;
                 consecutiveDetections = 0;
 
-                // TRACKING → SEEKING (only after sustained loss)
+                // TRACKING → SEEKING: only after sustained loss, not a single dropout.
                 if (state == TurretState.TRACKING && consecutiveMisses >= LOCK_LOST_FRAMES) {
-                    state = TurretState.SEEKING;
+                    state     = TurretState.SEEKING;
                     integral  = 0;
                     lastError = 0;
                 }
-                // While consecutiveMisses < LOCK_LOST_FRAMES we remain in
-                // TRACKING and will HOLD position (Case C below).
             }
 
             // ================================================================
-            // STEP 5 — Compute targetAngleDeg
+            // STEP 5 — Compute PID error
             //
-            //  Case A  SEEKING               → odometry bearing
-            //  Case B  TRACKING + tag seen   → Limelight tx  (final say)
-            //  Case C  TRACKING + tag absent → hold last position
+            //  SEEKING               → odometry bearing error
+            //  TRACKING + tag seen   → tx directly (Limelight has final say)
+            //  TRACKING + tag absent → 0 (hold position, no jerk)
             // ================================================================
             currentServoPos = turretServo1.getPosition();
             turretAngleDeg  = servoToAngle(currentServoPos);
@@ -302,12 +292,10 @@ public class TurretOdoAi implements Subsystem {
                 commandedAngleInitialized = true;
             }
 
+            double error;
+
             if (state == TurretState.SEEKING) {
-                // ── Case A: ODOMETRY ─────────────────────────────────────
-                // Compute the field-relative bearing to (xt, yt), convert to
-                // a turret-relative angle, and drive toward it.
-                // The purpose is to put the tag inside the camera's FOV so
-                // the Limelight can confirm lock and take over.
+                // ── ODOMETRY: sweep to rough bearing so the tag enters FOV ──
                 double dx = xt - x;
                 double dy = yt - y;
                 distanceToTarget = Math.sqrt(dx * dx + dy * dy);
@@ -318,45 +306,31 @@ public class TurretOdoAi implements Subsystem {
                 targetAngleDeg = normalizeDegrees(
                         fieldAngleDeg - heading + 180 + AngleOffset + AngleAdjust + ManualAngleAdjust);
 
+                error = targetAngleDeg - commandedAngle;
+                if (error >  180) error -= 360;
+                if (error < -180) error += 360;
+
             } else if (targetFiducial != null) {
-                // ── Case B: LIMELIGHT — final say ────────────────────────
-                // tx = degrees the tag is left/right of the camera crosshair.
-                //
-                // Camera mount correction:
-                //   Camera is on the LEFT of the turret centreline.
-                //   CAMERA_MOUNT_OFFSET_DEG is subtracted so the turret aligns
-                //   its centreline with the tag, not just the camera crosshair.
-                //   Example: if the camera is 5° left of centre and tx = 0,
-                //   the tag appears centred in the camera but the turret is
-                //   actually 5° right of the goal — subtracting 5° corrects this.
-                //
-                // We apply tx to commandedAngle (not the physical servo read-back)
-                // to avoid lag-induced oscillation while the servo is catching up.
-                double tx = (targetFiducial.getTargetXDegrees() + TX_OFFSET)
-                        - CAMERA_MOUNT_OFFSET_DEG;
-                targetAngleDeg = normalizeDegrees(
-                        commandedAngle + TX_SIGN_FLIP * tx + AngleAdjust + ManualAngleAdjust);
+                // ── LIMELIGHT TAKES OVER COMPLETELY ──────────────────────────
+                // tx is the angular distance the tag is off-centre in the camera.
+                // Feeding it directly as the PID error means the turret drives
+                // until tx == 0 — perfectly centred on the goal.
+                // CAMERA_MOUNT_OFFSET_DEG shifts the equilibrium so the turret
+                // barrel (not just the camera crosshair) centres on the goal.
+                error = TX_SIGN_FLIP * (targetFiducial.getTargetXDegrees()
+                        + TX_OFFSET - CAMERA_MOUNT_OFFSET_DEG);
 
             } else {
-                // ── Case C: HOLD ─────────────────────────────────────────
-                // Still in TRACKING but tag briefly absent.
-                // Zero the error so the PID holds the current position.
-                // The turret won't jerk to an odometry estimate on a dropout.
-                targetAngleDeg = commandedAngle;
+                // ── HOLD: tag briefly absent — stay put until LOCK_LOST_FRAMES ─
+                error = 0;
             }
 
             // ================================================================
-            // STEP 6 — PID drive toward targetAngleDeg
+            // STEP 6 — PID drive
             // ================================================================
-            double error = targetAngleDeg - commandedAngle;
-            if (error >  180) error -= 360;
-            if (error < -180) error += 360;
-
-            // Dead-band. Save lastError even on early return to prevent a
-            // derivative spike on the next active frame.
             double tolerance = (state == TurretState.TRACKING) ? TX_TOLERANCE_DEG : 0.5;
             if (Math.abs(error) < tolerance) {
-                lastError      = error;
+                lastError      = error;   // must save — prevents derivative spike on exit
                 lastUpdateTime = currentTime;
                 return;
             }

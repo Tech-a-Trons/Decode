@@ -123,7 +123,7 @@ public class RegionalRed extends NextFTCOpMode {
                     if (intakeToggle) {
 
                         CompliantIntake.INSTANCE.on();
-                        Transfer.INSTANCE.off();
+                        Transfer.INSTANCE.repel();
 
                         // Reset ball counter when starting intake
 

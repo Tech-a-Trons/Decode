@@ -11,20 +11,16 @@ public class LiftServo0 extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        Servo liftservo1 = null;
-        Servo liftservo2 = null;
+        Servo hood = null;
 
-        liftservo1 = hardwareMap.get(Servo.class, "lift1");
+        hood = hardwareMap.get(Servo.class, "hood");
 
-        liftservo2 = hardwareMap.get(Servo.class, "lift2");
 
         waitForStart();
 
         while (opModeIsActive()) {
-            liftservo1.setPosition(0);
-            liftservo2.setPosition(0);
-            telemetry.addData("Servo1", liftservo1.getPosition());
-            telemetry.addData("Servo2", liftservo2.getPosition());
+            hood.setPosition(0);
+
 
         }
     }

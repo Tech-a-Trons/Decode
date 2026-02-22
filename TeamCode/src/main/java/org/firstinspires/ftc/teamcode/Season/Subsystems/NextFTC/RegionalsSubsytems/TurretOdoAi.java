@@ -31,10 +31,17 @@ public class TurretOdoAi implements Subsystem {
     //      over immediately — LOCK_CONFIRM_FRAMES = 1.
     //
     //  TRACKING
-    //    • Limelight has COMPLETE control. tx is fed directly as the PID
-    //      error. The turret drives until tx == 0 (tag perfectly centred).
+    //    • Limelight has COMPLETE control. The horizontal offset is fed
+    //      directly as the PID error. Turret drives until offset == 0.
     //    • Tag briefly lost → HOLD position (error = 0, no jerk).
     //    • After LOCK_LOST_FRAMES consecutive misses → back to SEEKING.
+    //
+    // LIMELIGHT ORIENTATION NOTE:
+    //   The Limelight is mounted VERTICALLY (rotated 90° from horizontal).
+    //   When rotated 90°, the physical left/right of the scene is reported
+    //   as ty (getTargetYDegrees), NOT tx. So we read ty for turret tracking.
+    //   If you ever rotate the camera back to horizontal, swap back to
+    //   getTargetXDegrees().
     //
     // CAMERA MOUNT OFFSET:
     //   The Limelight is mounted on the LEFT side of the turret.
@@ -128,7 +135,7 @@ public class TurretOdoAi implements Subsystem {
     // Flip to -1.0 if the turret moves the wrong direction when tracking.
     public static double TX_SIGN_FLIP = 1.0;
 
-    // Dead-band in TRACKING — ignore tiny residual tx to prevent jitter.
+    // Dead-band in TRACKING — ignore tiny residual offset to prevent jitter.
     public static double TX_TOLERANCE_DEG = 0.5;
 
     // Limelight heading update rate limiting
@@ -281,7 +288,8 @@ public class TurretOdoAi implements Subsystem {
             // STEP 5 — Compute PID error
             //
             //  SEEKING               → odometry bearing error
-            //  TRACKING + tag seen   → tx directly (Limelight has final say)
+            //  TRACKING + tag seen   → horizontal offset directly (Limelight
+            //                          has final say)
             //  TRACKING + tag absent → 0 (hold position, no jerk)
             // ================================================================
             currentServoPos = turretServo1.getPosition();
@@ -312,13 +320,14 @@ public class TurretOdoAi implements Subsystem {
 
             } else if (targetFiducial != null) {
                 // ── LIMELIGHT TAKES OVER COMPLETELY ──────────────────────────
-                // tx is the angular distance the tag is off-centre in the camera.
-                // Feeding it directly as the PID error means the turret drives
-                // until tx == 0 — perfectly centred on the goal.
+                // Camera is mounted VERTICALLY (rotated 90°).
+                // When rotated 90°, the horizontal scene offset is reported as
+                // ty (getTargetYDegrees), not tx. We use ty so the turret tracks
+                // left/right correctly with the rotated camera.
                 // CAMERA_MOUNT_OFFSET_DEG shifts the equilibrium so the turret
                 // barrel (not just the camera crosshair) centres on the goal.
-                error = TX_SIGN_FLIP * (targetFiducial.getTargetXDegrees()
-                        + TX_OFFSET - CAMERA_MOUNT_OFFSET_DEG);
+                double horizontalOffset = targetFiducial.getTargetYDegrees();
+                error = TX_SIGN_FLIP * (horizontalOffset + TX_OFFSET - CAMERA_MOUNT_OFFSET_DEG);
 
             } else {
                 // ── HOLD: tag briefly absent — stay put until LOCK_LOST_FRAMES ─

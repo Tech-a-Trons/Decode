@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.RegionalsPrototypeTeleops;
 
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID.newvelo;
+import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID.turret;
 import static dev.nextftc.bindings.Bindings.button;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -39,7 +40,7 @@ public class RegionalRed extends NextFTCOpMode {
                         CompliantIntake.INSTANCE,
                         Transfer.INSTANCE,
                         TurretPID.INSTANCE,
-                        TurretOdoAi.INSTANCE,
+                        //TurretOdoAi.INSTANCE,
                         NewHood.INSTANCE,
                         ColorSensor.INSTANCE
                 ),
@@ -102,7 +103,7 @@ public class RegionalRed extends NextFTCOpMode {
                                 TARGET_X - pose.getX(),
                                 TARGET_Y - pose.getY()
                         );
-                        TurretOdoAi.INSTANCE.relocalize();
+                        //TurretOdoAi.INSTANCE.relocalize();
                         TurretPID.INSTANCE.regionalsshooterdistance(d).schedule();
                         double actualRPM = TurretPID.INSTANCE.getActualVelocity();
                         NewHood.INSTANCE.adjustForDistanceAndVelocity(d, newvelo, actualRPM);
@@ -161,13 +162,13 @@ public class RegionalRed extends NextFTCOpMode {
 // === MANUAL TURRET CONTROL - SINGLE TAP (Gamepad 2) ===
         Gamepads.gamepad2().dpadRight()
                 .whenBecomesTrue(() -> {
-                    TurretOdoAi.INSTANCE.turnRight();
+                    //TurretOdoAi.INSTANCE.turnRight();
 
                 });
 
         Gamepads.gamepad2().dpadLeft()
                 .whenBecomesTrue(() -> {
-                    TurretOdoAi.INSTANCE.turnLeft();
+                    //TurretOdoAi.INSTANCE.turnLeft();
 
                 });
 
@@ -239,4 +240,9 @@ public class RegionalRed extends NextFTCOpMode {
         );
         PedroComponent.follower().update();
     }
+    public void onStop(){
+        Transfer.INSTANCE.off();
+        CompliantIntake.INSTANCE.off();
+        TurretPID.INSTANCE.setShooterSpeed(0);
     }
+}

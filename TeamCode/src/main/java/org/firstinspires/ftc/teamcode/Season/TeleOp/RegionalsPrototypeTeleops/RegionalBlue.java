@@ -225,7 +225,7 @@ public class RegionalBlue extends NextFTCOpMode {
         telemetry.addData("X", String.format("%.1f", pose.getX()));
         telemetry.addData("Y", String.format("%.1f", pose.getY()));
         telemetry.addData("Heading", String.format("%.1f°", (Math.toDegrees(pose.getHeading())+360) % 360));
-        telemetry.addData("Kp", TurretOdoAi.INSTANCE.kP);
+       // telemetry.addData("Kp", TurretOdoAi.INSTANCE.kP);
 
         // Show killswitch status
         if (gamepad2.y) {

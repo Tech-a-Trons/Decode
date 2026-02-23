@@ -20,79 +20,133 @@ public class TurretOdoAi implements Subsystem {
 
     public static final TurretOdoAi INSTANCE = new TurretOdoAi();
 
+    // =====================================================================
+    // TWO-PHASE TRACKING STATE MACHINE
+    //
+    //  SEEKING
+    //    • Odometry calculates the bearing to the target and drives the
+    //      turret to that rough angle first, putting the AprilTag inside
+    //      the Limelight's FOV.
+    //    • If the Limelight sees the tag before odometry finishes, it takes
+    //      over immediately — LOCK_CONFIRM_FRAMES = 1.
+    //
+    //  TRACKING
+    //    • Limelight has COMPLETE control. The horizontal offset is fed
+    //      directly as the PID error. Turret drives until offset == 0.
+    //    • Tag briefly lost → HOLD position (error = 0, no jerk).
+    //    • After LOCK_LOST_FRAMES consecutive misses → back to SEEKING.
+    //
+    // LIMELIGHT ORIENTATION NOTE:
+    //   The Limelight is mounted VERTICALLY (rotated 90° from horizontal).
+    //   When rotated 90°, the physical left/right of the scene is reported
+    //   as ty (getTargetYDegrees), NOT tx. So we read ty for turret tracking.
+    //   If you ever rotate the camera back to horizontal, swap back to
+    //   getTargetXDegrees().
+    //
+    // CAMERA MOUNT OFFSET:
+    //   The Limelight is mounted on the LEFT side of the turret.
+    //   CAMERA_MOUNT_OFFSET_DEG corrects for this so the turret centreline —
+    //   not just the camera crosshair — centres on the goal.
+    //   Tune on field: start at 0, increase until turret barrel is on goal.
+    // =====================================================================
+
+    private enum TurretState { SEEKING, TRACKING }
+    private TurretState state = TurretState.SEEKING;
+
+    // 1 = take over on the very first valid detection.
+    // Increase only if false positives are a problem.
+    public static int LOCK_CONFIRM_FRAMES = 1;
+
+    // Frames of sustained tag loss before falling back to SEEKING.
+    // At ~10ms/loop, 10 = ~100ms hold before giving up.
+    public static int LOCK_LOST_FRAMES = 10;
+
+    private int consecutiveDetections = 0;
+    private int consecutiveMisses     = 0;
+
     // ------------------ Hardware ------------------
-    private Servo turretServo1;
-    private Servo turretServo2;
+    private Servo       turretServo1;
+    private Servo       turretServo2;
     private Limelight3A limelight;
 
-    // ------------------ Robot Pose (odometry fallback) ------------------
-    private double x = 0;
-    private double y = 0;
+    // ------------------ Robot Pose (from odometry) ------------------
+    private double x       = 0;
+    private double y       = 0;
     private double heading = 0;
 
     public double ManualAngleAdjust = 0;
 
-    // ------------------ Target ------------------
+    // ------------------ Target coordinates (odometry fallback) ------------------
     public static double xt = 130;
     public static double yt = 130;
     double AngleOffset = -30;
 
     // ------------------ Turret state ------------------
-    private double targetAngleDeg = 0;
-    private double turretAngleDeg = 0;
+    private double targetAngleDeg   = 0;   // only meaningful during SEEKING
+    private double turretAngleDeg   = 0;
     private double distanceToTarget = 0;
-    private double currentServoPos = 0;
+    private double currentServoPos  = 0;
 
-    // Servo safety
     public static double SERVO_MIN = 0.0;
     public static double SERVO_MAX = 1.0;
     public boolean hardwareInitialized = false;
 
-    // Manual mode
-    public boolean manualMode = false;
+    public boolean manualMode     = false;
     private double manualPosition = 0.25;
 
-    // ========== PID CONSTANTS ==========
-    public static double kP = 10.00;
-    public static double kI = 0.001;
-    public static double kD = 0.04;
+    // =====================================================================
+    // PID CONSTANTS
+    //   SEEKING  → kP_seek  (aggressive — sweeps to rough angle quickly)
+    //   TRACKING → kP_track (gentle    — fine-centres without overshoot)
+    // =====================================================================
+    public static double kP_seek  = 1.0;
+    public static double kP_track = 0.5;
+    public static double kI           = 0.001;
+    public static double kD           = 0.04;
     public static double MAX_VELOCITY = 1100;
-    public static double TOLERANCE = 0.1;
+    public static double TOLERANCE    = 0.1;
     public double AngleAdjust = 0;
 
-    // ========== PID STATE ==========
-    private double lastError = 0;
-    private double integral = 0;
-    private double lastUpdateTime = 0;
-    private boolean firstRun = true;
-    private double commandedAngle = 0;
+    // PID state
+    private double  lastError                 = 0;
+    private double  integral                  = 0;
+    private double  lastUpdateTime            = 0;
+    private boolean firstRun                  = true;
+    private double  commandedAngle            = 0;
     private boolean commandedAngleInitialized = false;
 
-    // ========== RATE LIMITING ==========
-    private ElapsedTime loopTimer = new ElapsedTime();
+    // Rate limiting
+    private ElapsedTime loopTimer             = new ElapsedTime();
     private static final double MIN_LOOP_TIME = 0.010;
     private int skippedLoops = 0;
 
-    // ========== LIMELIGHT ==========
-    // Limelight is PRIMARY. Odometry is fallback only.
-    public static int    TARGET_TAG_ID     = -1;   // set per alliance in setAlliance()
-    public static double TX_OFFSET         = -1.0; // tune: negative = shift left
-    public static double TX_SIGN_FLIP      = 1.0;  // flip to -1.0 if turret corrects wrong way
-    public static double TX_TOLERANCE_DEG  = 0.5;  // dead-band — inside this, hold position
+    // =====================================================================
+    // LIMELIGHT CONFIG
+    // =====================================================================
+    public static int TARGET_TAG_ID = -1;
 
-    // Whether Limelight currently has a valid lock on the target tag
-    private boolean limelightLocked = false;
+    // Physical camera mount offset (left-side mount).
+    // Tune on field: start at 0, adjust until turret barrel centres on goal.
+    public static double CAMERA_MOUNT_OFFSET_DEG = 5.0;
 
-    // Limelight orientation update rate limiting (separate from main loop)
-    private ElapsedTime llOrientationTimer = new ElapsedTime();
-    private static final double LL_ORIENTATION_INTERVAL = 0.1; // update heading 10x/sec max
+    // Fine crosshair bias trim — small residual after mount offset is set.
+    public static double TX_OFFSET = 0.0;
 
-    // ========== DIAGNOSTICS ==========
-    private double lastPoseCorrectionMag = 0;
+    // Flip to -1.0 if the turret moves the wrong direction when tracking.
+    public static double TX_SIGN_FLIP = 1.0;
+
+    // Dead-band in TRACKING — ignore tiny residual offset to prevent jitter.
+    public static double TX_TOLERANCE_DEG = 0.5;
+
+    // Limelight heading update rate limiting
+    private ElapsedTime llOrientationTimer              = new ElapsedTime();
+    private static final double LL_ORIENTATION_INTERVAL = 0.1;
+
+    // Diagnostics
+    private double lastPoseCorrectionMag    = 0;
     private int    limelightCorrectionCount = 0;
     public static double MAX_POSE_CORRECTION_INCHES = 12.0;
 
-    // ========== PERFORMANCE ==========
     private Pose cachedPose = null;
 
     private TurretOdoAi() {}
@@ -100,11 +154,11 @@ public class TurretOdoAi implements Subsystem {
     // ------------------ Alliance Setup ------------------
     public void setAlliance(String alliance) {
         if (alliance.equals("blue")) {
-            AngleOffset = -30 + 90;
+            AngleOffset   = -30 + 90;
             TARGET_TAG_ID = 20;
             if (limelight != null) limelight.pipelineSwitch(5);
         } else if (alliance.equals("red")) {
-            AngleOffset = -36;
+            AngleOffset   = -36;
             xt = 130;
             yt = 130;
             TARGET_TAG_ID = 24;
@@ -123,13 +177,17 @@ public class TurretOdoAi implements Subsystem {
             turretServo2.setPosition(0.25);
             manualPosition = 0.25;
 
-            commandedAngle = normalizeDegrees(servoToAngle(0.25));
+            commandedAngle            = normalizeDegrees(servoToAngle(0.25));
             commandedAngleInitialized = true;
 
             loopTimer.reset();
             llOrientationTimer.reset();
             lastUpdateTime = loopTimer.seconds();
-            firstRun = true;
+            firstRun       = true;
+
+            state                 = TurretState.SEEKING;
+            consecutiveDetections = 0;
+            consecutiveMisses     = 0;
 
             hardwareInitialized = true;
         } catch (Exception e) {
@@ -153,68 +211,99 @@ public class TurretOdoAi implements Subsystem {
     public void periodic() {
         if (!hardwareInitialized) return;
 
-        double currentTime = loopTimer.seconds();
+        double currentTime         = loopTimer.seconds();
         double timeSinceLastUpdate = currentTime - lastUpdateTime;
-        if (timeSinceLastUpdate < MIN_LOOP_TIME) {
-            skippedLoops++;
-            return;
-        }
-
+        if (timeSinceLastUpdate < MIN_LOOP_TIME) { skippedLoops++; return; }
         if (PedroComponent.follower() == null) return;
 
         try {
-            // === 1. Update odometry pose (always needed for heading + fallback) ===
+            // ================================================================
+            // STEP 1 — Odometry pose
+            //   Always runs — heading is needed in both states, and bearing
+            //   calculation runs whenever we are SEEKING.
+            // ================================================================
             cachedPose = PedroComponent.follower().getPose();
             if (cachedPose == null) return;
 
-            x = cachedPose.getX() - 72;
-            y = cachedPose.getY() - 72;
+            x       = cachedPose.getX() - 72;
+            y       = cachedPose.getY() - 72;
             heading = Math.toDegrees(cachedPose.getHeading());
             if (heading < 0) heading += 360;
 
-            // === 2. Feed heading to Limelight at a safe rate (no pipelineSwitch here!) ===
+            // ================================================================
+            // STEP 2 — Feed heading to Limelight (rate-limited)
+            // ================================================================
             if (limelight != null && llOrientationTimer.seconds() > LL_ORIENTATION_INTERVAL) {
                 limelight.updateRobotOrientation(heading);
                 llOrientationTimer.reset();
             }
 
-            // === 3. Try Limelight FIRST — it is the primary source of targetAngleDeg ===
-            limelightLocked = false;
+            // ================================================================
+            // STEP 3 — Poll Limelight for the target AprilTag
+            // ================================================================
+            LLResultTypes.FiducialResult targetFiducial = null;
             if (limelight != null) {
                 LLResult result = limelight.getLatestResult();
                 if (result != null && result.isValid()) {
                     List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
-                    if (fiducials != null && !fiducials.isEmpty()) {
-
-                        LLResultTypes.FiducialResult targetFiducial = null;
+                    if (fiducials != null) {
                         for (LLResultTypes.FiducialResult f : fiducials) {
                             if (TARGET_TAG_ID < 0 || f.getFiducialId() == TARGET_TAG_ID) {
                                 targetFiducial = f;
                                 break;
                             }
                         }
-
-                        if (targetFiducial != null) {
-                            // === LIMELIGHT IS PRIMARY ===
-                            // tx = how many degrees the tag is left/right of the camera crosshair.
-                            // We add that directly to the current turret angle to get the true target.
-                            double tx = targetFiducial.getTargetXDegrees() + TX_OFFSET;
-
-                            currentServoPos = turretServo1.getPosition();
-                            turretAngleDeg  = servoToAngle(currentServoPos);
-
-                            // Target = where turret is NOW, shifted by tx to centre on tag
-                            targetAngleDeg = normalizeDegrees(turretAngleDeg + TX_SIGN_FLIP * tx + AngleAdjust + ManualAngleAdjust);                            limelightLocked = true;
-
-                            // Also opportunistically correct Pedro pose from bot-pose
-                            tryPoseCorrection(result);
-                        }
                     }
+                    if (targetFiducial != null) tryPoseCorrection(result);
                 }
             }
 
-            // === 4. Fallback to odometry ONLY if Limelight has no lock ===
-            if (!limelightLocked) {
+            // ================================================================
+            // STEP 4 — State machine transitions
+            // ================================================================
+            if (targetFiducial != null) {
+                consecutiveDetections++;
+                consecutiveMisses = 0;
+
+                // SEEKING → TRACKING: Limelight sees the tag — take over now.
+                // Works whether odometry finished its sweep or not.
+                if (state == TurretState.SEEKING && consecutiveDetections >= LOCK_CONFIRM_FRAMES) {
+                    state     = TurretState.TRACKING;
+                    integral  = 0;   // clear seeking wind-up before fine tracking
+                    lastError = 0;
+                }
+            } else {
+                consecutiveMisses++;
+                consecutiveDetections = 0;
+
+                // TRACKING → SEEKING: only after sustained loss, not a single dropout.
+                if (state == TurretState.TRACKING && consecutiveMisses >= LOCK_LOST_FRAMES) {
+                    state     = TurretState.SEEKING;
+                    integral  = 0;
+                    lastError = 0;
+                }
+            }
+
+            // ================================================================
+            // STEP 5 — Compute PID error
+            //
+            //  SEEKING               → odometry bearing error
+            //  TRACKING + tag seen   → horizontal offset directly (Limelight
+            //                          has final say)
+            //  TRACKING + tag absent → 0 (hold position, no jerk)
+            // ================================================================
+            currentServoPos = turretServo1.getPosition();
+            turretAngleDeg  = servoToAngle(currentServoPos);
+
+            if (!commandedAngleInitialized) {
+                commandedAngle            = normalizeDegrees(turretAngleDeg);
+                commandedAngleInitialized = true;
+            }
+
+            double error;
+
+            if (state == TurretState.SEEKING) {
+                // ── ODOMETRY: sweep to rough bearing so the tag enters FOV ──
                 double dx = xt - x;
                 double dy = yt - y;
                 distanceToTarget = Math.sqrt(dx * dx + dy * dy);
@@ -222,29 +311,35 @@ public class TurretOdoAi implements Subsystem {
                 double fieldAngleDeg = Math.toDegrees(Math.atan2(dy, dx));
                 if (fieldAngleDeg < 0) fieldAngleDeg += 360;
 
-                targetAngleDeg = normalizeDegrees(fieldAngleDeg - heading + 180 + AngleOffset + AngleAdjust + ManualAngleAdjust);            }
+                targetAngleDeg = normalizeDegrees(
+                        fieldAngleDeg - heading + 180 + AngleOffset + AngleAdjust + ManualAngleAdjust);
 
-            // === 5. Read current servo position ===
-            currentServoPos = turretServo1.getPosition();
-            turretAngleDeg  = servoToAngle(currentServoPos);
+                error = targetAngleDeg - commandedAngle;
+                if (error >  180) error -= 360;
+                if (error < -180) error += 360;
 
-            if (!commandedAngleInitialized) {
-                commandedAngle = normalizeDegrees(turretAngleDeg);
-                commandedAngleInitialized = true;
+            } else if (targetFiducial != null) {
+                // ── LIMELIGHT TAKES OVER COMPLETELY ──────────────────────────
+                // Camera is mounted VERTICALLY (rotated 90°).
+                // When rotated 90°, the horizontal scene offset is reported as
+                // ty (getTargetYDegrees), not tx. We use ty so the turret tracks
+                // left/right correctly with the rotated camera.
+                // CAMERA_MOUNT_OFFSET_DEG shifts the equilibrium so the turret
+                // barrel (not just the camera crosshair) centres on the goal.
+                double horizontalOffset = targetFiducial.getTargetYDegrees();
+                error = TX_SIGN_FLIP * (horizontalOffset + TX_OFFSET - CAMERA_MOUNT_OFFSET_DEG);
+
+            } else {
+                // ── HOLD: tag briefly absent — stay put until LOCK_LOST_FRAMES ─
+                error = 0;
             }
 
-            // === 6. PID toward targetAngleDeg ===
-            double error = targetAngleDeg - commandedAngle;
-            if (error >  180) error -= 360;
-            if (error < -180) error += 360;
-
-            // Skip PID update if locked on and within dead-band
-            if (limelightLocked && Math.abs(error) < TX_TOLERANCE_DEG) {
-                lastUpdateTime = currentTime;
-                return;
-            }
-            // Odometry tolerance
-            if (!limelightLocked && Math.abs(error) < 0.5) {
+            // ================================================================
+            // STEP 6 — PID drive
+            // ================================================================
+            double tolerance = (state == TurretState.TRACKING) ? TX_TOLERANCE_DEG : 0.5;
+            if (Math.abs(error) < tolerance) {
+                lastError      = error;   // must save — prevents derivative spike on exit
                 lastUpdateTime = currentTime;
                 return;
             }
@@ -252,6 +347,8 @@ public class TurretOdoAi implements Subsystem {
             double dt = firstRun ? MIN_LOOP_TIME : timeSinceLastUpdate;
             if (dt <= 0 || dt > 0.2) dt = MIN_LOOP_TIME;
             firstRun = false;
+
+            double kP = (state == TurretState.TRACKING) ? kP_track : kP_seek;
 
             double P_output = kP * error;
 
@@ -278,11 +375,11 @@ public class TurretOdoAi implements Subsystem {
             lastUpdateTime = currentTime;
 
         } catch (Exception e) {
-            // Silent catch — never crash the loop
+            // Never crash the opmode loop
         }
     }
 
-    // ------------------ Pose Correction (opportunistic, no pipeline switch) ------------------
+    // ------------------ Pose Correction (opportunistic) ------------------
     private void tryPoseCorrection(LLResult result) {
         try {
             Pose3D botPose3D = result.getBotpose();
@@ -304,7 +401,7 @@ public class TurretOdoAi implements Subsystem {
             PedroComponent.follower().setPose(new Pose(llX, llY, Math.toRadians(llYawDeg)));
             limelightCorrectionCount++;
         } catch (Exception e) {
-            // Ignore pose correction failures
+            // Silently ignore — pose correction is opportunistic
         }
     }
 
@@ -352,8 +449,8 @@ public class TurretOdoAi implements Subsystem {
     }
 
     public double normalizeDegrees(double angle) {
-        if (angle >  180) { angle -= 360; if (angle >  180) angle -= 360; }
-        if (angle < -180) { angle += 360; if (angle < -180) angle += 360; }
+        while (angle >  180) angle -= 360;
+        while (angle < -180) angle += 360;
         return angle;
     }
 
@@ -362,21 +459,24 @@ public class TurretOdoAi implements Subsystem {
     }
 
     // ------------------ Getters ------------------
-    public double  getX()                 { return x; }
-    public double  getY()                 { return y; }
-    public double  getHeading()           { return heading; }
-    public double  getTargetAngleDeg()    { return targetAngleDeg; }
-    public double  getTurretAngleDeg()    { return turretAngleDeg; }
-    public double  getDistanceToTarget()  { return distanceToTarget; }
-    public double  getLastError()         { return lastError; }
-    public double  getIntegral()          { return integral; }
-    public double  getKp()                { return kP; }
-    public int     getSkippedLoops()      { return skippedLoops; }
-    public double  getLoopTime()          { return loopTimer.seconds() - lastUpdateTime; }
-    public boolean isManualMode()         { return manualMode; }
-    public double  getManualPosition()    { return manualPosition; }
-    public double  getCommandedAngle()    { return commandedAngle; }
-    public boolean isLimelightLocked()    { return limelightLocked; }
+    public double  getX()                        { return x; }
+    public double  getY()                        { return y; }
+    public double  getHeading()                  { return heading; }
+    public double  getTargetAngleDeg()           { return targetAngleDeg; }
+    public double  getTurretAngleDeg()           { return turretAngleDeg; }
+    public double  getDistanceToTarget()         { return distanceToTarget; }
+    public double  getLastError()                { return lastError; }
+    public double  getIntegral()                 { return integral; }
+    public double  getKp()                       { return (state == TurretState.TRACKING) ? kP_track : kP_seek; }
+    public int     getSkippedLoops()             { return skippedLoops; }
+    public double  getLoopTime()                 { return loopTimer.seconds() - lastUpdateTime; }
+    public boolean isManualMode()                { return manualMode; }
+    public double  getManualPosition()           { return manualPosition; }
+    public double  getCommandedAngle()           { return commandedAngle; }
+    public boolean isLimelightLocked()           { return state == TurretState.TRACKING; }
     public int     getLimelightCorrectionCount() { return limelightCorrectionCount; }
     public double  getLastPoseCorrectionMag()    { return lastPoseCorrectionMag; }
+    public TurretState getState()                { return state; }
+    public int     getConsecutiveDetections()    { return consecutiveDetections; }
+    public int     getConsecutiveMisses()        { return consecutiveMisses; }
 }

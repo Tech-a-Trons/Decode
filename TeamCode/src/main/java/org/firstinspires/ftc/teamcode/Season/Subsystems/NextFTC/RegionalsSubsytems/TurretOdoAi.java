@@ -135,7 +135,7 @@ public class TurretOdoAi implements Subsystem {
     // HEADING_FF_GAIN_RIGHT: proportional gain for right turns — WORKING, do not change.
     // HEADING_FF_GAIN_LEFT:  proportional gain for left turns — base scaling.
     public static double HEADING_FF_GAIN_RIGHT = 2.5; // do not change
-    public static double HEADING_FF_GAIN_LEFT  = 4.0;
+    public static double HEADING_FF_GAIN_LEFT  = 5.0;
 
     // ── LEFT-ONLY THRESHOLD BOOST ─────────────────────────────────────────
     // Extra fixed servo delta applied ONLY during left turns when heading rate
@@ -143,8 +143,8 @@ public class TurretOdoAi implements Subsystem {
     // proportional gain — it's a flat kick based purely on turn speed, not tx.
     // Start LEFT_BOOST_AMOUNT at 0.001 and increase until left catches up.
     // Raise LEFT_BOOST_THRESHOLD_DEG_S if it triggers on small unintended drift.
-    public static double LEFT_BOOST_THRESHOLD_DEG_S = 5.0; // deg/sec to trigger boost
-    public static double LEFT_BOOST_AMOUNT          = 0.005; // extra servo units per loop
+    public static double LEFT_BOOST_THRESHOLD_DEG_S = 2.5; // deg/sec to trigger boost
+    public static double LEFT_BOOST_AMOUNT          = 0.01; // extra servo units per loop
     // Handles residual error after feedforward.
     // Gain scales with error: large error → GAIN_MAX, small error → GAIN_MIN.
     public static double TRACKING_GAIN_MAX  = 5.0;

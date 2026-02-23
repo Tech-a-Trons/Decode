@@ -84,13 +84,13 @@ public class RedGate18 extends NextFTCOpMode {
                         new BezierCurve(
                                 new Pose(85.000, 85.000),
                                 new Pose(87.608, 55.112),
-                                new Pose(134, 57.193)
+                                new Pose(137, 57.193)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                .addPath(
           new BezierCurve(
-            new Pose(134, 57.193),
+            new Pose(137, 57.193),
             new Pose(94.007, 60.817),
             new Pose(85.000, 85.000)
           )
@@ -309,10 +309,10 @@ public class RedGate18 extends NextFTCOpMode {
         RobotContext.lastPose = follower.getPose();
     }
     private void scheduleOuttake() {
-        OuttakePID.INSTANCE.setTargetVelocity(1000);
+        OuttakePID.INSTANCE.setTargetVelocity(700);
     }
     private void secondshotforyouuuuu() {
-        OuttakePID.INSTANCE.setTargetVelocity(1000);
+        OuttakePID.INSTANCE.setTargetVelocity(700);
     }
     private void Intake() {
         CompliantIntake.INSTANCE.on();

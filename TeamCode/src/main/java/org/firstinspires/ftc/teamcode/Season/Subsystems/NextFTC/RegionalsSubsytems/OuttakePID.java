@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsyt
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class OuttakePID {
@@ -29,8 +30,8 @@ public class OuttakePID {
         outtakeRight = hardwareMap.get(DcMotorEx.class, "outtakeright");
 
         // outtakeright is reversed to match MotorEx("outtakeright").reversed()
-        outtakeLeft.setDirection(DcMotor.Direction.FORWARD);
-        outtakeRight.setDirection(DcMotor.Direction.REVERSE);
+        outtakeLeft.setDirection(DcMotor.Direction.REVERSE);
+        outtakeRight.setDirection(DcMotor.Direction.FORWARD);
 
         outtakeLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         outtakeRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

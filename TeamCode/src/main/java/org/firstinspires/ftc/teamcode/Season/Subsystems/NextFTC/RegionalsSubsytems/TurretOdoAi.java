@@ -128,7 +128,7 @@ public class TurretOdoAi implements Subsystem {
     // HEADING_FF_GAIN_LEFT:  robot turning left  (negative headingRate) — reduce if turret
     //                        overshoots right during left turns (try 0.6, 0.5, etc).
     public static double HEADING_FF_GAIN_RIGHT = 2.5; // right turns — do not change
-    public static double HEADING_FF_GAIN_LEFT  = 2.9; // left turns  — tune this down
+    public static double HEADING_FF_GAIN_LEFT  = 20; // left turns  — tune this down
     // Handles residual error after feedforward.
     // Gain scales with error: large error → GAIN_MAX, small error → GAIN_MIN.
     public static double TRACKING_GAIN_MAX  = 5.0;

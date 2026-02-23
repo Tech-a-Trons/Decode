@@ -25,8 +25,8 @@ public class NewHood implements Subsystem {
     public static double MID_POS   = 0.5;   // 15-90"
 
     // ===== FAR SHOT VELOCITY-BASED SWITCHING (> 90") =====
-    public static double FAR_HIGH_POS    = 0.8;    // High hood when RPM is good
-    public static double FAR_LOW_POS     = 0.5;    // Low hood when RPM drops
+    public static double FAR_HIGH_POS    = 0.85;    // High hood when RPM is good
+    public static double FAR_LOW_POS     = 0.7;  //0.5  // Low hood when RPM drops
     public static double FAR_RPM_THRESHOLD = 1600; // RPM below this switches to low hood
 
     // ===== GOAL POSITION =====

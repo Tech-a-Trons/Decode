@@ -34,11 +34,11 @@ import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 import dev.nextftc.ftc.components.LoopTimeComponent;
 
-@Autonomous(name = "RedGate18", group = "Examples")
-public class RedGate18 extends NextFTCOpMode {
+@Autonomous(name = "RedFar9", group = "Examples")
+public class RedFar extends NextFTCOpMode {
     VoltageGet volt = new VoltageGet();
 
-    public RedGate18() {
+    public RedFar() {
         addComponents(
                 new SubsystemComponent(NewHood.INSTANCE, CompliantIntake.INSTANCE,Transfer.INSTANCE,ManualTurret.INSTANCE),
                 BulkReadComponent.INSTANCE,
@@ -51,9 +51,9 @@ public class RedGate18 extends NextFTCOpMode {
     private Timer pathTimer, opmodeTimer;
     private int pathState;
 
-    private final Pose startPose = new Pose(123.22766570605188, 123.15850144092221, Math.toRadians(35));
+    private final Pose startPose = new Pose(87.707, 8.328, Math.toRadians(0));
     //    private final Pose scorePose = new Pose(90, 90, Math.toRadians(215));
-    private final Pose scorePose = new Pose(85, 85, Math.toRadians(0));
+    private final Pose scorePose = new Pose(87.031, 17.521, Math.toRadians(0));
 
     private final Pose preprePickup1 = new Pose(12, 12, Math.toRadians(180));
     private final Pose prePickup1 = new Pose(17.581, 10.0470, Math.toRadians(180));
@@ -80,21 +80,14 @@ public class RedGate18 extends NextFTCOpMode {
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
 
         grabPrePickup1 = follower.pathBuilder()
-            .addPath(
+                .addPath(
                         new BezierCurve(
-                                new Pose(85.000, 85.000),
-                                new Pose(87.608, 55.112),
-                                new Pose(134, 57.193)
+                                new Pose(87.031, 17.521),
+                                new Pose(85.540, 36.086),
+                                new Pose(131.133, 37.447)
                         )
-                )
-                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
-               .addPath(
-          new BezierCurve(
-            new Pose(134, 57.193),
-            new Pose(94.007, 60.817),
-            new Pose(85.000, 85.000)
-          )
-        ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+
                 .build();
 
 
@@ -102,36 +95,46 @@ public class RedGate18 extends NextFTCOpMode {
         grabPickup3 = follower.pathBuilder()
                 .addPath(
                         new BezierLine(
-                                new Pose(85.000, 85.000),
+                                new Pose(87.161, 17.288),
 
-                                new Pose(126.285, 84.421)
+                                new Pose(133.751, 20.479)
                         )
-                ).setTangentHeadingInterpolation()
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                .addPath(
+                        new BezierLine(
+                                new Pose(133.751, 20.479),
 
+                                new Pose(133.929, 15.597)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
         grabPrePickup2 = follower.pathBuilder()
                 .addPath(
-                        new BezierCurve(
-                                new Pose(85.000, 85.000),
-                                new Pose(93.635, 58.775),
-                                new Pose(126.530, 61.300)
+                        new BezierLine(
+                                new Pose(86.925, 17.383),
+
+                                new Pose(135.207, 8.640)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(25))
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+
                 .build();
         scorePickup1 = follower.pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(123, 84.53525179856116), new Pose(83.000, 83.000))
-                )
-                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                        new BezierLine(
+                                new Pose(131.133, 37.447),
+
+                                new Pose(86.925, 17.383)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
         scorePickup2 = follower.pathBuilder()
                 .addPath(
-                new BezierCurve(
-                        new Pose(126.530, 61.300),
-                        new Pose(86.203, 68.473),
-                        new Pose(85.000, 85.000)
+                new BezierLine(
+                        new Pose(135.207, 8.640),
+
+                        new Pose(87.161, 17.288)
                 )
-        ).setLinearHeadingInterpolation(Math.toRadians(25), Math.toRadians(0))
+        ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
 //        grabPickup2 = follower.pathBuilder()
 //
@@ -143,9 +146,9 @@ public class RedGate18 extends NextFTCOpMode {
         scorePickup3 = follower.pathBuilder()
                 .addPath(
                         new BezierLine(
-                                new Pose(126.285, 84.421),
+                                new Pose(133.929, 15.597),
 
-                                new Pose(85.000, 85.000)
+                                new Pose(87.191, 17.537)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -175,7 +178,7 @@ public class RedGate18 extends NextFTCOpMode {
         switch (pathState) {
             case 0:
                 NewHood.INSTANCE.midclose();
-                ManualTurret.INSTANCE.setPosition(1);
+                ManualTurret.INSTANCE.setPosition(0.93);
                 secondshotforyouuuuu();
                 follower.followPath(scorePreload, true);
                 setPathState(1);
@@ -188,54 +191,58 @@ public class RedGate18 extends NextFTCOpMode {
 
                     Intake();
                     follower.followPath(grabPrePickup1);
-                    scheduleOuttake();
+
                     setPathState(2);
                 }
                 break;
 
             case 2:
                 if (!follower.isBusy()) {
-                    Transfer.INSTANCE.off();
-                    shootThreeBalls();
-                    Intake();
+                    follower.followPath(scorePickup1);
+                   scheduleOuttake();
                     setPathState(3);
                 }
                 break;
 
             case 3:
                 if (!follower.isBusy()) {
-                    follower.followPath(grabPrePickup2);
+                    shootThreeBalls();
+                    Intake();
+
                     setPathState(4);
                 }
                 break;
 
             case 4:
                 if (!follower.isBusy()) {
-                    GateIntake();
-                    follower.followPath(scorePickup2);
-                    scheduleOuttake();
+                    follower.followPath(grabPrePickup2);
+
                     setPathState(5);
                 }
                 break;
 
             case 5:
                 if (!follower.isBusy()) {
-                    shootThreeBalls();
                     Intake();
+                    follower.followPath(scorePickup2);
+                    scheduleOuttake();
+
                     setPathState(6);
                 }
                 break;
 //
             case 6:
                 if (!follower.isBusy()) {
-                    follower.followPath(grabPrePickup2);
-                    setPathState(7);
+                    shootThreeBalls();
+                    Intake();
+//                    follower.followPath(grabPrePickup2);
+                    setPathState(-1);
                 }
                 break;
 
             case 7:
                 if (!follower.isBusy()) {
-                    GateIntake();
+                    Intake();
                     follower.followPath(scorePickup2);
                     scheduleOuttake();
                     setPathState(8);
@@ -259,7 +266,7 @@ public class RedGate18 extends NextFTCOpMode {
                 break;
             case 10:
                 if (!follower.isBusy()) {
-                    GateIntake();
+                    Intake();
                     follower.followPath(scorePickup2);
                     scheduleOuttake();
                     setPathState(11);
@@ -277,17 +284,17 @@ public class RedGate18 extends NextFTCOpMode {
                 }
                 break;
             case 12:
-            if (!follower.isBusy()) {
-                follower.followPath(grabPickup3, true);
-                scheduleOuttake();
-                Intake();
+                if (!follower.isBusy()) {
+                    follower.followPath(grabPickup3, true);
+                    scheduleOuttake();
+                    Intake();
 
 //                    shootThreeBalls();
 //                    follower.followPath(grabPickup3, true);
 //                    scheduleOuttake();
-                setPathState(13);
-            }
-            break;
+                    setPathState(13);
+                }
+                break;
             case 13:
                 if (!follower.isBusy()) {
                     follower.followPath(scorePickup3);
@@ -309,10 +316,10 @@ public class RedGate18 extends NextFTCOpMode {
         RobotContext.lastPose = follower.getPose();
     }
     private void scheduleOuttake() {
-        OuttakePID.INSTANCE.setTargetVelocity(1000);
+        OuttakePID.INSTANCE.setTargetVelocity(1300);
     }
     private void secondshotforyouuuuu() {
-        OuttakePID.INSTANCE.setTargetVelocity(1000);
+        OuttakePID.INSTANCE.setTargetVelocity(1450);
     }
     private void Intake() {
         CompliantIntake.INSTANCE.on();
@@ -339,7 +346,7 @@ public class RedGate18 extends NextFTCOpMode {
         sleep(500);
         CompliantIntake.INSTANCE.on();
         Transfer.INSTANCE.on();
-        sleep(700);
+        sleep(600);
         CompliantIntake.INSTANCE.off();
         Transfer.INSTANCE.off();
         OuttakePID.INSTANCE.setTargetVelocity(0);
@@ -391,7 +398,7 @@ public class RedGate18 extends NextFTCOpMode {
 
     @Override public void onStop() {
         savePose();
-        TurretPID.INSTANCE.resetShooter().schedule();
+        OuttakePID.INSTANCE.stop();
 
     }
 

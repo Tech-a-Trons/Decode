@@ -39,7 +39,7 @@ public class RegionalRed extends NextFTCOpMode {
                         CompliantIntake.INSTANCE,
                         Transfer.INSTANCE,
                         TurretPID.INSTANCE,
-                        TurretOdoAi.INSTANCE,
+//                        TurretOdoAi.INSTANCE,
                         NewHood.INSTANCE,
                         ColorSensor.INSTANCE
                 ),
@@ -102,7 +102,7 @@ public class RegionalRed extends NextFTCOpMode {
                                 TARGET_X - pose.getX(),
                                 TARGET_Y - pose.getY()
                         );
-                        TurretOdoAi.INSTANCE.relocalize();
+                        //TurretOdoAi.INSTANCE.relocalize();
                         TurretPID.INSTANCE.regionalsshooterdistance(d).schedule();
                         double actualRPM = TurretPID.INSTANCE.getActualVelocity();
                         NewHood.INSTANCE.adjustForDistanceAndVelocity(d, newvelo, actualRPM);
@@ -146,6 +146,7 @@ public class RegionalRed extends NextFTCOpMode {
                 .whenBecomesTrue(() -> {
                     Transfer.INSTANCE.on();
                     CompliantIntake.INSTANCE.on();
+//                    PedroComponent.follower().holdPoint(PedroComponent.follower().getPose());
                 });
 
         // === EMERGENCY STOP ===
@@ -156,6 +157,7 @@ public class RegionalRed extends NextFTCOpMode {
                     CompliantIntake.INSTANCE.off();
                     Transfer.INSTANCE.off();
                     intakeToggle = false;
+                    PedroComponent.follower().startTeleopDrive();
                 });
 
 // === MANUAL TURRET CONTROL - SINGLE TAP (Gamepad 2) ===

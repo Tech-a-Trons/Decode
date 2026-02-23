@@ -36,8 +36,9 @@ public class TurretPID implements Subsystem {
             new MotorEx("outtakeright").reversed()
     );
 
+
     public ControlSystem controller = ControlSystem.builder()
-            .velPid(0.003, 0, 0) // Velocity PID with 0.003
+            .velPid(0.02, 0, 0) // Velocity PID with 0.003
             .basicFF(0.0001, 0, 0.044) // Basic feedforward with kV=0.0001, kA=0.0, kS=0.01
             .build();
 
@@ -86,18 +87,18 @@ public class TurretPID implements Subsystem {
         shootRequested = true;
         hasShot = false;
 
-        return new RunToVelocity(controller, newvelo, 5).requires(this);
+        return new RunToVelocity(controller, -newvelo, 5).requires(this);
     }
 
     public Command regionalsshooterdistance(double distance) {
         newvelo =
                 0.041 * distance * distance
                         - 2.9 * distance
-                        + 1400; //1350
+                        + 1250; //1350
 
         if (distance > 95) {
 //            newvelo -= 0.7 * (distance - 95);
-            newvelo += -(0.25 * (distance - 42.5)) + 75;
+            newvelo += -(0.25 * (distance - 42.5)) + 60;
         }
 
         newvelo= Math.max(1200, Math.min(2000, newvelo));
@@ -106,7 +107,7 @@ public class TurretPID implements Subsystem {
         shootRequested = true;
         hasShot = false;
 
-        return new RunToVelocity(controller, newvelo, 5).requires(this);
+        return new RunToVelocity(controller, -newvelo, 5).requires(this);
     }
 
     public Command setFarShooterSpeed(){

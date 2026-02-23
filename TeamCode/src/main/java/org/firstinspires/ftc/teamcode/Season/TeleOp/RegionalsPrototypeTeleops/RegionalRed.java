@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.RegionalsPrototypeTeleops;
 
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID.newvelo;
+import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID.turret;
 import static dev.nextftc.bindings.Bindings.button;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -39,7 +40,7 @@ public class RegionalRed extends NextFTCOpMode {
                         CompliantIntake.INSTANCE,
                         Transfer.INSTANCE,
                         TurretPID.INSTANCE,
-//                        TurretOdoAi.INSTANCE,
+                        TurretOdoAi.INSTANCE,
                         NewHood.INSTANCE,
                         ColorSensor.INSTANCE
                 ),
@@ -69,11 +70,11 @@ public class RegionalRed extends NextFTCOpMode {
 
         NewHood.INSTANCE.setAlliance("red");
         TurretOdoAi.INSTANCE.setAlliance("red");
-           // TurretOdoAi.INSTANCE.AngleAdjust = 0;
+        TurretOdoAi.INSTANCE.AngleAdjust = 0;
         TurretOdoAi.INSTANCE.ManualAngleAdjust= 0;
 
         // Reseters
-        //ColorSensor.artifactcounter = 0;
+        ColorSensor.artifactcounter = 0;
 
 
         // Set initial pose
@@ -95,14 +96,14 @@ public class RegionalRed extends NextFTCOpMode {
         // === SHOOT ===
         button(() -> gamepad1.right_trigger > 0.05)
                 .whenTrue(() -> {
-                    //ColorSensor.artifactcounter = 0;
+                    ColorSensor.artifactcounter = 0;
                     Pose pose = PedroComponent.follower().getPose();
                     if (pose != null) {
                         double d = Math.hypot(
                                 TARGET_X - pose.getX(),
                                 TARGET_Y - pose.getY()
                         );
-                        //TurretOdoAi.INSTANCE.relocalize();
+                        TurretOdoAi.INSTANCE.relocalize();
                         TurretPID.INSTANCE.regionalsshooterdistance(d).schedule();
                         double actualRPM = TurretPID.INSTANCE.getActualVelocity();
                         NewHood.INSTANCE.adjustForDistanceAndVelocity(d, newvelo, actualRPM);
@@ -123,10 +124,10 @@ public class RegionalRed extends NextFTCOpMode {
                     if (intakeToggle) {
 
                         CompliantIntake.INSTANCE.on();
-                        Transfer.INSTANCE.off();
+                        Transfer.INSTANCE.repel();
 
                         // Reset ball counter when starting intake
-
+                        ColorSensor.artifactcounter = 0;
 
                     } else {
                         // Manually stopping intake
@@ -135,6 +136,7 @@ public class RegionalRed extends NextFTCOpMode {
 
                         // Reset ball counter
 
+                        ColorSensor.artifactcounter = 0;
 
                     }
                 });
@@ -146,7 +148,6 @@ public class RegionalRed extends NextFTCOpMode {
                 .whenBecomesTrue(() -> {
                     Transfer.INSTANCE.on();
                     CompliantIntake.INSTANCE.on();
-//                    PedroComponent.follower().holdPoint(PedroComponent.follower().getPose());
                 });
 
         // === EMERGENCY STOP ===
@@ -157,7 +158,6 @@ public class RegionalRed extends NextFTCOpMode {
                     CompliantIntake.INSTANCE.off();
                     Transfer.INSTANCE.off();
                     intakeToggle = false;
-                    PedroComponent.follower().startTeleopDrive();
                 });
 
 // === MANUAL TURRET CONTROL - SINGLE TAP (Gamepad 2) ===
@@ -176,13 +176,13 @@ public class RegionalRed extends NextFTCOpMode {
         // Artifact Count Updater (Gamepad 2)
         Gamepads.gamepad2().rightBumper()
                 .whenBecomesTrue(() -> {
-                    //ColorSensor.INSTANCE.artifactcounter += 1;
+                    ColorSensor.INSTANCE.artifactcounter += 1;
 
                 });
 
         Gamepads.gamepad2().leftBumper()
                 .whenBecomesTrue(() -> {
-                   // ColorSensor.INSTANCE.artifactcounter -= 1;
+                    ColorSensor.INSTANCE.artifactcounter -= 1;
 
                 });
         // Emergency Backup Drivetrain Stop
@@ -205,32 +205,32 @@ public class RegionalRed extends NextFTCOpMode {
         NewHood.INSTANCE.adjustForCurrentDistance();
         InttakeStopper.reset();
         if (intakeToggle) {
-//            ColorSensor.INSTANCE.IncountBalls();
-//            if (ColorSensor.artifactcounter == 0) {
-//            }
-//            if (ColorSensor.artifactcounter == 1) {
-//                Transfer.INSTANCE.advance();
-//                // Reset toggle state
-//            }
-//            if (ColorSensor.artifactcounter == 2) {
-//                Transfer.INSTANCE.off();
-//                // Reset toggle state
-//            }
-//            // Auto-stop when 3 balls are collected
-//            if (ColorSensor.artifactcounter == 3) {
-//
-//                // Turn off intake and transfer
-//                    CompliantIntake.INSTANCE.off();
-//                    Transfer.INSTANCE.off();
-//                    // Reset toggle state
-//                    intakeToggle = false;
-//
-//
-//                    // Optional: Rumble controller to alert driver
-//                    gamepad1.rumble(250);
-//                    gamepad2.rumble(250);
-//
-//            }
+            ColorSensor.INSTANCE.IncountBalls();
+            if (ColorSensor.artifactcounter == 0) {
+            }
+            if (ColorSensor.artifactcounter == 1) {
+                Transfer.INSTANCE.advance();
+                // Reset toggle state
+            }
+            if (ColorSensor.artifactcounter == 2) {
+                Transfer.INSTANCE.off();
+                // Reset toggle state
+            }
+            // Auto-stop when 3 balls are collected
+            if (ColorSensor.artifactcounter == 3) {
+
+                // Turn off intake and transfer
+                    CompliantIntake.INSTANCE.off();
+                    Transfer.INSTANCE.off();
+                    // Reset toggle state
+                    intakeToggle = false;
+
+
+                    // Optional: Rumble controller to alert driver
+                    gamepad1.rumble(250);
+                    gamepad2.rumble(250);
+
+            }
         }
         // Drive control - runs every loop for responsive driving
         PedroComponent.follower().setTeleOpDrive(
@@ -241,4 +241,9 @@ public class RegionalRed extends NextFTCOpMode {
         );
         PedroComponent.follower().update();
     }
+    public void onStop(){
+        Transfer.INSTANCE.off();
+        CompliantIntake.INSTANCE.off();
+        TurretPID.INSTANCE.setShooterSpeed(0);
     }
+}

@@ -123,12 +123,28 @@ public class TurretOdoAi implements Subsystem {
 
 
     // ── HEADING RATE FEEDFORWARD ──────────────────────────────────────────
-    // Separate gains per turn direction so each side tunes independently.
-    // HEADING_FF_GAIN_RIGHT: robot turning right (positive headingRate) — WORKING, leave alone.
-    // HEADING_FF_GAIN_LEFT:  robot turning left  (negative headingRate) — reduce if turret
-    //                        overshoots right during left turns (try 0.6, 0.5, etc).
-    public static double HEADING_FF_GAIN_RIGHT = 2.5; // right turns — do not change
-    public static double HEADING_FF_GAIN_LEFT  = 20; // left turns  — tune this down
+    // When the robot turns, the turret counter-rotates by the same amount
+    // to keep the tag centered proactively, before tx error builds up.
+    //
+    // HEADING_FF_SIGN: direction of compensation. +1.0 or -1.0.
+    //   Separate from TX_SIGN_FLIP — controls FF direction only.
+    //   If FF makes tracking worse in BOTH directions → flip this.
+    //   Tune this before touching the gains.
+    public static double HEADING_FF_SIGN = 1.0;
+
+    // HEADING_FF_GAIN_RIGHT: proportional gain for right turns — WORKING, do not change.
+    // HEADING_FF_GAIN_LEFT:  proportional gain for left turns — base scaling.
+    public static double HEADING_FF_GAIN_RIGHT = 2.5; // do not change
+    public static double HEADING_FF_GAIN_LEFT  = 4.0;
+
+    // ── LEFT-ONLY THRESHOLD BOOST ─────────────────────────────────────────
+    // Extra fixed servo delta applied ONLY during left turns when heading rate
+    // exceeds LEFT_BOOST_THRESHOLD_DEG_S. Structurally different from the
+    // proportional gain — it's a flat kick based purely on turn speed, not tx.
+    // Start LEFT_BOOST_AMOUNT at 0.001 and increase until left catches up.
+    // Raise LEFT_BOOST_THRESHOLD_DEG_S if it triggers on small unintended drift.
+    public static double LEFT_BOOST_THRESHOLD_DEG_S = 5.0; // deg/sec to trigger boost
+    public static double LEFT_BOOST_AMOUNT          = 0.005; // extra servo units per loop
     // Handles residual error after feedforward.
     // Gain scales with error: large error → GAIN_MAX, small error → GAIN_MIN.
     public static double TRACKING_GAIN_MAX  = 5.0;
@@ -320,10 +336,14 @@ public class TurretOdoAi implements Subsystem {
                 // The sign: if robot turns CW (positive heading rate in our convention),
                 // the tag appears to move CCW in camera frame, so turret must turn CW.
                 // TX_SIGN_FLIP handles if your servo direction is reversed.
-                double headingDelta   = headingRate * timeSinceLastUpdate;
-                // Pick gain based on turn direction — right is tuned, left has separate gain
-                double ffGain        = (headingDelta >= 0) ? HEADING_FF_GAIN_RIGHT : HEADING_FF_GAIN_LEFT;
-                double ffServoDelta   = TX_SIGN_FLIP * headingDelta * SERVO_DEG_RATIO * ffGain;
+                double headingDelta = headingRate * timeSinceLastUpdate;
+                double ffGain       = (headingDelta >= 0) ? HEADING_FF_GAIN_RIGHT : HEADING_FF_GAIN_LEFT;
+                double ffServoDelta = HEADING_FF_SIGN * headingDelta * SERVO_DEG_RATIO * ffGain;
+
+                // Left-only threshold boost — flat extra kick during fast left turns
+                if (headingRate < -LEFT_BOOST_THRESHOLD_DEG_S) {
+                    ffServoDelta += HEADING_FF_SIGN * LEFT_BOOST_AMOUNT;
+                }
                 lastFeedforward       = ffServoDelta;
                 currentServoPos       = clamp(currentServoPos - ffServoDelta, SERVO_MIN, SERVO_MAX);
 

@@ -25,7 +25,7 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name = "Red Teleop w/C")
+@TeleOp(name = "Final Red Teleop")
 public class RegionalRed extends NextFTCOpMode {
 
     private boolean intakeToggle = false;

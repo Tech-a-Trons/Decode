@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.OdoTrackRed;
 //import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.O;
 
-@TeleOp
+//@TeleOp
 public class RedOdoTrackProto extends LinearOpMode {
     @Override
     public void runOpMode() {

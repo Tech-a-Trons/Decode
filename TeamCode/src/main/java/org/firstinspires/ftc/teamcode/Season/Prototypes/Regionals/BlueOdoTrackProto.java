@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.OdoT
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.OdoTrackRed;
 //import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.O;
 
-@TeleOp
+//@TeleOp
 public class BlueOdoTrackProto extends LinearOpMode {
     @Override
     public void runOpMode() {

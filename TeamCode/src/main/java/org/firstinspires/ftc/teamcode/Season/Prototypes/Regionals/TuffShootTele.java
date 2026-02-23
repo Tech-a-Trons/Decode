@@ -25,7 +25,7 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "Moving while shooting")
+//@TeleOp(name = "Moving while shooting")
 public class TuffShootTele extends NextFTCOpMode {
     private boolean intakeToggle = false;
     private boolean turretManualMode = false;

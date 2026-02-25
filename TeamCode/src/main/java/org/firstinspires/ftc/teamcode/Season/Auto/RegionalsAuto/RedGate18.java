@@ -322,7 +322,7 @@ public class RedGate18 extends NextFTCOpMode {
     }
 
     private void secondshotforyouuuuu() {
-        ShooterPID.INSTANCE.setTargetVelocity(1400);
+        ShooterPID.INSTANCE.setTargetVelocity(1410);
     }
 
     private void GateIntake() {

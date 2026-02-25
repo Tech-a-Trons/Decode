@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsyte
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.ManualTurret;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.NewHood;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.NewTurret;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Transfer;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdoAi;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID;
@@ -44,6 +45,7 @@ public class RegionalBlue extends NextFTCOpMode {
                         Transfer.INSTANCE,
                         TurretPID.INSTANCE,
 //                        TurretOdoAi.INSTANCE,
+                        NewTurret.INSTANCE,
                         ManualTurret.INSTANCE,
                         NewHood.INSTANCE,
                         ColorSensor.INSTANCE
@@ -72,8 +74,11 @@ public class RegionalBlue extends NextFTCOpMode {
         NewHood.INSTANCE.init(hardwareMap);
         ColorSensor.INSTANCE.init(hardwareMap);
 
+        NewTurret.INSTANCE.init(hardwareMap);
+
         NewHood.INSTANCE.setAlliance("blue");
 //        TurretOdoAi.INSTANCE.setAlliance("blue");
+        NewTurret.INSTANCE.setAlliance("blie");
 
 
         // Reseters
@@ -192,13 +197,15 @@ public class RegionalBlue extends NextFTCOpMode {
         // Artifact Count Updater (Gamepad 2)
         Gamepads.gamepad2().dpadLeft()
                 .whenBecomesTrue(() -> {
-                   ManualTurret.INSTANCE.setPosition(x+0.1);
+//                   ManualTurret.INSTANCE.setPosition(x+0.1);
+                    NewTurret.INSTANCE.turnLeft();
 
                 });
 
         Gamepads.gamepad2().dpadRight()
                 .whenBecomesTrue(() -> {
-                    ManualTurret.INSTANCE.setPosition(x-0.1);
+//                    ManualTurret.INSTANCE.setPosition(x-0.1);
+                    NewTurret.INSTANCE.turnRight();
 
                 });
         // Emergency Backup Drivetrain Stop

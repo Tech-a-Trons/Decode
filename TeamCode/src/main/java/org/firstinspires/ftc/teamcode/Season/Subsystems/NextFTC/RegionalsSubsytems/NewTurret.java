@@ -169,18 +169,18 @@ public class NewTurret implements Subsystem {
     // NEVER replace with servo.getPosition(). Always use this variable.
     //
     // Mapping (inverted — higher angle → lower servo position):
-    //   angle = 340·(1−pos) − 180
-    //   pos   = 1 − (angle+180) / 340
-    //   pos = 0.0  ↔  angle = +160°
-    //   pos = 0.5  ↔  angle ≈  −10°
+    //   angle = 350·(1−pos) − 180
+    //   pos   = 1 − (angle+180) / 350
+    //   pos = 0.0  ↔  angle = +170°
+    //   pos = 0.5  ↔  angle ≈   −5°
     //   pos = 1.0  ↔  angle = −180°
     // ─────────────────────────────────────────────────────────────────────
     private double currentServoPos = 0.25;
     public static double SERVO_MIN = 0.0;
     public static double SERVO_MAX = 1.0;
 
-    // 340° over 0.0–1.0 → degrees per servo unit (for delta conversion)
-    private static final double DEG_PER_SERVO_UNIT = 340.0;
+    // 350° over 0.0–1.0 → degrees per servo unit (for delta conversion)
+    private static final double DEG_PER_SERVO_UNIT = 350.0;
 
     // ═════════════════════════════════════════════════════════════════════
     // LAYER 1 — HEADING RATE FEEDFORWARD
@@ -193,7 +193,7 @@ public class NewTurret implements Subsystem {
     //   headingDelta (deg) = headingRate (deg/s) × dt (s)
     //   Δpos = −(headingDelta × FF_SIGN × FF_GAIN) / DEG_PER_SERVO_UNIT
     //   The negative sign is from the inverted servo mapping:
-    //     Δangle = −340·Δpos  →  Δpos = −Δangle/340
+    //     Δangle = −350·Δpos  →  Δpos = −Δangle/350
     //   Robot CW (positive headingDelta in our convention) → turret must
     //   also swing CW to stay on goal → angle increases → pos decreases.
     //   FF_SIGN handles the physical case where this is reversed.
@@ -492,11 +492,11 @@ public class NewTurret implements Subsystem {
             //               → tag stays near crosshair at all times.
             //
             // Derivation:
-            //   angle = 340·(1−pos) − 180
-            //   Δangle = −340·Δpos
-            //   Δpos   = −Δangle / 340
+            //   angle = 350·(1−pos) − 180
+            //   Δangle = −350·Δpos
+            //   Δpos   = −Δangle / 350
             //   To cancel robot rotation: Δangle_turret = headingDelta
-            //   ∴ Δpos = −headingDelta / 340
+            //   ∴ Δpos = −headingDelta / 350
             //   FF_SIGN flips direction if the servo is oriented the other way.
             //   FF_GAIN scales the compensation (1.0 = perfect, tune from there).
             // ════════════════════════════════════════════════════════════
@@ -567,7 +567,7 @@ public class NewTurret implements Subsystem {
             //   whenever commandedAngle crossed the wrap boundary.
             //
             //   Conversion: pidDegPerSec × dt = Δangle (deg)
-            //               Δpos = −Δangle / 340  (inverted mapping)
+            //               Δpos = −Δangle / 350  (inverted mapping)
             // ════════════════════════════════════════════════════════════
 
             // Recompute odoError relative to current servo pos (FF moved it)

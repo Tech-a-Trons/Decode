@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Season.Auto.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.ColorSensor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.NewHood;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.NewTurret;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Transfer;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdoAi;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID;
@@ -41,7 +42,8 @@ public class RegionalRed extends NextFTCOpMode {
                         CompliantIntake.INSTANCE,
                         Transfer.INSTANCE,
                         TurretPID.INSTANCE,
-                        TurretOdoAi.INSTANCE,
+                        //TurretOdoAi.INSTANCE,
+                        NewTurret.INSTANCE,
                         NewHood.INSTANCE,
                         ColorSensor.INSTANCE
                 ),
@@ -65,7 +67,8 @@ public class RegionalRed extends NextFTCOpMode {
     public void onStartButtonPressed() {
 
         // Initialize turret safely
-        TurretOdoAi.INSTANCE.init(hardwareMap);
+        //TurretOdoAi.INSTANCE.init(hardwareMap);
+        NewTurret.INSTANCE.init(hardwareMap);
         NewHood.INSTANCE.init(hardwareMap);
         //ColorSensor.INSTANCE.init(hardwareMap);
 
@@ -73,6 +76,9 @@ public class RegionalRed extends NextFTCOpMode {
         TurretOdoAi.INSTANCE.setAlliance("red");
         TurretOdoAi.INSTANCE.AngleAdjust = 0;
         TurretOdoAi.INSTANCE.ManualAngleAdjust= 0;
+        NewTurret.INSTANCE.setAlliance("red");
+        NewTurret.INSTANCE.AngleAdjust = 0;
+        NewTurret.INSTANCE.ManualAngleAdjust= 0;
 
         // Reseters
         ColorSensor.artifactcounter = 0;
@@ -170,13 +176,14 @@ else {
 // === MANUAL TURRET CONTROL - SINGLE TAP (Gamepad 2) ===
         Gamepads.gamepad2().dpadRight()
                 .whenBecomesTrue(() -> {
-                    TurretOdoAi.INSTANCE.turnRight();
-
+                    //TurretOdoAi.INSTANCE.turnRight();
+                    NewTurret.INSTANCE.turnRight();
                 });
 
         Gamepads.gamepad2().dpadLeft()
                 .whenBecomesTrue(() -> {
-                    TurretOdoAi.INSTANCE.turnLeft();
+//                    TurretOdoAi.INSTANCE.turnLeft();
+                    NewTurret.INSTANCE.turnLeft();
 
                 });
 

@@ -4,9 +4,9 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
-
 @TeleOp
 public class TurretPls extends LinearOpMode {
+
     Servo turretServo1;
     Servo turretServo2;
 
@@ -24,21 +24,22 @@ public class TurretPls extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
+
             if (gamepad1.a) {
-                turretServo1.setPosition(currentServoPos + 0.1);
-                turretServo2.setPosition(currentServoPos + 0.1);
-                currentServoPos = turretServo1.getPosition();
-                telemetry.addData("Pos: ", currentServoPos);
-                telemetry.update();
+                currentServoPos = Math.min(1.0, currentServoPos + 0.1);
             }
 
             if (gamepad1.b) {
-                turretServo1.setPosition(currentServoPos - 0.1);
-                turretServo2.setPosition(currentServoPos - 0.1);
-                currentServoPos = turretServo1.getPosition();
-                telemetry.addData("Pos: ", currentServoPos);
-                telemetry.update();
+                currentServoPos = Math.max(0.0, currentServoPos - 0.1);
             }
+
+            turretServo1.setPosition(currentServoPos);
+            turretServo2.setPosition(currentServoPos);
+
+            telemetry.addData("Pos: ", currentServoPos);
+            telemetry.update();
+
+            sleep(200); // prevents rapid spamming
         }
     }
 }

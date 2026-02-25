@@ -38,7 +38,7 @@ public class TurretPID implements Subsystem {
 
 
     public ControlSystem controller = ControlSystem.builder()
-            .velPid(0.015, 0, 0) // Velocity PID with 0.003 0.02
+            .velPid(0.017, 0, 0) // Velocity PID with 0.003 0.02
             .basicFF(0.0001, 0, 0.0) // Basic feedforward with kV=0.0001, kA=0.0, kS=0.01
             .build();
 
@@ -98,7 +98,7 @@ public class TurretPID implements Subsystem {
 
         if (distance > 95) {
 //            newvelo -= 0.7 * (distance - 95);
-            newvelo += -(0.25 * (distance - 42.5)) + 60;
+            newvelo += -(0.25 * (distance - 42.5)) + 75;
         }
 
         newvelo= Math.max(1200, Math.min(2000, newvelo));

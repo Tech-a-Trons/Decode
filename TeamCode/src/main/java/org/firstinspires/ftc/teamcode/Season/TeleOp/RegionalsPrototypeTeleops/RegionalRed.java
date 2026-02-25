@@ -42,8 +42,8 @@ public class RegionalRed extends NextFTCOpMode {
                         CompliantIntake.INSTANCE,
                         Transfer.INSTANCE,
                         TurretPID.INSTANCE,
-                        //TurretOdoAi.INSTANCE,
-                        NewTurret.INSTANCE,
+                        TurretOdoAi.INSTANCE,
+//                        NewTurret.INSTANCE,
                         NewHood.INSTANCE,
                         ColorSensor.INSTANCE
                 ),
@@ -67,8 +67,8 @@ public class RegionalRed extends NextFTCOpMode {
     public void onStartButtonPressed() {
 
         // Initialize turret safely
-        //TurretOdoAi.INSTANCE.init(hardwareMap);
-        NewTurret.INSTANCE.init(hardwareMap);
+        TurretOdoAi.INSTANCE.init(hardwareMap);
+
         NewHood.INSTANCE.init(hardwareMap);
         //ColorSensor.INSTANCE.init(hardwareMap);
 

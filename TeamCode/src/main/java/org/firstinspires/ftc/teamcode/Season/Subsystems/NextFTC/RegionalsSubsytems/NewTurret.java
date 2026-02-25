@@ -121,11 +121,27 @@ public class NewTurret implements Subsystem {
      */
     public static double FINE_ALIGN_ENTRY_DEG = 12.0;
 
+    /**
+     * Odometry bearing error threshold (degrees) that forces an IMMEDIATE
+     * return to SEEKING from FINE_ALIGN, even when the tag is still visible.
+     *
+     * WHY: During a large robot turn the heading feedforward moves the turret
+     * most of the way, but if the residual odoError grows past this threshold
+     * it means the turret is significantly off-bearing and the 2D tx loop is
+     * too slow to catch up.  Handing back to the faster odometry PID prevents
+     * the tag from walking out of frame on aggressive manoeuvres.
+     *
+     * Rule of thumb: set to roughly half your Limelight's horizontal FOV.
+     * Default 5° works well for a ~60° FOV camera (tag stays visible up to ~30°).
+     * Increase if SEEKING kicks in too aggressively on small corrections.
+     */
+    public static double ODO_OVERRIDE_DEG = 5.0;
+
     /** Consecutive visible frames required before entering FINE_ALIGN. */
-    public static int LOCK_CONFIRM_FRAMES = 2;
+    public static int LOCK_CONFIRM_FRAMES = 1;
 
     /** Consecutive missed frames before falling back to SEEKING. */
-    public static int LOCK_LOST_FRAMES = 20;
+    public static int LOCK_LOST_FRAMES = 10;
 
     private int consecutiveDetections = 0;
     private int consecutiveMisses     = 0;
@@ -235,25 +251,27 @@ public class NewTurret implements Subsystem {
      * Minimum position step per loop when outside the dead-band.
      * Mirrors BASE_POWER = 0.03 in BlueLL/RedLL.
      */
-    public static double FINE_BASE_STEP = 0.004;
+    public static double FINE_BASE_STEP = 0.006;
 
     /**
      * Proportional gain: step += FINE_kP × |tx_error_deg|
      * Mirrors kP_CLOSE = 0.01 in BlueLL/RedLL, scaled to position units.
+     * Higher = faster centering, lower = less overshoot.
      */
-    public static double FINE_kP = 3.0;
+    public static double FINE_kP = 0.05;
 
     /**
      * Maximum position step per loop.
-     * Mirrors MAX_POWER = 0.8 in BlueLL/RedLL.
+     * Mirrors MAX_POWER = 0.8 in BlueLL/RedLL — prevents slamming.
+     * At 100 Hz loop rate, 0.04 step/loop × 350 deg/unit = 14 deg/loop max.
      */
-    public static double FINE_MAX_STEP = 0.1;
+    public static double FINE_MAX_STEP = 0.04;
 
     /**
      * Physical camera offset from barrel centerline (degrees).
      * Adjust until getLastTx() ≈ 0 when barrel is on target.
      */
-    public static double CAMERA_MOUNT_OFFSET_DEG = 0.0;
+    public static double CAMERA_MOUNT_OFFSET_DEG = 7.0;
 
     /** Fine crosshair bias trim (degrees). Adjust after CAMERA_MOUNT_OFFSET_DEG. */
     public static double TX_OFFSET = 0.0;
@@ -279,7 +297,7 @@ public class NewTurret implements Subsystem {
     private int    skippedLoops                 = 0;
 
     private final ElapsedTime llOrientationTimer        = new ElapsedTime();
-    private static final double LL_ORIENTATION_INTERVAL = 0.1;
+    private static final double LL_ORIENTATION_INTERVAL = 0.033; // ~30 Hz — faster pose updates
 
     // ─────────────────────────────────────────────────────────────────────
     // DIAGNOSTICS
@@ -291,6 +309,30 @@ public class NewTurret implements Subsystem {
     private double lastPoseCorrectionMag    = 0;
     private int    limelightCorrectionCount = 0;
     public static double MAX_POSE_CORRECTION_INCHES = 12.0;
+
+    /**
+     * Accumulated tx-based correction to odometry bearing (degrees).
+     *
+     * WHY THIS EXISTS:
+     *   AngleOffset was tuned at one robot position/heading. At different
+     *   field positions odometry drift means the computed bearing is slightly
+     *   off. When FINE_ALIGN has the tag centered (tx ≈ 0), the turret IS
+     *   pointing at the goal, so we know the true bearing. We compare that
+     *   to what odometry computed and add the gap to this correction term,
+     *   which is then added to targetAngleDeg every loop in SEEKING.
+     *   Result: each FINE_ALIGN lock automatically recalibrates the odometry
+     *   bearing for the next time SEEKING runs — no manual retuning needed.
+     *
+     * RESET: call resetOdoCorrection() to zero it out (e.g. at match start).
+     * BOUNDS: clamped to ±ODO_CORRECTION_MAX_DEG to reject bad measurements.
+     */
+    private double odoAngleCorrection = 0.0;
+    public static double ODO_CORRECTION_MAX_DEG  = 30.0; // reject corrections outside this
+    public static double ODO_CORRECTION_ALPHA    = 0.15; // low-pass weight (0=no update, 1=instant)
+
+    // Software-tracked commanded angle — kept in sync so SEEKING always
+    // resumes from the servo's current physical position after FINE_ALIGN.
+    private double commandedAngle = 0;
 
     private Pose cachedPose = null;
 
@@ -304,17 +346,17 @@ public class NewTurret implements Subsystem {
     // ═════════════════════════════════════════════════════════════════════
     public void setAlliance(String alliance) {
         if (alliance.equalsIgnoreCase("blue")) {
-            AngleOffset      = -30 + 90;
+            AngleOffset      = -36 + 90 - 45; // tuned value from TurretOdoAi
             TARGET_TAG_ID    = 20;
             allianceTxOffset = 0.0;
-            if (limelight != null) limelight.pipelineSwitch(5);
+            if (limelight != null) limelight.pipelineSwitch(0);
         } else if (alliance.equalsIgnoreCase("red")) {
-            AngleOffset      = -36;
+            AngleOffset      = -45 - 45;       // tuned value from TurretOdoAi
             xt               = 130;
             yt               = 130;
             TARGET_TAG_ID    = 24;
             allianceTxOffset = 0.0;
-            if (limelight != null) limelight.pipelineSwitch(4);
+            if (limelight != null) limelight.pipelineSwitch(1);
         }
     }
 
@@ -349,6 +391,8 @@ public class NewTurret implements Subsystem {
             consecutiveMisses     = 0;
             seekIntegral          = 0;
             seekLastError         = 0;
+            odoAngleCorrection    = 0.0;
+            commandedAngle        = normalizeDegrees(servoToAngle(currentServoPos));
 
             hardwareInitialized = true;
         } catch (Exception e) {
@@ -414,7 +458,8 @@ public class NewTurret implements Subsystem {
             if (fieldAngleDeg < 0) fieldAngleDeg += 360;
 
             targetAngleDeg = normalizeDegrees(
-                    fieldAngleDeg - heading + 180 + AngleOffset + AngleAdjust + ManualAngleAdjust);
+                    fieldAngleDeg - heading + 180 + AngleOffset + AngleAdjust + ManualAngleAdjust
+                            + odoAngleCorrection);
 
             // ════════════════════════════════════════════════════════════
             // STEP 4 — Poll Limelight
@@ -450,6 +495,22 @@ public class NewTurret implements Subsystem {
 
             // ════════════════════════════════════════════════════════════
             // STEP 6 — State machine transitions
+            //
+            // Three paths:
+            //   A) SEEKING → FINE_ALIGN: tag confirmed in frame AND
+            //      odometry says we're close enough (odoError ≤ FINE_ALIGN_ENTRY_DEG).
+            //
+            //   B) FINE_ALIGN → SEEKING (odo override): odoError has grown
+            //      past ODO_OVERRIDE_DEG. This fires IMMEDIATELY — no frame
+            //      count needed — because a large bearing error means a fast
+            //      turn has outpaced the tx loop and odometry must take over
+            //      before the tag walks out of frame. Tag visibility is
+            //      irrelevant here: even if the tag is still visible, the
+            //      odometry PID is faster at catching up to big errors.
+            //
+            //   C) FINE_ALIGN → SEEKING (tag lost): tag absent for
+            //      LOCK_LOST_FRAMES. Feedforward keeps the turret on bearing
+            //      during the gap; odometry corrects any accumulated error.
             // ════════════════════════════════════════════════════════════
             if (targetFiducial != null) {
                 consecutiveDetections++;
@@ -458,6 +519,7 @@ public class NewTurret implements Subsystem {
                 if (state == TurretState.SEEKING
                         && consecutiveDetections >= LOCK_CONFIRM_FRAMES
                         && Math.abs(odoError) <= FINE_ALIGN_ENTRY_DEG) {
+                    // Path A — hand off to Limelight tx control
                     state         = TurretState.FINE_ALIGN;
                     seekIntegral  = 0;
                     seekLastError = 0;
@@ -467,10 +529,24 @@ public class NewTurret implements Subsystem {
                 consecutiveDetections = 0;
 
                 if (state == TurretState.FINE_ALIGN && consecutiveMisses >= LOCK_LOST_FRAMES) {
+                    // Path C — tag genuinely gone, fall back to odometry.
+                    // Re-sync commandedAngle to current servo position so SEEKING
+                    // resumes from exactly where FINE_ALIGN left the turret — no jump.
                     state         = TurretState.SEEKING;
                     seekIntegral  = 0;
                     seekLastError = 0;
+                    commandedAngle = normalizeDegrees(servoToAngle(currentServoPos));
                 }
+            }
+
+            // Path B — odo override (checked every loop regardless of tag visibility)
+            // Large bearing error means a big turn just happened; odometry is faster.
+            if (state == TurretState.FINE_ALIGN && Math.abs(odoError) > ODO_OVERRIDE_DEG) {
+                state         = TurretState.SEEKING;
+                seekIntegral  = 0;
+                seekLastError = 0;
+                // Re-sync commandedAngle here too so PID starts from current position
+                commandedAngle = normalizeDegrees(servoToAngle(currentServoPos));
             }
 
             // ════════════════════════════════════════════════════════════
@@ -533,15 +609,46 @@ public class NewTurret implements Subsystem {
                             * (txDeg + TX_OFFSET + allianceTxOffset - CAMERA_MOUNT_OFFSET_DEG);
 
                     if (Math.abs(netError) > FINE_ALIGN_THRESHOLD_DEG) {
+                        // Proportional step, floored by BASE_STEP, capped by MAX_STEP
                         double step = FINE_BASE_STEP + FINE_kP * Math.abs(netError);
                         step = Math.min(step, FINE_MAX_STEP);
 
+                        // Apply in the direction that reduces netError
                         double servoDelta = (netError > 0) ? -step : step;
-                        lastFineServoDelta = servoDelta;
-                        currentServoPos    = clamp(currentServoPos + servoDelta, SERVO_MIN, SERVO_MAX);
+                        lastFineServoDelta  = servoDelta;
+                        currentServoPos = clamp(currentServoPos + servoDelta, SERVO_MIN, SERVO_MAX);
                     } else {
                         lastFineServoDelta = 0;
+
+                        // ── TX-BASED BEARING CORRECTION ───────────────────────
+                        // The tag is centered (tx within dead-band). This means
+                        // the turret is pointing at the goal RIGHT NOW. We know:
+                        //   true bearing = servoToAngle(currentServoPos)
+                        //   odo bearing  = targetAngleDeg  (already includes
+                        //                  AngleOffset + AngleAdjust + odoAngleCorrection)
+                        //
+                        // Any gap is accumulated odometry error. Fold it into
+                        // odoAngleCorrection via a low-pass filter so SEEKING is
+                        // more accurate the next time the tag is lost.
+                        //
+                        // Low-pass (alpha): small alpha = slow drift correction,
+                        // large alpha = fast but noisier. 0.15 is a good start.
+                        double trueBearing = normalizeDegrees(servoToAngle(currentServoPos));
+                        double bearingGap  = trueBearing - targetAngleDeg;
+                        if (bearingGap >  180) bearingGap -= 360;
+                        if (bearingGap < -180) bearingGap += 360;
+
+                        // Only accept corrections within the sanity bound
+                        if (Math.abs(bearingGap + odoAngleCorrection) < ODO_CORRECTION_MAX_DEG) {
+                            odoAngleCorrection += ODO_CORRECTION_ALPHA * bearingGap;
+                            odoAngleCorrection  = clamp(odoAngleCorrection,
+                                    -ODO_CORRECTION_MAX_DEG, ODO_CORRECTION_MAX_DEG);
+                        }
                     }
+
+                    // Keep commandedAngle in sync with wherever FINE_ALIGN has
+                    // moved the servo so SEEKING resumes from the right place.
+                    commandedAngle = normalizeDegrees(servoToAngle(currentServoPos));
                 }
                 // Tag absent: FF correction already applied, position held.
 
@@ -570,14 +677,16 @@ public class NewTurret implements Subsystem {
             //               Δpos = −Δangle / 350  (inverted mapping)
             // ════════════════════════════════════════════════════════════
 
-            // Recompute odoError relative to current servo pos (FF moved it)
+            // Recompute odoError relative to commandedAngle (FF moved currentServoPos;
+            // commandedAngle tracks where we've told the turret to go in angle space).
+            // Using commandedAngle rather than servoToAngle(currentServoPos) keeps the
+            // PID smooth even when FF produces small floating-point rounding differences.
             turretAngleDeg = servoToAngle(currentServoPos);
-            double odoErrorPost = targetAngleDeg - turretAngleDeg;
+            double odoErrorPost = targetAngleDeg - commandedAngle;
             if (odoErrorPost >  180) odoErrorPost -= 360;
             if (odoErrorPost < -180) odoErrorPost += 360;
 
             if (Math.abs(odoErrorPost) < TOLERANCE) {
-                // Close enough — skip PID to avoid micro-jitter
                 seekLastError  = odoErrorPost;
                 setServos(currentServoPos);
                 firstRun       = false;
@@ -592,7 +701,10 @@ public class NewTurret implements Subsystem {
             double D_out  = kD_seek * ((odoErrorPost - seekLastError) / dt);
             double pidDegPerSec = clamp(P_out + I_out + D_out, -MAX_VELOCITY, MAX_VELOCITY);
 
-            // Convert PID output to servo delta (inverted mapping: angle↑ → pos↓)
+            // Advance commandedAngle in angle space (normalize keeps it in ±180°)
+            commandedAngle = normalizeDegrees(commandedAngle + pidDegPerSec * dt);
+
+            // Convert to servo delta (inverted mapping: angle↑ → pos↓) and accumulate
             double seekServoDelta = -(pidDegPerSec * dt) / DEG_PER_SERVO_UNIT;
             currentServoPos = clamp(currentServoPos + seekServoDelta, SERVO_MIN, SERVO_MAX);
 
@@ -659,8 +771,15 @@ public class NewTurret implements Subsystem {
             double currentHeadingRad = PedroComponent.follower().getPose().getHeading();
             PedroComponent.follower().setPose(new Pose(llX, llY, currentHeadingRad));
 
+            // Force SEEKING so the odometry PID immediately drives the turret
+            // to the bearing implied by the corrected pose. Without this the
+            // turret would hold its current position even though the pose just
+            // changed, and FINE_ALIGN would re-engage on stale odoError values.
+            state         = TurretState.SEEKING;
             seekIntegral  = 0;
             seekLastError = 0;
+            consecutiveDetections = 0;
+            consecutiveMisses     = 0;
             return true;
         } catch (Exception e) {
             return false;
@@ -679,6 +798,9 @@ public class NewTurret implements Subsystem {
 
     public void turnRight() { ManualAngleAdjust += 2; }
     public void turnLeft()  { ManualAngleAdjust -= 2; }
+
+    /** Zeroes the accumulated tx-based bearing correction (call at match start if needed). */
+    public void resetOdoCorrection() { odoAngleCorrection = 0.0; }
 
     private double servoToAngle(double servoPos) {
         return normalizeDegrees(DEG_PER_SERVO_UNIT * (1.0 - servoPos) - 180.0);
@@ -727,4 +849,6 @@ public class NewTurret implements Subsystem {
     public double      getLastFineServoDelta()       { return lastFineServoDelta; }
     public double      getLastFFServoDelta()         { return lastFFServoDelta; }
     public double      getAllianceTxOffset()          { return allianceTxOffset; }
+    public double      getOdoAngleCorrection()       { return odoAngleCorrection; }
+    public double      getCommandedAngle()           { return commandedAngle; }
 }

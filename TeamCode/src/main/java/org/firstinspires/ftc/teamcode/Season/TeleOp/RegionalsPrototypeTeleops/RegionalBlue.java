@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.RegionalsPrototypeTeleops;
 
+import static org.firstinspires.ftc.teamcode.Season.Auto.Tuning.follower;
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RobotContext.lastPose;
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID.newvelo;
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID.turret;
@@ -8,6 +9,7 @@ import static dev.nextftc.bindings.Bindings.button;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Season.Auto.Constants;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RobotContext;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.ColorSensor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.ManualTurret;
@@ -44,9 +46,7 @@ public class RegionalBlue extends NextFTCOpMode {
                         CompliantIntake.INSTANCE,
                         Transfer.INSTANCE,
                         TurretPID.INSTANCE,
-//                        TurretOdoAi.INSTANCE,
-                        NewTurret.INSTANCE,
-                        ManualTurret.INSTANCE,
+                        TurretOdoAi.INSTANCE,
                         NewHood.INSTANCE,
                         ColorSensor.INSTANCE
                 ),
@@ -56,7 +56,7 @@ public class RegionalBlue extends NextFTCOpMode {
         );
     }
 
-    private static final double TARGET_X = 130;
+    private static final double TARGET_X = 0;
     private static final double TARGET_Y = 130;
     private Pose Middle = new Pose(72, 72, Math.toRadians(270));
     private final MotorEx frontLeftMotor = new MotorEx("fl").reversed();
@@ -70,15 +70,14 @@ public class RegionalBlue extends NextFTCOpMode {
     public void onStartButtonPressed() {
 
         // Initialize turret safely
-        ManualTurret.INSTANCE.init(hardwareMap);
+
         NewHood.INSTANCE.init(hardwareMap);
         ColorSensor.INSTANCE.init(hardwareMap);
-
-        NewTurret.INSTANCE.init(hardwareMap);
+        TurretOdoAi.INSTANCE.init(hardwareMap);
 
         NewHood.INSTANCE.setAlliance("blue");
-//        TurretOdoAi.INSTANCE.setAlliance("blue");
-        NewTurret.INSTANCE.setAlliance("blie");
+        TurretOdoAi.INSTANCE.setAlliance("blue");
+//        NewTurret.INSTANCE.setAlliance("blie");
 
 
         // Reseters
@@ -137,6 +136,7 @@ public class RegionalBlue extends NextFTCOpMode {
 
                     if (intakeToggle) {
 
+                        ColorSensor.INSTANCE.light();
                         CompliantIntake.INSTANCE.on();
                         Transfer.INSTANCE.repel();
 
@@ -147,6 +147,7 @@ public class RegionalBlue extends NextFTCOpMode {
                         // Manually stopping intake
                         CompliantIntake.INSTANCE.off();
                         Transfer.INSTANCE.off();
+//                        ColorSensor.INSTANCE.nolight();
 
                         // Reset ball counter
                     }
@@ -171,74 +172,13 @@ public class RegionalBlue extends NextFTCOpMode {
                     intakeToggle = false;
                 });
 
-// === MANUAL TURRET CONTROL - SINGLE TAP (Gamepad 2) ===
-        Gamepads.gamepad2().rightBumper()
-                .whenBecomesTrue(() -> {
-                    if (ColorSensor.INSTANCE.artifactcounter != 4) {
-                        ColorSensor.INSTANCE.artifactcounter += 1;
-                    }
-
-                });
-
-        Gamepads.gamepad2().leftBumper()
-                .whenBecomesTrue(() -> {
-                    if (ColorSensor.INSTANCE.artifactcounter != 0) {
-                        ColorSensor.INSTANCE.artifactcounter -= 1;
-                    }
-                });
-        Gamepads.gamepad2().a()
-                .whenBecomesTrue(() -> {
-                    CompliantIntake.INSTANCE.slight();
-                    Transfer.INSTANCE.fullreverse();
-                });
-
-
-
-        // Artifact Count Updater (Gamepad 2)
-        Gamepads.gamepad2().dpadLeft()
-                .whenBecomesTrue(() -> {
-//                   ManualTurret.INSTANCE.setPosition(x+0.1);
-                    NewTurret.INSTANCE.turnLeft();
-
-                });
-
-        Gamepads.gamepad2().dpadRight()
-                .whenBecomesTrue(() -> {
-//                    ManualTurret.INSTANCE.setPosition(x-0.1);
-                    NewTurret.INSTANCE.turnRight();
-
-                });
-        // Emergency Backup Drivetrain Stop
-
-        button(() -> gamepad2.right_trigger > 0.2)
-                .whenTrue(() -> {
-                    SlowModeMultiplier = 0;
-                    gamepad1.rumble(500);
-                })
-                .whenFalse(() -> {
-                    SlowModeMultiplier = 1;
-                });
-        Gamepads.gamepad2().b()
-                .whenBecomesTrue(() -> {
-                    TurretPID.shootRequested = false;
-                });
-    }
+   }
     @Override
     public void onUpdate() {
-        x = ManualTurret.INSTANCE.getPosition();
         NewHood.INSTANCE.adjustForCurrentDistance(); // moved out
 
         if (intakeToggle) {
             ColorSensor.INSTANCE.IncountBalls();
-            if (ColorSensor.artifactcounter == 1) Transfer.INSTANCE.repel();
-            if (ColorSensor.artifactcounter == 2) Transfer.INSTANCE.off();
-            if (ColorSensor.artifactcounter >= 3) {
-                CompliantIntake.INSTANCE.off();
-                Transfer.INSTANCE.off();
-                intakeToggle = false;
-                gamepad1.rumble(250);
-                gamepad2.rumble(250);
-            }
         } // ← block correctly ends here
 
         // Drive always runs
@@ -254,5 +194,6 @@ public class RegionalBlue extends NextFTCOpMode {
         Transfer.INSTANCE.off();
         CompliantIntake.INSTANCE.off();
         TurretPID.INSTANCE.setShooterSpeed(0);
+        RobotContext.lastPose = PedroComponent.follower().getPose();
     }
 }

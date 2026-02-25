@@ -106,7 +106,7 @@ public class RedGate18 extends NextFTCOpMode {
                         new BezierLine(
                                 new Pose(85.000, 85.000),
 
-                                new Pose(126.285, 84.421)
+                                new Pose(130, 84.421)
                         )
                 ).setTangentHeadingInterpolation()
 
@@ -116,7 +116,7 @@ public class RedGate18 extends NextFTCOpMode {
                         new BezierCurve(
                                 new Pose(85.000, 85.000),
                                 new Pose(93.635, 58.775),
-                                new Pose(129, 61.300)
+                                new Pose(132, 61.300)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(25))
                 .build();
@@ -145,7 +145,7 @@ public class RedGate18 extends NextFTCOpMode {
         scorePickup3 = follower.pathBuilder()
                 .addPath(
                         new BezierLine(
-                                new Pose(126.285, 84.421),
+                                new Pose(130, 84.421),
 
                                 new Pose(85.000, 85.000)
                         )
@@ -318,27 +318,27 @@ public class RedGate18 extends NextFTCOpMode {
         Transfer.INSTANCE.repel();
     }
     private void setShooterFromOdometry() {
-        ShooterPID.INSTANCE.setTargetVelocity(1200);
+        ShooterPID.INSTANCE.setTargetVelocity(1231);
     }
 
     private void secondshotforyouuuuu() {
-        ShooterPID.INSTANCE.setTargetVelocity(1410);
+        ShooterPID.INSTANCE.setTargetVelocity(1231);
     }
 
     private void GateIntake() {
         CompliantIntake.INSTANCE.on();
         Transfer.INSTANCE.repel();
-        sleep(1200);
+        sleep(1600);
         Transfer.INSTANCE.off();
 
     }
 
     private void shootThreeBalls() {
 
-            sleep(500);
+            sleep(600);
             CompliantIntake.INSTANCE.on();
             Transfer.INSTANCE.on();
-            sleep(700);
+            sleep(900);
             CompliantIntake.INSTANCE.off();
             Transfer.INSTANCE.off();
             ShooterPID.INSTANCE.stop();

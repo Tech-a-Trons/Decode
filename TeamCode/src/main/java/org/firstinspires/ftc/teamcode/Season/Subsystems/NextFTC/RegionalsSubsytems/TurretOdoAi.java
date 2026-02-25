@@ -1205,12 +1205,12 @@ public class TurretOdoAi implements Subsystem {
             xt            = 0;
             yt            = 144;
             TARGET_TAG_ID = 20;
-            if (limelight != null) limelight.pipelineSwitch(0);
+            if (limelight != null) limelight.pipelineSwitch(1);
         } else if (alliance.equalsIgnoreCase("red")) {
             xt            = 144;
             yt            = 144;
             TARGET_TAG_ID = 24;
-            if (limelight != null) limelight.pipelineSwitch(1);
+            if (limelight != null) limelight.pipelineSwitch(0);
         }
     }
 

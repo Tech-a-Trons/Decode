@@ -3,15 +3,19 @@ package org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsyt
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 public class ShooterPID {
 
     public static ShooterPID INSTANCE;
 
     // ── Tuning ────────────────────────────────────────────────────────────
-    public static double kP = 0.012;
+    public static double kP = 0.007;    // Feedback - only trims remaining error
     public static double kI = 0.0;
     public static double kD = 0.0;
+    public static double kV = 0.00045;  // Feedforward velocity gain
+    public static double kS = 0.02;     // Feedforward static friction offset
+    public static double MAX_INTEGRAL = 0.2; // Anti-windup clamp
     public static double VELO_TOL = 75;
 
     // Always store positive target — motors run negative internally
@@ -20,6 +24,7 @@ public class ShooterPID {
     // ── Hardware ──────────────────────────────────────────────────────────
     private DcMotorEx outtakeLeft;
     private DcMotorEx outtakeRight;
+    private VoltageSensor voltageSensor;
 
     // ── PID state ─────────────────────────────────────────────────────────
     private double integralSum = 0;
@@ -30,6 +35,7 @@ public class ShooterPID {
     private ShooterPID(HardwareMap hardwareMap) {
         outtakeLeft  = hardwareMap.get(DcMotorEx.class, "outtakeleft");
         outtakeRight = hardwareMap.get(DcMotorEx.class, "outtakeright");
+        voltageSensor = hardwareMap.voltageSensor.iterator().next();
 
         // Match AutoOuttake: outtakeright is reversed
         outtakeLeft.setDirection(DcMotor.Direction.FORWARD);
@@ -56,11 +62,20 @@ public class ShooterPID {
         double dt  = (lastTime == 0) ? 0.02 : (now - lastTime) / 1e9;
         lastTime   = now;
 
+        // Integral with anti-windup clamp
         integralSum += error * dt;
+        integralSum = Math.max(-MAX_INTEGRAL, Math.min(MAX_INTEGRAL, integralSum));
+
         double derivative = (error - lastError) / dt;
         lastError = error;
 
-        double output = kP * error + kI * integralSum + kD * derivative;
+        // Feedforward carries the bulk of the load; PID only trims error
+        double ff = kV * target + kS * Math.signum(target);
+        double fb = kP * error + kI * integralSum + kD * derivative;
+
+        // Voltage compensation: scale output so behavior is consistent as battery drains
+        double voltage = voltageSensor.getVoltage();
+        double output = (ff + fb) * (12.0 / voltage);
         output = Math.max(-1.0, Math.min(1.0, output));
 
         outtakeLeft.setPower(output);

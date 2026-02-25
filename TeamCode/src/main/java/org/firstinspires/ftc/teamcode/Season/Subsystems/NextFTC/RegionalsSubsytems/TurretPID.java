@@ -98,10 +98,10 @@ public class TurretPID implements Subsystem {
 
         if (distance > 95) {
 //            newvelo -= 0.7 * (distance - 95);
-            newvelo += -(0.25 * (distance - 42.5)) + 75;
+            newvelo += -(0.25 * (distance - 42.5)) + 90; //75
         }
 
-        newvelo= Math.max(1200, Math.min(2000, newvelo));
+        newvelo= Math.max(1200, Math.min(2400, newvelo)); //2000
 
         newactv = newvelo;
         shootRequested = true;

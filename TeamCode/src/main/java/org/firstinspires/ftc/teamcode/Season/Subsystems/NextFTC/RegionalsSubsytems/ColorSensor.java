@@ -121,14 +121,11 @@ public class ColorSensor implements Subsystem {
             rgbindicator.setPosition(0.6);
         }
     }
+        public void nolight() {
+            rgbindicator.setPosition(0);
+        }
 
-    // ================= PERIODIC =================
 
-    @Override
-    public void periodic() {
-        if (!initialized) return;
-        light();
-    }
 
     // ================= GETTERS =================
 

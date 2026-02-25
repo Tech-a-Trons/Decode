@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.RegionalsPrototypeTeleops;
 
+import static org.firstinspires.ftc.teamcode.Season.Auto.Tuning.follower;
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RobotContext.lastPose;
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID.newvelo;
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID.turret;
@@ -8,6 +9,7 @@ import static dev.nextftc.bindings.Bindings.button;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Season.Auto.Constants;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RobotContext;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.ColorSensor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.NewHood;
@@ -71,14 +73,12 @@ public class RegionalRed extends NextFTCOpMode {
 
         NewHood.INSTANCE.init(hardwareMap);
         //ColorSensor.INSTANCE.init(hardwareMap);
-
+ColorSensor.INSTANCE.init(hardwareMap);
         NewHood.INSTANCE.setAlliance("red");
         TurretOdoAi.INSTANCE.setAlliance("red");
         TurretOdoAi.INSTANCE.AngleAdjust = 0;
         TurretOdoAi.INSTANCE.ManualAngleAdjust= 0;
-        NewTurret.INSTANCE.setAlliance("red");
-        NewTurret.INSTANCE.AngleAdjust = 0;
-        NewTurret.INSTANCE.ManualAngleAdjust= 0;
+        
 
         // Reseters
         ColorSensor.artifactcounter = 0;
@@ -135,7 +135,7 @@ else {
                     intakeToggle = !intakeToggle;
 
                     if (intakeToggle) {
-
+                        ColorSensor.INSTANCE.light();
                         CompliantIntake.INSTANCE.on();
                         Transfer.INSTANCE.repel();
 
@@ -146,7 +146,7 @@ else {
                         // Manually stopping intake
                         CompliantIntake.INSTANCE.off();
                         Transfer.INSTANCE.off();
-
+//                        ColorSensor.INSTANCE.nolight();
                         // Reset ball counter
 
                         ColorSensor.artifactcounter = 0;
@@ -173,38 +173,7 @@ else {
                     intakeToggle = false;
                 });
 
-// === MANUAL TURRET CONTROL - SINGLE TAP (Gamepad 2) ===
-        Gamepads.gamepad2().dpadRight()
-                .whenBecomesTrue(() -> {
-                    //TurretOdoAi.INSTANCE.turnRight();
-                    NewTurret.INSTANCE.turnRight();
-                });
 
-        Gamepads.gamepad2().dpadLeft()
-                .whenBecomesTrue(() -> {
-//                    TurretOdoAi.INSTANCE.turnLeft();
-                    NewTurret.INSTANCE.turnLeft();
-
-                });
-
-        // Artifact Count Updater (Gamepad 2)
-        Gamepads.gamepad2().rightBumper()
-                .whenBecomesTrue(() -> {
-                    ColorSensor.INSTANCE.artifactcounter += 1;
-
-                });
-
-        Gamepads.gamepad2().leftBumper()
-                .whenBecomesTrue(() -> {
-                    ColorSensor.INSTANCE.artifactcounter -= 1;
-
-                });
-        Gamepads.gamepad2().a()
-                .whenBecomesTrue(() -> {
-                    CompliantIntake.INSTANCE.slight();
-                    Transfer.INSTANCE.fullreverse();
-                });
-        // Emergency Backup Drivetrain Stop
 
         button(() -> gamepad2.right_trigger > 0.2)
                 .whenTrue(() -> {
@@ -214,42 +183,13 @@ else {
                 .whenFalse(() -> {
                     SlowModeMultiplier = 1;
                 });
-        Gamepads.gamepad2().b()
-                .whenBecomesTrue(() -> {
-                    TurretPID.shootRequested = false;
-                });
+
     }
     @Override
     public void onUpdate() {
         NewHood.INSTANCE.adjustForCurrentDistance();
-        InttakeStopper.reset();
         if (intakeToggle) {
             ColorSensor.INSTANCE.IncountBalls();
-            if (ColorSensor.artifactcounter == 0) {
-            }
-            if (ColorSensor.artifactcounter == 1) {
-                Transfer.INSTANCE.repel();
-                // Reset toggle state
-            }
-            if (ColorSensor.artifactcounter == 2) {
-                Transfer.INSTANCE.off();
-                // Reset toggle state
-            }
-            // Auto-stop when 3 balls are collected
-            if (ColorSensor.artifactcounter == 3) {
-
-                // Turn off intake and transfer
-                    CompliantIntake.INSTANCE.off();
-                    Transfer.INSTANCE.off();
-                    // Reset toggle state
-                    intakeToggle = false;
-
-
-                    // Optional: Rumble controller to alert driver
-                    gamepad1.rumble(250);
-                    gamepad2.rumble(250);
-
-            }
         }
         // Drive control - runs every loop for responsive driving
         PedroComponent.follower().setTeleOpDrive(
@@ -264,5 +204,6 @@ else {
         Transfer.INSTANCE.off();
         CompliantIntake.INSTANCE.off();
         TurretPID.INSTANCE.setShooterSpeed(0);
+        RobotContext.lastPose = PedroComponent.follower().getPose();
     }
 }

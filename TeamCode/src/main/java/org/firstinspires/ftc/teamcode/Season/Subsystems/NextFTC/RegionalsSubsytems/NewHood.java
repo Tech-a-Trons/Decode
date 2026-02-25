@@ -27,7 +27,7 @@ public class NewHood implements Subsystem {
     // ===== FAR SHOT VELOCITY-BASED SWITCHING (> 90") =====
     public static double FAR_HIGH_POS    = 0.85;    // High hood when RPM is good
     public static double FAR_LOW_POS     = 0.7;  //0.5  // Low hood when RPM drops
-    public static double FAR_RPM_THRESHOLD = 1600; // RPM below this switches to low hood
+    public static double FAR_RPM_THRESHOLD = -1600; // RPM below this switches to low hood
 
     // ===== GOAL POSITION =====
     public static double GOAL_X = 121.0;
@@ -42,7 +42,7 @@ public class NewHood implements Subsystem {
     // ===== OTHER PRESETS =====
     public static double BASE_POS    = MID_POS;
     public static double complete    = 0.1;
-    public static double midclosePos = 0.6;
+    public static double midclosePos = 0.45;
     public static double openPos     = 0.3;
 
     // ===== AUTO ADJUST =====
@@ -194,9 +194,9 @@ public class NewHood implements Subsystem {
         }
 
         // === FAR RANGE: > 90" - Velocity-based switching ===
-        if (distance > FAR_THRESHOLD) {
+        if (distance < FAR_THRESHOLD) {
             // Switch between high and low hood based on actual RPM
-            if (actualRPM >= FAR_RPM_THRESHOLD) {
+            if (actualRPM <= FAR_RPM_THRESHOLD) {
                 hood.setPosition(FAR_HIGH_POS);  // High arc when RPM is good
             } else {
                 hood.setPosition(FAR_LOW_POS);   // Drop to low arc when RPM falls

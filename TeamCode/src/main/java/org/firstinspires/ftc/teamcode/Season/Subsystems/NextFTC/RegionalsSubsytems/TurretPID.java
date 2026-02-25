@@ -57,7 +57,7 @@ public class TurretPID implements Subsystem {
         //hood.INSTANCE.close();
         return new RunToVelocity(
                 controller,
-                1400, // distance*3.03 1500 close
+                -1400, // distance*3.03 1500 close
                 5
         ).requires(this);
     }
@@ -72,7 +72,7 @@ public class TurretPID implements Subsystem {
 
     double newactv;
     public Command newshooterdistance(double distance) {
-         newvelo =
+        newvelo =
                 0.041 * distance * distance
                         - 2.9 * distance
                         + 1350; //1400

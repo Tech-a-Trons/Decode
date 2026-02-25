@@ -18,6 +18,9 @@ public class Transfer implements Subsystem {
     public void repel() {
         transfer.setPower(0.1);
     }
+    public void fullreverse(){
+        transfer.setPower(1);
+    }
     public void nice() {
         transfer.setPower(-0.34);
     }

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Season.TeleOp.RegionalsPrototypeTeleops;
 
+import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RobotContext.lastPose;
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID.newvelo;
 import static org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID.turret;
 import static dev.nextftc.bindings.Bindings.button;
@@ -78,7 +79,13 @@ public class RegionalRed extends NextFTCOpMode {
 
 
         // Set initial pose
-        PedroComponent.follower().setPose(new Pose(72, 72, Math.toRadians(270)));
+        if (lastPose != null){
+    PedroComponent.follower().setPose(lastPose);
+        }
+else {
+    PedroComponent.follower().setPose(new Pose(0,0,0));
+}
+
         PedroComponent.follower().startTeleopDrive();
 
 //        Gamepads.gamepad1().dpadLeft()
@@ -103,7 +110,7 @@ public class RegionalRed extends NextFTCOpMode {
                                 TARGET_X - pose.getX(),
                                 TARGET_Y - pose.getY()
                         );
-                        TurretOdoAi.INSTANCE.relocalize();
+
                         TurretPID.INSTANCE.regionalsshooterdistance(d).schedule();
                         double actualRPM = TurretPID.INSTANCE.getActualVelocity();
                         NewHood.INSTANCE.adjustForDistanceAndVelocity(d, newvelo, actualRPM);
@@ -185,6 +192,11 @@ public class RegionalRed extends NextFTCOpMode {
                     ColorSensor.INSTANCE.artifactcounter -= 1;
 
                 });
+        Gamepads.gamepad2().a()
+                .whenBecomesTrue(() -> {
+                    CompliantIntake.INSTANCE.slight();
+                    Transfer.INSTANCE.fullreverse();
+                });
         // Emergency Backup Drivetrain Stop
 
         button(() -> gamepad2.right_trigger > 0.2)
@@ -209,7 +221,7 @@ public class RegionalRed extends NextFTCOpMode {
             if (ColorSensor.artifactcounter == 0) {
             }
             if (ColorSensor.artifactcounter == 1) {
-                Transfer.INSTANCE.advance();
+                Transfer.INSTANCE.repel();
                 // Reset toggle state
             }
             if (ColorSensor.artifactcounter == 2) {

@@ -4,7 +4,7 @@ package org.firstinspires.ftc.teamcode.Season.Auto.RegionalsAuto;
 import org.firstinspires.ftc.teamcode.Season.Auto.Constants;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.LimeLightSubsystems.RedExperimentalDistanceLExtractor;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.Turret;
-import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.AutoOuttake;
+
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.CompliantIntake;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Hood;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.ManualTurret;
@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsyte
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.OuttakePID;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.RedLL;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.Qual2Subsystems.RobotContext;
+import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.ShooterPID;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.Transfer;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretOdoAi;
 import org.firstinspires.ftc.teamcode.Season.Subsystems.NextFTC.RegionalsSubsytems.TurretPID;
@@ -80,17 +81,18 @@ public class RedGate18 extends NextFTCOpMode {
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
 
         grabPrePickup1 = follower.pathBuilder()
-            .addPath(
+                .addPath(
                         new BezierCurve(
                                 new Pose(85.000, 85.000),
-                                new Pose(87.608, 55.112),
-                                new Pose(137, 57.193)
+                                new Pose(95.669, 53.833),
+                                new Pose(170, 59.524)
                         )
                 )
+
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                .addPath(
           new BezierCurve(
-            new Pose(137, 57.193),
+            new Pose(170, 59.524),
             new Pose(94.007, 60.817),
             new Pose(85.000, 85.000)
           )
@@ -114,7 +116,7 @@ public class RedGate18 extends NextFTCOpMode {
                         new BezierCurve(
                                 new Pose(85.000, 85.000),
                                 new Pose(93.635, 58.775),
-                                new Pose(126.530, 61.300)
+                                new Pose(129, 61.300)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(25))
                 .build();
@@ -127,7 +129,7 @@ public class RedGate18 extends NextFTCOpMode {
         scorePickup2 = follower.pathBuilder()
                 .addPath(
                 new BezierCurve(
-                        new Pose(126.530, 61.300),
+                        new Pose(129, 61.300),
                         new Pose(86.203, 68.473),
                         new Pose(85.000, 85.000)
                 )
@@ -175,7 +177,7 @@ public class RedGate18 extends NextFTCOpMode {
         switch (pathState) {
             case 0:
                 NewHood.INSTANCE.midclose();
-                ManualTurret.INSTANCE.setPosition(1);
+                ManualTurret.INSTANCE.setPosition(0);
                 secondshotforyouuuuu();
                 follower.followPath(scorePreload, true);
                 setPathState(1);
@@ -188,7 +190,7 @@ public class RedGate18 extends NextFTCOpMode {
 
                     Intake();
                     follower.followPath(grabPrePickup1);
-                    scheduleOuttake();
+                    setShooterFromOdometry();
                     setPathState(2);
                 }
                 break;
@@ -213,7 +215,7 @@ public class RedGate18 extends NextFTCOpMode {
                 if (!follower.isBusy()) {
                     GateIntake();
                     follower.followPath(scorePickup2);
-                    scheduleOuttake();
+                    setShooterFromOdometry();
                     setPathState(5);
                 }
                 break;
@@ -237,7 +239,7 @@ public class RedGate18 extends NextFTCOpMode {
                 if (!follower.isBusy()) {
                     GateIntake();
                     follower.followPath(scorePickup2);
-                    scheduleOuttake();
+                    setShooterFromOdometry();
                     setPathState(8);
                 }
                 break;
@@ -261,7 +263,7 @@ public class RedGate18 extends NextFTCOpMode {
                 if (!follower.isBusy()) {
                     GateIntake();
                     follower.followPath(scorePickup2);
-                    scheduleOuttake();
+                    setShooterFromOdometry();
                     setPathState(11);
                 }
                 break;
@@ -279,8 +281,7 @@ public class RedGate18 extends NextFTCOpMode {
             case 12:
             if (!follower.isBusy()) {
                 follower.followPath(grabPickup3, true);
-                scheduleOuttake();
-                Intake();
+                setShooterFromOdometry();
 
 //                    shootThreeBalls();
 //                    follower.followPath(grabPickup3, true);
@@ -309,22 +310,19 @@ public class RedGate18 extends NextFTCOpMode {
         RobotContext.lastPose = follower.getPose();
     }
     private void scheduleOuttake() {
-        OuttakePID.INSTANCE.setTargetVelocity(700);
+
     }
-    private void secondshotforyouuuuu() {
-        OuttakePID.INSTANCE.setTargetVelocity(700);
-    }
+
     private void Intake() {
         CompliantIntake.INSTANCE.on();
         Transfer.INSTANCE.repel();
     }
     private void setShooterFromOdometry() {
-        Pose pose = follower.getPose();
-        double distance = Math.hypot(
-                96 - pose.getX(),  // TARGET_X = 96 (your scorePose X)
-                96 - pose.getY()   // TARGET_Y = 96 (your scorePose Y)
-        );
-        TurretPID.INSTANCE.setShooterFromDistance(distance).schedule();
+        ShooterPID.INSTANCE.setTargetVelocity(1200);
+    }
+
+    private void secondshotforyouuuuu() {
+        ShooterPID.INSTANCE.setTargetVelocity(1400);
     }
 
     private void GateIntake() {
@@ -336,15 +334,18 @@ public class RedGate18 extends NextFTCOpMode {
     }
 
     private void shootThreeBalls() {
-        sleep(500);
-        CompliantIntake.INSTANCE.on();
-        Transfer.INSTANCE.on();
-        sleep(700);
-        CompliantIntake.INSTANCE.off();
-        Transfer.INSTANCE.off();
-        OuttakePID.INSTANCE.setTargetVelocity(0);
+
+            sleep(500);
+            CompliantIntake.INSTANCE.on();
+            Transfer.INSTANCE.on();
+            sleep(700);
+            CompliantIntake.INSTANCE.off();
+            Transfer.INSTANCE.off();
+            ShooterPID.INSTANCE.stop();
+
 
     }
+
 
     public void setPathState(int pState) {
         pathState = pState;
@@ -354,11 +355,10 @@ public class RedGate18 extends NextFTCOpMode {
     @Override
     public void onUpdate() {
 
-        OuttakePID.INSTANCE.update();
-
-
+        ShooterPID.INSTANCE.update();
         follower.update();
         autonomousPathUpdate();
+        telemetry.addData("Velocity", ShooterPID.INSTANCE.getActualVelocity());
         telemetry.addData("Path State", pathState);
         telemetry.addData("X", follower.getPose().getX());
         telemetry.addData("Y", follower.getPose().getY());
@@ -368,8 +368,8 @@ public class RedGate18 extends NextFTCOpMode {
 
     @Override
     public void onInit() {
-        OuttakePID.init(hardwareMap);
 
+ShooterPID.init(hardwareMap);
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
@@ -391,8 +391,7 @@ public class RedGate18 extends NextFTCOpMode {
 
     @Override public void onStop() {
         savePose();
-        TurretPID.INSTANCE.resetShooter().schedule();
-
+      ShooterPID.INSTANCE.stop();
     }
 
 }

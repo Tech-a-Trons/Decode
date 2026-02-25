@@ -30,8 +30,8 @@ public class OuttakePID {
         outtakeRight = hardwareMap.get(DcMotorEx.class, "outtakeright");
 
         // outtakeright is reversed to match MotorEx("outtakeright").reversed()
-        outtakeLeft.setDirection(DcMotor.Direction.REVERSE);
-        outtakeRight.setDirection(DcMotor.Direction.FORWARD);
+        outtakeLeft.setDirection(DcMotor.Direction.FORWARD);
+        outtakeRight.setDirection(DcMotor.Direction.REVERSE);
 
         outtakeLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         outtakeRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -68,7 +68,7 @@ public class OuttakePID {
     }
 
     public void setTargetVelocity(double velocity) {
-        activeTargetVelocity = velocity;
+        activeTargetVelocity = -velocity;
         resetPID();
     }
 

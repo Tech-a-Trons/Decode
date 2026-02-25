@@ -13,6 +13,7 @@ public class CompliantIntake implements Subsystem {
     public void repel() {
         intake.setPower(-1);
     }
+    public void slight(){intake.setPower(-0.3);}
     public void mid() {
         intake.setPower(0.5);
     }

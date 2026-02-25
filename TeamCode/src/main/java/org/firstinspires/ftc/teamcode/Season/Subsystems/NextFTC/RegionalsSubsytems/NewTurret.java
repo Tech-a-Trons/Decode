@@ -241,19 +241,19 @@ public class NewTurret implements Subsystem {
      * Proportional gain: step += FINE_kP × |tx_error_deg|
      * Mirrors kP_CLOSE = 0.01 in BlueLL/RedLL, scaled to position units.
      */
-    public static double FINE_kP = 0.03;
+    public static double FINE_kP = 3.0;
 
     /**
      * Maximum position step per loop.
      * Mirrors MAX_POWER = 0.8 in BlueLL/RedLL.
      */
-    public static double FINE_MAX_STEP = 0.025;
+    public static double FINE_MAX_STEP = 0.1;
 
     /**
      * Physical camera offset from barrel centerline (degrees).
      * Adjust until getLastTx() ≈ 0 when barrel is on target.
      */
-    public static double CAMERA_MOUNT_OFFSET_DEG = 7.0;
+    public static double CAMERA_MOUNT_OFFSET_DEG = 0.0;
 
     /** Fine crosshair bias trim (degrees). Adjust after CAMERA_MOUNT_OFFSET_DEG. */
     public static double TX_OFFSET = 0.0;

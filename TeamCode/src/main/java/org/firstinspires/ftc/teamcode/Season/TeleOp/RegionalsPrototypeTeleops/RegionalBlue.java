@@ -129,6 +129,41 @@ public class RegionalBlue extends NextFTCOpMode {
                 .whenTrue(() -> {
                     Transfer.INSTANCE.repel();
                 });
+
+        // In your TeleOp periodic/loop:
+        Gamepads.gamepad1().leftBumper()
+                .whenBecomesTrue(() -> {
+                    Pose limelightPose = TurretOdoAi.INSTANCE.getRobotPosFromTarget();
+
+                    if (limelightPose != null) {
+                        // Preserve the current odometry heading — only correct X/Y
+                        double currentHeading = PedroComponent.follower().getPose().getHeading();
+
+                        double dx = limelightPose.getX() - PedroComponent.follower().getPose().getX();
+                        double dy = limelightPose.getY() - PedroComponent.follower().getPose().getY();
+                        double correctionMag = Math.hypot(dx, dy);
+
+                        if (correctionMag < 12.0) { // reject if >12 inches off — likely a bad read
+                            PedroComponent.follower().setPose(new Pose(
+                                    limelightPose.getX(), limelightPose.getY(), currentHeading
+                            ));
+                        }
+
+                        Pose correctedPose = new Pose(
+                                limelightPose.getX(),
+                                limelightPose.getY(),
+                                currentHeading
+                        );
+
+                        PedroComponent.follower().setPose(correctedPose);
+                        telemetry.addLine("Relocalized via Limelight!");
+                    } else {
+                        telemetry.addLine("Relocalization failed — no valid tag in view.");
+                    }
+
+                    telemetry.update();
+                });
+
         // === INTAKE TOGGLE ===
         Gamepads.gamepad1().rightBumper()
                 .whenBecomesTrue(() -> {

@@ -554,6 +554,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+
 import java.util.List;
 
 import dev.nextftc.core.subsystems.Subsystem;
@@ -969,6 +972,22 @@ public class TurretOdoAi implements Subsystem {
                 if (TARGET_TAG_ID < 0 || f.getFiducialId() == TARGET_TAG_ID) return f;
             }
         } catch (Exception e) { /* ignore */ }
+        return null;
+    }
+
+    public Pose getRobotPosFromTarget() {
+        LLResult result = limelight.getLatestResult();
+
+        if (result != null && result.isValid()) {
+            Pose3D robotPos = result.getBotpose();
+
+            double angle = robotPos.getOrientation().getYaw(AngleUnit.DEGREES) + 90;
+
+            if (angle > 360) {angle -= 360;}
+
+            return new Pose(robotPos.getPosition().y / 0.0254 + 70.625, -robotPos.getPosition().x / 0.0254 + 70.625);
+        }
+
         return null;
     }
 
